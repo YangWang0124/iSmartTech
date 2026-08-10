@@ -60,8 +60,8 @@ export function AdminProductsPage() {
   };
 
   if (!session) return <main className="page container admin-loading"><h1>Opening product manager…</h1></main>;
-  if (!session.authenticated) return <main className="page container admin-gate"><span className="eyebrow">STAFF AREA</span><h1>Product management</h1><p>Sign in with your authorised ChatGPT account to manage the catalogue.</p><a className="button button--primary" href="/signin-with-chatgpt?return_to=/admin">Sign in with ChatGPT</a></main>;
-  if (!session.authorized) return <main className="page container admin-gate"><span className="eyebrow">ACCESS RESTRICTED</span><h1>This account is not authorised</h1><p>Signed in as {session.email}. Ask the site owner to add this address to the staff allowlist.</p><a className="button button--ghost" href="/signout-with-chatgpt?return_to=/admin">Use another account</a></main>;
+  if (!session.authenticated) return <main className="page container admin-gate"><span className="eyebrow">STAFF AREA</span><h1>Product management</h1><p>Sign in with your authorised ChatGPT account to manage the catalogue.</p><a className="button button--primary" href="/signin-with-chatgpt?return_to=/staff/products">Sign in with ChatGPT</a></main>;
+  if (!session.authorized) return <main className="page container admin-gate"><span className="eyebrow">ACCESS RESTRICTED</span><h1>This account is not authorised</h1><p>Signed in as {session.email}. Ask the site owner to add this address to the staff allowlist.</p><a className="button button--ghost" href="/signout-with-chatgpt?return_to=/staff/products">Use another account</a></main>;
 
   return <main className="page container admin-page">
     <div className="admin-heading"><div><span className="eyebrow">STAFF CATALOGUE</span><h1>Product management</h1><p>Create products, upload images, update prices and stock, then publish when ready.</p></div><div><span>{session.email}</span><a href="/signout-with-chatgpt?return_to=/">Sign out</a></div></div>

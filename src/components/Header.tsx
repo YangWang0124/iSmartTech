@@ -24,6 +24,7 @@ export function Header() {
           <NavLink to="/contact" onClick={() => setMenuOpen(false)}>{t("contact")}</NavLink>
         </nav>
         <div className="language-toggle" role="group" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>中文</button></div>
+        <Link className="staff-link" to="/staff/products" aria-label="Staff sign in">♙ <span>Staff sign in</span></Link>
         <Link className="cart-link" to="/cart" aria-label={`Cart with ${itemCount} items`}>
           <span aria-hidden="true">▰</span><span>{t("cart")}</span>{itemCount > 0 && <b>{itemCount}</b>}
         </Link>
