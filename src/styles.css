@@ -13,3 +13,5 @@
 
 /* Allow the homepage search bar to overlap the next section without clipping. */
 .hero{overflow:visible;position:relative;z-index:1}
+
+.language-toggle{display:flex;border:1px solid #d8e1eb;border-radius:6px;overflow:hidden;flex:none}.language-toggle button{border:0;background:white;color:#64748b;padding:7px 9px;font-size:10px;font-weight:800}.language-toggle button.active{background:var(--navy);color:white}@media(max-width:700px){.language-toggle{margin-left:auto}.language-toggle button{padding:6px 7px}.main-header{gap:11px}}

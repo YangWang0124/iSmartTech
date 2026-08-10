@@ -3,9 +3,11 @@ import { useCart } from "../context/CartContext";
 import { money } from "../lib/products";
 import type { Product } from "../types";
 import { ProductVisual } from "./ProductVisual";
+import { useLanguage } from "../context/LanguageContext";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const { language } = useLanguage();
   return (
     <article className="product-card">
       <Link className="product-card__visual" to={`/products/${product.id}`}>
@@ -20,7 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
           <div><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>inc GST</small></div>
           <button className="icon-button" onClick={() => addItem(product.id)} aria-label={`Add ${product.name} to cart`}>＋</button>
         </div>
-        <p className="stock"><i /> In stock · Ships today</p>
+        <p className="stock"><i /> {language === "zh" ? "有货 · 今日发货" : "In stock · Ships today"}</p>
       </div>
     </article>
   );
