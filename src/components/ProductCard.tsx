@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="product-card">
       <Link className="product-card__visual" to={`/products/${product.id}`}>
         {product.badge && <span className="badge">{product.badge}</span>}
-        <ProductVisual icon={displayed.icon} accent={displayed.accent} />
+        <ProductVisual icon={displayed.icon} accent={displayed.accent} image={displayed.image} alt={displayed.name} />
       </Link>
       <div className="product-card__content">
         <span className="eyebrow">{displayed.brand} · {displayed.category}</span>

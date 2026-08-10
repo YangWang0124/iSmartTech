@@ -9,6 +9,8 @@ export type Product = {
   rating: number;
   reviews: number;
   stock: number;
+  image?: string;
+  published?: boolean;
   badge?: string;
   icon: string;
   accent: string;

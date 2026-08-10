@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
 import { SearchBar } from "../components/SearchBar";
-import { categories, products } from "../lib/products";
 import { useLanguage } from "../context/LanguageContext";
+import { useProducts } from "../context/ProductContext";
 
 const categoryMeta: Record<string, { icon: string; copy: string }> = {
   "CCTV Cameras": { icon: "◉", copy: "See every detail, day or night" },
@@ -16,6 +16,7 @@ const categoryMeta: Record<string, { icon: string; copy: string }> = {
 const categoryZh: Record<string, { name: string; copy: string }> = { "CCTV Cameras":{name:"监控摄像头",copy:"昼夜看清每个细节"}, "Security Kits":{name:"安防套装",copy:"完整即用型系统"}, "Alarm Systems":{name:"报警系统",copy:"智能防护及即时警报"}, "Intercoms":{name:"可视对讲",copy:"随时了解门外访客"}, "Networking":{name:"网络设备",copy:"随处保持可靠连接"}, "Recorders":{name:"录像机",copy:"安全持续录像"}, "Storage":{name:"存储设备",copy:"专用监控硬盘"} };
 
 export function HomePage() {
+  const { products, categories } = useProducts();
   const { language } = useLanguage();
   const zh = language === "zh";
   return (

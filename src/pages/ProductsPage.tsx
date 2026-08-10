@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
-import { brands, categories, products } from "../lib/products";
 import { useLanguage } from "../context/LanguageContext";
+import { useProducts } from "../context/ProductContext";
 
 const categoryZh: Record<string, string> = { "CCTV Cameras":"监控摄像头", "Security Kits":"安防套装", "Alarm Systems":"报警系统", "Intercoms":"可视对讲", "Networking":"网络设备", "Recorders":"录像机", "Storage":"存储设备" };
 
 export function ProductsPage() {
+  const { products, categories, brands } = useProducts();
   const { language } = useLanguage();
   const zh = language === "zh";
   const [params, setParams] = useSearchParams();
@@ -28,7 +29,7 @@ export function ProductsPage() {
       (!term || `${product.name} ${product.brand} ${product.category} ${product.shortDescription}`.toLowerCase().includes(term)) &&
       (!category || product.category === category) && (!brand || product.brand === brand));
     return [...result].sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "rating" ? b.rating - a.rating : 0);
-  }, [query, category, brand, sort]);
+  }, [products, query, category, brand, sort]);
 
   return (
     <main className="page container">

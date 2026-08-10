@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && mkdir -p dist/server && cp worker/static.js dist/server/index.js",
+    "build": "tsc -b && vite build && vite build --config vite.worker.config.ts",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx"
   },
