@@ -24,7 +24,9 @@ function loadCart(): CartItem[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
-  useEffect(() => localStorage.setItem("iot-tech-cart", JSON.stringify(items)), [items]);
+  useEffect(() => {
+    localStorage.setItem("iot-tech-cart", JSON.stringify(items));
+  }, [items]);
 
   const value = useMemo<CartContextValue>(() => ({
     items,
