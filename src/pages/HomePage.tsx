@@ -13,6 +13,7 @@ const categoryMeta: Record<string, { icon: string; copy: string }> = {
   "Recorders": { icon: "▰", copy: "Secure, always-on recording" },
   "Storage": { icon: "◫", copy: "Purpose-built surveillance drives" },
 };
+const categoryZh: Record<string, { name: string; copy: string }> = { "CCTV Cameras":{name:"监控摄像头",copy:"昼夜看清每个细节"}, "Security Kits":{name:"安防套装",copy:"完整即用型系统"}, "Alarm Systems":{name:"报警系统",copy:"智能防护及即时警报"}, "Intercoms":{name:"可视对讲",copy:"随时了解门外访客"}, "Networking":{name:"网络设备",copy:"随处保持可靠连接"}, "Recorders":{name:"录像机",copy:"安全持续录像"}, "Storage":{name:"存储设备",copy:"专用监控硬盘"} };
 
 export function HomePage() {
   const { language } = useLanguage();
@@ -43,14 +44,14 @@ export function HomePage() {
 
       <section className="section container">
         <div className="section-heading"><div><span className="eyebrow">{zh ? "找到适合您的方案" : "FIND YOUR SOLUTION"}</span><h2>{zh ? "按类别选购" : "Shop by category"}</h2></div><Link to="/products">{zh ? "查看全部商品" : "View all products"} →</Link></div>
-        <div className="category-grid">{categories.map((category) => <Link key={category} to={`/products?category=${encodeURIComponent(category)}`} className="category-card"><span>{categoryMeta[category]?.icon}</span><div><h3>{category}</h3><p>{categoryMeta[category]?.copy}</p></div><b>→</b></Link>)}</div>
+        <div className="category-grid">{categories.map((category) => <Link key={category} to={`/products?category=${encodeURIComponent(category)}`} className="category-card"><span>{categoryMeta[category]?.icon}</span><div><h3>{zh ? categoryZh[category]?.name : category}</h3><p>{zh ? categoryZh[category]?.copy : categoryMeta[category]?.copy}</p></div><b>→</b></Link>)}</div>
       </section>
 
       <section className="section section--tint"><div className="container"><div className="section-heading"><div><span className="eyebrow">{zh ? "客户喜爱" : "CUSTOMER FAVOURITES"}</span><h2>{zh ? "精选商品" : "Featured products"}</h2></div><Link to="/products">{zh ? "浏览全部系列" : "Browse the full range"} →</Link></div><ProductGrid products={products.slice(0, 8)} /></div></section>
 
-      <section className="container advice-banner"><div><span className="eyebrow">NOT SURE WHERE TO START?</span><h2>Let's design the right setup together.</h2><p>Tell our friendly team what you need to protect. We'll recommend a practical solution without the jargon.</p></div><Link className="button button--light" to="/contact">Get free advice <span>→</span></Link></section>
+      <section className="container advice-banner"><div><span className="eyebrow">{zh ? "不知道从哪里开始？" : "NOT SURE WHERE TO START?"}</span><h2>{zh ? "让我们一起设计合适的方案。" : "Let's design the right setup together."}</h2><p>{zh ? "告诉我们您需要保护什么，友好的团队会为您推荐实用且易懂的解决方案。" : "Tell our friendly team what you need to protect. We'll recommend a practical solution without the jargon."}</p></div><Link className="button button--light" to="/contact">{zh ? "获取免费建议" : "Get free advice"} <span>→</span></Link></section>
 
-      <section className="section container"><div className="brand-row"><span>TRUSTED TECHNOLOGY FROM</span>{["Dahua", "HIKVISION", "Ubiquiti", "AJAX", "TP-Link", "UNIVIEW"].map((brand) => <strong key={brand}>{brand}</strong>)}</div></section>
+      <section className="section container"><div className="brand-row"><span>{zh ? "值得信赖的技术品牌" : "TRUSTED TECHNOLOGY FROM"}</span>{["Dahua", "HIKVISION", "Ubiquiti", "AJAX", "TP-Link", "UNIVIEW"].map((brand) => <strong key={brand}>{brand}</strong>)}</div></section>
     </>
   );
 }
