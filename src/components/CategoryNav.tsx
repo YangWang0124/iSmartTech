@@ -10,7 +10,7 @@ export function CategoryNav() {
   return (
     <nav className="category-nav" aria-label="Product categories">
       <div className="container category-nav__inner">
-        <Link className="category-nav__all" to="/products">☰ &nbsp;{t("shopAll")}</Link>
+        <Link className="category-nav__all" to="/installation-services">{language === "zh" ? "安装服务" : "Installs"}</Link>
         {categories.slice(0, 6).map((category) => (
           <Link key={category} to={`/products?category=${encodeURIComponent(category)}`}>{language === "zh" ? categoryZh[category] : category}</Link>
         ))}
