@@ -22,14 +22,14 @@ function HomeCarousel() {
     return () => window.clearInterval(timer);
   }, []);
   const move = (direction: number) => setSlide(current => (current + direction + 3) % 3);
-  return <section className="home-carousel" aria-roledescription="carousel" aria-label="Store promotions">
+  return <section className={`home-carousel ${slide > 0 ? "home-carousel--camera" : ""}`} aria-roledescription="carousel" aria-label="Store promotions">
     <div className="home-carousel__track" style={{ transform: `translateX(-${slide * 100}%)` }}>
       <article className="home-slide home-slide--installation" aria-hidden={slide !== 0}>
         <div className="container home-slide__content"><span>AUCKLAND INSTALLATION SERVICES</span><h1>Professional Installation<br />Available Auckland-Wide</h1><p>Get your products professionally installed by our experienced team anywhere across Auckland.</p><Link className="button button--primary" to="/installation-services">Click here to learn more about our installation services <b>→</b></Link></div>
         <div className="home-slide__motif" aria-hidden="true"><i /><i /><i /><strong>✓</strong></div>
       </article>
       <article className="home-slide home-slide--camera-banner" aria-label="Dahua camera promotion" aria-hidden={slide !== 1}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></article>
-      <article className="home-slide home-slide--placeholder" aria-label="Banner image placeholder 3" aria-hidden={slide !== 2} />
+      <article className="home-slide home-slide--camera-banner" aria-label="Dahua camera promotion" aria-hidden={slide !== 2}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></article>
     </div>
     <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner">‹</button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner">›</button>
     <div className="carousel-dots">{[0,1,2].map(index => <button key={index} className={slide === index ? "active" : ""} onClick={() => setSlide(index)} aria-label={`Show banner ${index + 1}`} aria-current={slide === index ? "true" : undefined} />)}</div>
