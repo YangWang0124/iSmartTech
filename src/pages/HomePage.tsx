@@ -28,7 +28,7 @@ function HomeCarousel() {
         <div className="container home-slide__content"><span>AUCKLAND INSTALLATION SERVICES</span><h1>Professional Installation<br />Available Auckland-Wide</h1><p>Get your products professionally installed by our experienced team anywhere across Auckland.</p><Link className="button button--primary" to="/installation-services">Click here to learn more about our installation services <b>→</b></Link></div>
         <div className="home-slide__motif" aria-hidden="true"><i /><i /><i /><strong>✓</strong></div>
       </article>
-      <article className="home-slide home-slide--placeholder" aria-label="Banner image placeholder 2" aria-hidden={slide !== 1} />
+      <article className="home-slide home-slide--camera-banner" aria-label="Dahua camera promotion" aria-hidden={slide !== 1}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></article>
       <article className="home-slide home-slide--placeholder" aria-label="Banner image placeholder 3" aria-hidden={slide !== 2} />
     </div>
     <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner">‹</button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner">›</button>

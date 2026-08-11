@@ -5,3 +5,5 @@ body{background:#fff}.top-strip{background:#e8e7e3;color:#013334}.brand__mark{ba
 .category-nav__inner>a{display:flex;align-items:center;height:36px;padding:0 14px;border-radius:8px;transition:background-color .18s,color .18s}.category-nav__inner>a:hover{background:#002829;color:#fd5e02}
 
 .brand__logo{display:block;width:250px;height:58px;object-fit:contain;object-position:left center}.brand__logo--footer{width:270px;height:54px;filter:brightness(0) invert(1)}@media(max-width:700px){.brand__logo{width:180px;height:46px}.brand__logo--footer{width:230px;height:50px}}
+
+.home-slide--camera-banner{background:#061d38}.home-slide--camera-banner img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 32%;max-width:none}@media(max-width:980px){.home-slide--camera-banner img{object-position:52% 36%}}@media(max-width:700px){.home-slide--camera-banner img{object-fit:contain;object-position:center}}
