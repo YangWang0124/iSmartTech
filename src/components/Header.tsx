@@ -15,7 +15,7 @@ export function Header() {
       <div className="top-strip"><div className="container">{t("owned")} <span>{t("advice")}</span></div></div>
       <div className="main-header container">
         <Link className="brand" to="/" aria-label="IoT Tech Store home">
-          <span className="brand__mark">IoT</span><span><strong>Tech Store</strong><small>SECURITY • NETWORKING • SMART TECH</small></span>
+          <img className="brand__logo" src="/assets/ismarttech-logo.gif?v=4" alt="iSmartTech — Smart Home Shop" />
         </Link>
         <div className="desktop-search"><SearchBar compact /></div>
         <nav className={`main-nav ${menuOpen ? "main-nav--open" : ""}`} aria-label="Main navigation">
