@@ -5,5 +5,6 @@ import App from "./App";
 import { CartProvider } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import "./styles.css";
+import "./palette.css";
 
 createRoot(document.getElementById("root")!).render(<StrictMode><BrowserRouter><LanguageProvider><CartProvider><App /></CartProvider></LanguageProvider></BrowserRouter></StrictMode>);
