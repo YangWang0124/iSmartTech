@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
-import { SearchBar } from "../components/SearchBar";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 
@@ -15,31 +15,34 @@ const categoryMeta: Record<string, { icon: string; copy: string }> = {
 };
 const categoryZh: Record<string, { name: string; copy: string }> = { "CCTV Cameras":{name:"监控摄像头",copy:"昼夜看清每个细节"}, "Security Kits":{name:"安防套装",copy:"完整即用型系统"}, "Alarm Systems":{name:"报警系统",copy:"智能防护及即时警报"}, "Intercoms":{name:"可视对讲",copy:"随时了解门外访客"}, "Networking":{name:"网络设备",copy:"随处保持可靠连接"}, "Recorders":{name:"录像机",copy:"安全持续录像"}, "Storage":{name:"存储设备",copy:"专用监控硬盘"} };
 
+function HomeCarousel() {
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setSlide(current => (current + 1) % 3), 6000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const move = (direction: number) => setSlide(current => (current + direction + 3) % 3);
+  return <section className="home-carousel" aria-roledescription="carousel" aria-label="Store promotions">
+    <div className="home-carousel__track" style={{ transform: `translateX(-${slide * 100}%)` }}>
+      <article className="home-slide home-slide--installation" aria-hidden={slide !== 0}>
+        <div className="container home-slide__content"><span>AUCKLAND INSTALLATION SERVICES</span><h1>Professional Installation<br />Available Auckland-Wide</h1><p>Get your products professionally installed by our experienced team anywhere across Auckland.</p><Link className="button button--primary" to="/contact?service=installation">Click here to learn more about our installation services <b>→</b></Link></div>
+        <div className="home-slide__motif" aria-hidden="true"><i /><i /><i /><strong>✓</strong></div>
+      </article>
+      <article className="home-slide home-slide--placeholder" aria-label="Banner image placeholder 2" aria-hidden={slide !== 1} />
+      <article className="home-slide home-slide--placeholder" aria-label="Banner image placeholder 3" aria-hidden={slide !== 2} />
+    </div>
+    <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner">‹</button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner">›</button>
+    <div className="carousel-dots">{[0,1,2].map(index => <button key={index} className={slide === index ? "active" : ""} onClick={() => setSlide(index)} aria-label={`Show banner ${index + 1}`} aria-current={slide === index ? "true" : undefined} />)}</div>
+  </section>;
+}
+
 export function HomePage() {
   const { products, categories } = useProducts();
   const { language } = useLanguage();
   const zh = language === "zh";
   return (
     <>
-      <section className="hero">
-        <div className="container hero__grid">
-          <div className="hero__content">
-            <span className="hero__eyebrow">{zh ? "智能安防，从这里开始" : "SMARTER SECURITY STARTS HERE"}</span>
-            <h1>{zh ? "守护重要的一切。" : "Protect what matters."}<br /><em>{zh ? "时刻保持连接。" : "Stay connected."}</em></h1>
-            <p>{zh ? "专业级安防、网络及智能科技，让新西兰家庭和企业轻松使用。" : "Professional-grade security, networking and smart technology—made straightforward for Kiwi homes and businesses."}</p>
-            <div className="hero__actions"><Link className="button button--primary" to="/products">{zh ? "选购全部商品" : "Shop all products"} <span>→</span></Link><Link className="button button--ghost" to="/contact">{zh ? "咨询专家" : "Talk to a specialist"}</Link></div>
-            <div className="hero__trust"><span>✓ {zh ? "新西兰本地运营" : "NZ owned & operated"}</span><span>✓ {zh ? "本地技术支持" : "Local technical support"}</span><span>✓ {zh ? "值得信赖的品牌" : "Trusted brands"}</span></div>
-          </div>
-          <div className="hero__art" aria-label="Connected security system illustration">
-            <div className="hero__rings" />
-            <div className="hero-camera"><span>4K</span><i /></div>
-            <div className="signal signal--one">● <span>{zh ? "持续在线" : "Always connected"}</span></div>
-            <div className="signal signal--two">✓ <span>{zh ? "智能侦测" : "Smart detection"}</span></div>
-            <div className="signal signal--three">24/7 <span>{zh ? "全天候守护" : "Peace of mind"}</span></div>
-          </div>
-        </div>
-        <div className="container hero__search"><SearchBar /></div>
-      </section>
+      <HomeCarousel />
 
       <section className="benefits"><div className="container benefits__grid"><div><b>✓</b><span><strong>{zh ? "专业建议" : "Expert advice"}</strong><small>{zh ? "真人服务，实用解答" : "Real people, practical answers"}</small></span></div><div><b>⚡</b><span><strong>{zh ? "新西兰快速配送" : "Fast NZ shipping"}</strong><small>{zh ? "全国可追踪配送" : "Tracked delivery nationwide"}</small></span></div><div><b>↺</b><span><strong>{zh ? "轻松退货" : "Easy returns"}</strong><small>{zh ? "简单友好的支持" : "Simple, friendly support"}</small></span></div><div><b>♢</b><span><strong>{zh ? "安心购物" : "Secure shopping"}</strong><small>{zh ? "放心选购" : "Shop with confidence"}</small></span></div></div></section>
 
