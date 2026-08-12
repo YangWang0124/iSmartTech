@@ -10,6 +10,7 @@ const schema = `CREATE TABLE IF NOT EXISTS products (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )`;
 const metaSchema = `CREATE TABLE IF NOT EXISTS catalogue_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)`;
+const retiredSampleIds = ["hikvision-colorvu", "uniview-4ch-kit", "ajax-starter-kit", "ubiquiti-g5-bullet", "tp-link-vigi-nvr", "ezviz-doorbell", "seagate-skyhawk-4tb", "dahua-16ch-nvr", "hikvision-intercom-kit", "reolink-solar-camera", "ruijie-poe-switch", "ajax-motioncam", "tp-link-outdoor-ap", "western-digital-8tb", "uniview-thermal-sensor"];
 
 export default {
   async fetch(request, env) {
@@ -65,6 +66,11 @@ async function ensureDatabase(db) {
   const names = new Set(columns.results.map(column => column.name));
   for (const [name, definition] of [["gallery_images", "TEXT NOT NULL DEFAULT '[]'"], ["feature_images", "TEXT NOT NULL DEFAULT '[]'"], ["colors", "TEXT NOT NULL DEFAULT '[]'"]]) {
     if (!names.has(name)) await db.prepare(`ALTER TABLE products ADD COLUMN ${name} ${definition}`).run();
+  }
+  const samplesRemoved = await db.prepare("SELECT value FROM catalogue_state WHERE key = ?").bind("retired-samples-removed").first();
+  if (!samplesRemoved) {
+    await db.batch(retiredSampleIds.map(id => db.prepare("DELETE FROM products WHERE id = ?").bind(id)));
+    await db.prepare("INSERT OR REPLACE INTO catalogue_state (key,value) VALUES (?,?)").bind("retired-samples-removed", new Date().toISOString()).run();
   }
   const seeded = await db.prepare("SELECT value FROM catalogue_state WHERE key = ?").bind("seeded").first();
   if (seeded) return;

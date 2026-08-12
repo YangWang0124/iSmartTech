@@ -1,114 +1,37 @@
 [
   {
-    "id": "dahua-4k-turret", "name": "Dahua 6MP Dual Light Turret Network Camera", "brand": "Dahua", "category": "CCTV Cameras", "price": 289, "oldPrice": 329, "sku": "DH-IPC-HDW3667EM-S-IL-ANZ", "rating": 4.8, "reviews": 24, "stock": 18, "badge": "Popular", "icon": "CAM", "accent": "blue", "image": "/assets/dahua-dh-ipc-hdw3667em.png",
+    "id": "dahua-4k-turret",
+    "name": "Dahua 6MP Dual Light Turret Network Camera",
+    "brand": "Dahua",
+    "category": "CCTV Cameras",
+    "price": 289,
+    "oldPrice": 329,
+    "sku": "DH-IPC-HDW3667EM-S-IL-ANZ",
+    "rating": 4.8,
+    "reviews": 24,
+    "stock": 18,
+    "badge": "Popular",
+    "icon": "CAM",
+    "accent": "blue",
+    "image": "/assets/dahua-dh-ipc-hdw3667em.png",
     "shortDescription": "Dahua DH-IPC-HDW3667EM-S-IL-ANZ | 6MP Dual Light Turret | Built-in Mic | SMD 4.0 | IP67",
     "description": "The Dahua DH-IPC-HDW3667EM-S-IL-ANZ delivers 6MP WizSense surveillance in a compact turret form, designed for both residential and commercial installations. Featuring smart dual-light technology, it automatically switches between infrared and warm white illumination based on motion, providing full-colour detail and effective deterrence when needed. Equipped with an integrated microphone and H.265+ compression, it captures clear audio alongside high-resolution video while minimising storage and bandwidth demands. Its IP67-rated housing ensures reliable performance across Australia’s harshest outdoor environments.",
-    "features": ["6MP full HD resolution", "30m night vision", "Weather proof", "Built-in microphone", "False alarm filter", "Colour night vision", "H.265+ compression", "Built-in light"],
-    "specifications": { "Resolution": "6MP", "Lens": "2.8 mm fixed", "Night vision": "Up to 30 m", "Power": "PoE / 12V DC", "Warranty": "3 years" }
-  },
-  {
-    "id": "hikvision-colorvu", "name": "Hikvision 6MP ColorVu Network Camera", "brand": "Hikvision", "category": "CCTV Cameras", "price": 249, "sku": "HK-DS2CD2367", "rating": 4.7, "reviews": 18, "stock": 9, "badge": "Staff pick", "icon": "CAM", "accent": "navy",
-    "shortDescription": "Reliable all-weather monitoring with vivid 24/7 colour imaging.",
-    "description": "Purpose-built for detailed monitoring around entrances, driveways and retail spaces, with low-light colour imaging and efficient network recording.",
-    "features": ["6MP high-resolution imaging", "24/7 colour technology", "Built-in microphone", "Weather-resistant enclosure"],
-    "specifications": { "Resolution": "3200 × 1800", "Lens": "2.8 mm", "Compression": "H.265+", "Power": "PoE", "Warranty": "3 years" }
-  },
-  {
-    "id": "uniview-4ch-kit", "name": "Uniview 4-Camera PoE Security Kit", "brand": "Uniview", "category": "Security Kits", "price": 899, "oldPrice": 999, "sku": "UNV-KIT-4CH-4MP", "rating": 4.9, "reviews": 31, "stock": 7, "badge": "Bundle deal", "icon": "KIT", "accent": "teal",
-    "shortDescription": "A complete four-camera security package for straightforward installation.",
-    "description": "Everything needed for a capable small-site CCTV setup: four weather-resistant cameras, a PoE recorder, storage and cabling in one practical package.",
-    "features": ["Four 4MP turret cameras", "4-channel PoE network recorder", "2TB surveillance hard drive", "Remote mobile viewing"],
-    "specifications": { "Channels": "4", "Storage": "2TB included", "Camera resolution": "4MP", "Remote access": "iOS / Android", "Warranty": "3 years" }
-  },
-  {
-    "id": "ajax-starter-kit", "name": "Ajax Wireless Alarm StarterKit", "brand": "Ajax", "category": "Alarm Systems", "price": 749, "sku": "AJ-STARTERKIT-BLK", "rating": 4.8, "reviews": 16, "stock": 11, "badge": "New", "icon": "ALM", "accent": "orange",
-    "shortDescription": "A polished wireless alarm foundation with app control and instant alerts.",
-    "description": "A flexible entry point to smart intrusion protection, including the hub, motion detector, door contact and remote control required for a compact installation.",
-    "features": ["Secure wireless communication", "Instant app notifications", "Easy system expansion", "Up to 15 hours backup power"],
-    "specifications": { "Connection": "Ethernet / cellular", "Wireless range": "Up to 2,000 m open space", "Colour": "Black", "App": "Ajax Security System", "Warranty": "2 years" }
-  },
-  {
-    "id": "ubiquiti-g5-bullet", "name": "Ubiquiti UniFi Protect G5 Bullet", "brand": "Ubiquiti", "category": "CCTV Cameras", "price": 319, "sku": "UVC-G5-BULLET", "rating": 4.9, "reviews": 42, "stock": 13, "badge": "Top rated", "icon": "CAM", "accent": "sky",
-    "shortDescription": "Compact 2K PoE camera designed for the UniFi Protect ecosystem.",
-    "description": "A streamlined indoor/outdoor camera with sharp 2K video, intelligent detections and seamless management through UniFi Protect.",
-    "features": ["2K video resolution", "AI event detections", "Integrated IR LEDs", "UniFi Protect management"],
-    "specifications": { "Resolution": "4MP (2688 × 1512)", "Field of view": "99.8°", "Audio": "Microphone", "Power": "PoE", "Warranty": "1 year" }
-  },
-  {
-    "id": "tp-link-vigi-nvr", "name": "TP-Link VIGI 8-Channel PoE NVR", "brand": "TP-Link", "category": "Recorders", "price": 329, "sku": "VIGI-NVR1008H-8P", "rating": 4.6, "reviews": 12, "stock": 15, "icon": "NVR", "accent": "green",
-    "shortDescription": "Eight-channel network recorder with built-in PoE for simpler deployments.",
-    "description": "Centralise compatible camera recording and playback with eight PoE ports, remote management and flexible hard-drive support.",
-    "features": ["8-channel live view", "Eight built-in PoE+ ports", "4K HDMI output", "Remote monitoring"],
-    "specifications": { "Channels": "8", "Drive bays": "1 × SATA", "Maximum storage": "10TB", "Output": "HDMI / VGA", "Warranty": "3 years" }
-  },
-  {
-    "id": "ezviz-doorbell", "name": "EZVIZ 2K Wi-Fi Video Doorbell", "brand": "EZVIZ", "category": "Intercoms", "price": 219, "oldPrice": 249, "sku": "EZ-DB2-PRO", "rating": 4.5, "reviews": 27, "stock": 22, "badge": "Great value", "icon": "BEL", "accent": "purple",
-    "shortDescription": "See and speak with visitors from anywhere using the mobile app.",
-    "description": "A battery-powered video doorbell with a wide viewing angle, clear two-way audio and smart human detection for everyday front-door awareness.",
-    "features": ["2K video", "176° ultra-wide view", "Two-way talk", "Smart human detection"],
-    "specifications": { "Resolution": "2544 × 1888", "Connection": "2.4GHz Wi-Fi", "Battery": "5,200mAh rechargeable", "Storage": "microSD / cloud", "Warranty": "2 years" }
-  },
-  {
-    "id": "seagate-skyhawk-4tb", "name": "Seagate SkyHawk 4TB Surveillance Drive", "brand": "Seagate", "category": "Storage", "price": 179, "sku": "ST4000VX016", "rating": 4.8, "reviews": 38, "stock": 34, "icon": "HDD", "accent": "cyan",
-    "shortDescription": "Purpose-built storage for always-on surveillance recording systems.",
-    "description": "Optimised for continuous recording workloads, supporting multiple high-definition camera streams with reliable, quiet operation.",
-    "features": ["4TB capacity", "24/7 workload design", "Supports up to 64 cameras", "ImagePerfect firmware"],
-    "specifications": { "Capacity": "4TB", "Interface": "SATA 6Gb/s", "Cache": "256MB", "Form factor": "3.5 inch", "Warranty": "3 years" }
-  },
-  {
-    "id": "dahua-16ch-nvr", "name": "Dahua 16-Channel 4K Network Recorder", "brand": "Dahua", "category": "Recorders", "price": 549, "sku": "DH-NVR4216-16P", "rating": 4.7, "reviews": 14, "stock": 6, "icon": "NVR", "accent": "blue",
-    "shortDescription": "A scalable 16-channel recorder with PoE and intelligent search.",
-    "description": "A practical recorder for larger homes and commercial sites, offering sixteen PoE channels, 4K output and room for high-capacity surveillance storage.",
-    "features": ["16 PoE camera channels", "4K decoding and output", "Two SATA drive bays", "AI-powered event search"],
-    "specifications": { "Channels": "16", "PoE ports": "16", "Drive bays": "2", "Maximum storage": "20TB", "Warranty": "3 years" }
-  },
-  {
-    "id": "hikvision-intercom-kit", "name": "Hikvision IP Video Intercom Kit", "brand": "Hikvision", "category": "Intercoms", "price": 599, "sku": "HK-KIS603-P", "rating": 4.6, "reviews": 9, "stock": 8, "icon": "INT", "accent": "navy",
-    "shortDescription": "A complete door station and indoor touchscreen communication kit.",
-    "description": "Answer visitors from a bright indoor display or mobile app, unlock a connected door and review captured visitor snapshots.",
-    "features": ["7-inch touchscreen monitor", "1080p door station", "Remote app answering", "PoE network connection"],
-    "specifications": { "Display": "7 inch touch", "Camera": "2MP", "Connection": "PoE / Wi-Fi", "Door control": "1 relay", "Warranty": "3 years" }
-  },
-  {
-    "id": "reolink-solar-camera", "name": "Reolink 4K Solar Security Camera", "brand": "Reolink", "category": "CCTV Cameras", "price": 369, "sku": "RL-ARGUS-PT-4K-SP", "rating": 4.7, "reviews": 35, "stock": 19, "badge": "Wire-free", "icon": "SOL", "accent": "amber",
-    "shortDescription": "Wire-free pan-and-tilt monitoring powered by an included solar panel.",
-    "description": "Ideal where cabling is difficult, this rechargeable camera provides wide-area 4K monitoring, automatic tracking and sustainable solar charging.",
-    "features": ["4K wire-free video", "355° pan and 140° tilt", "Solar panel included", "Person and vehicle detection"],
-    "specifications": { "Resolution": "8MP", "Connection": "2.4 / 5GHz Wi-Fi", "Power": "Battery + solar", "Storage": "microSD / cloud", "Warranty": "2 years" }
-  },
-  {
-    "id": "ruijie-poe-switch", "name": "Ruijie Reyee 8-Port PoE+ Managed Switch", "brand": "Ruijie", "category": "Networking", "price": 189, "sku": "RG-ES210GC-P", "rating": 4.6, "reviews": 11, "stock": 25, "icon": "NET", "accent": "green",
-    "shortDescription": "Cloud-managed PoE switching for cameras, access points and intercoms.",
-    "description": "Power and connect a compact security network with eight PoE+ ports, simple cloud management and useful topology tools.",
-    "features": ["Eight PoE+ ports", "120W total PoE budget", "Cloud management", "Automatic loop prevention"],
-    "specifications": { "Ports": "10 × Gigabit", "PoE ports": "8", "PoE budget": "120W", "Management": "Cloud / web", "Warranty": "3 years" }
-  },
-  {
-    "id": "ajax-motioncam", "name": "Ajax MotionCam Indoor Detector", "brand": "Ajax", "category": "Alarm Systems", "price": 239, "sku": "AJ-MOTIONCAM-WHT", "rating": 4.8, "reviews": 20, "stock": 17, "icon": "PIR", "accent": "orange",
-    "shortDescription": "Wireless motion protection with photo verification of alarm events.",
-    "description": "Confirm what triggered an alarm through rapid photo verification, while smart filtering helps ignore pets and routine movement.",
-    "features": ["Photo alarm verification", "Pet immunity up to 20kg", "Encrypted wireless link", "Up to four-year battery life"],
-    "specifications": { "Detection range": "12 m", "Viewing angle": "88.5°", "Photo resolution": "640 × 480", "Battery": "2 × CR123A", "Warranty": "2 years" }
-  },
-  {
-    "id": "tp-link-outdoor-ap", "name": "TP-Link Omada Outdoor Wi-Fi 6 Access Point", "brand": "TP-Link", "category": "Networking", "price": 269, "sku": "EAP610-OUTDOOR", "rating": 4.7, "reviews": 29, "stock": 12, "icon": "WFI", "accent": "green",
-    "shortDescription": "Extend fast, reliable Wi-Fi to yards, warehouses and outdoor cameras.",
-    "description": "A durable dual-band access point for extending managed Wi-Fi coverage across outdoor areas and challenging commercial spaces.",
-    "features": ["Wi-Fi 6 dual-band performance", "IP67 weatherproof design", "PoE+ powered", "Centralised Omada management"],
-    "specifications": { "Wireless": "AX1800", "Bands": "2.4GHz / 5GHz", "Power": "802.3at PoE+", "Mounting": "Wall / pole", "Warranty": "5 years" }
-  },
-  {
-    "id": "western-digital-8tb", "name": "WD Purple 8TB Surveillance Hard Drive", "brand": "Western Digital", "category": "Storage", "price": 329, "sku": "WD85PURZ", "rating": 4.9, "reviews": 51, "stock": 21, "badge": "Best seller", "icon": "HDD", "accent": "purple",
-    "shortDescription": "High-capacity storage engineered for demanding 24/7 video systems.",
-    "description": "Designed for continuous multi-camera workloads, with generous capacity for higher-resolution systems and longer retention periods.",
-    "features": ["8TB surveillance capacity", "Always-on reliability", "Supports up to 64 cameras", "AllFrame technology"],
-    "specifications": { "Capacity": "8TB", "Interface": "SATA 6Gb/s", "Cache": "256MB", "Workload": "180TB/year", "Warranty": "3 years" }
-  },
-  {
-    "id": "uniview-thermal-sensor", "name": "Uniview Dual-Spectrum Thermal Camera", "brand": "Uniview", "category": "CCTV Cameras", "price": 1299, "sku": "UNV-TIC2621", "rating": 4.9, "reviews": 6, "stock": 3, "badge": "Specialist", "icon": "THM", "accent": "red",
-    "shortDescription": "Thermal and visible imaging for perimeter and heat-event detection.",
-    "description": "A specialist dual-sensor camera for early temperature alerts and dependable perimeter awareness in low-visibility conditions.",
-    "features": ["Thermal and optical sensors", "Temperature exception alerts", "Fire and smoke detection", "IP67 outdoor protection"],
-    "specifications": { "Thermal resolution": "256 × 192", "Optical resolution": "4MP", "Detection": "Fire / intrusion", "Power": "PoE", "Warranty": "3 years" }
+    "features": [
+      "6MP full HD resolution",
+      "30m night vision",
+      "Weather proof",
+      "Built-in microphone",
+      "False alarm filter",
+      "Colour night vision",
+      "H.265+ compression",
+      "Built-in light"
+    ],
+    "specifications": {
+      "Resolution": "6MP",
+      "Lens": "2.8 mm fixed",
+      "Night vision": "Up to 30 m",
+      "Power": "PoE / 12V DC",
+      "Warranty": "3 years"
+    }
   }
 ]
