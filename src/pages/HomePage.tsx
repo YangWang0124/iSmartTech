@@ -26,7 +26,7 @@ function HomeCarousel() {
         <div className="container home-slide__content"><span>AUCKLAND INSTALLATION SERVICES</span><h1>Professional Installation<br />Available Auckland-Wide</h1><p>Get your products professionally installed by our experienced team anywhere across Auckland.</p><Link className="button button--primary" to="/installation-services">Click here to learn more about our installation services <b>→</b></Link></div>
         <div className="home-slide__motif" aria-hidden="true"><i /><i /><i /><strong>✓</strong></div>
       </article>
-      <article className="home-slide home-slide--camera-banner" aria-label="Dahua camera promotion" aria-hidden={slide !== 1}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></article>
+      <Link className="home-slide home-slide--camera-banner" to="/products/dahua-4k-turret" aria-label="View the Dahua 6MP Dual Light Turret Network Camera" aria-hidden={slide !== 1}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></Link>
       <article className="home-slide home-slide--camera-banner" aria-label="Dahua camera promotion" aria-hidden={slide !== 2}><img src="/assets/dahua-camera-split-banner.v2.png" alt="Black and white Dahua cameras installed under modern roof eaves" /></article>
     </div>
     <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner">‹</button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner">›</button>
