@@ -25,7 +25,7 @@ export function Header() {
     <header>
       <div className="top-strip"><div className="container">{t("owned")} <span>{t("advice")}</span></div></div>
       <div className="main-header container">
-        <Link className="brand" to="/" aria-label="IoT Tech Store home">
+        <Link className="brand" to="/" aria-label="iSmartTech home">
           <img className="brand__logo" src="/assets/ismarttech-logo.gif?v=4" alt="iSmartTech — Smart Home Shop" />
         </Link>
         <div className="desktop-search"><SearchBar compact /></div>
