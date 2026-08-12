@@ -4,16 +4,14 @@ import { ProductGrid } from "../components/ProductGrid";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 
-const categoryMeta: Record<string, { icon: string; copy: string }> = {
-  "CCTV Cameras": { icon: "◉", copy: "See every detail, day or night" },
-  "Security Kits": { icon: "▦", copy: "Complete, ready-to-go systems" },
-  "Alarm Systems": { icon: "⌁", copy: "Smart protection and instant alerts" },
-  "Intercoms": { icon: "▤", copy: "Know who's at the door" },
-  "Networking": { icon: "⌁", copy: "Reliable connections everywhere" },
-  "Recorders": { icon: "▰", copy: "Secure, always-on recording" },
-  "Storage": { icon: "◫", copy: "Purpose-built surveillance drives" },
-};
-const categoryZh: Record<string, { name: string; copy: string }> = { "CCTV Cameras":{name:"监控摄像头",copy:"昼夜看清每个细节"}, "Security Kits":{name:"安防套装",copy:"完整即用型系统"}, "Alarm Systems":{name:"报警系统",copy:"智能防护及即时警报"}, "Intercoms":{name:"可视对讲",copy:"随时了解门外访客"}, "Networking":{name:"网络设备",copy:"随处保持可靠连接"}, "Recorders":{name:"录像机",copy:"安全持续录像"}, "Storage":{name:"存储设备",copy:"专用监控硬盘"} };
+const homepageCategories = [
+  { name: "CCTV", slug: "category_cctv", icon: "◉", copy: "See every detail, day or night", zhName: "监控系统", zhCopy: "昼夜看清每个细节" },
+  { name: "Intercom", slug: "category_intercom", icon: "▤", copy: "Know who's at the door", zhName: "可视对讲", zhCopy: "随时了解门外访客" },
+  { name: "Smart Home", slug: "category_smart-home", icon: "⌂", copy: "Smarter comfort and control", zhName: "智能家居", zhCopy: "轻松掌控舒适生活" },
+  { name: "Alarm", slug: "category_alarm", icon: "⌁", copy: "Smart protection and instant alerts", zhName: "报警系统", zhCopy: "智能防护及即时警报" },
+  { name: "Audio", slug: "category_audio", icon: "♫", copy: "Sound for every room and space", zhName: "影音设备", zhCopy: "为每个空间带来好声音" },
+  { name: "Network", slug: "category_network", icon: "⌘", copy: "Reliable connections everywhere", zhName: "网络设备", zhCopy: "随处保持可靠连接" },
+];
 
 function HomeCarousel() {
   const [slide, setSlide] = useState(0);
@@ -37,7 +35,7 @@ function HomeCarousel() {
 }
 
 export function HomePage() {
-  const { products, categories } = useProducts();
+  const { products } = useProducts();
   const { language } = useLanguage();
   const zh = language === "zh";
   return (
@@ -48,7 +46,7 @@ export function HomePage() {
 
       <section className="section container">
         <div className="section-heading"><div><span className="eyebrow">{zh ? "找到适合您的方案" : "FIND YOUR SOLUTION"}</span><h2>{zh ? "按类别选购" : "Shop by category"}</h2></div><Link to="/products">{zh ? "查看全部商品" : "View all products"} →</Link></div>
-        <div className="category-grid">{categories.map((category) => <Link key={category} to={`/products?category=${encodeURIComponent(category)}`} className="category-card"><span>{categoryMeta[category]?.icon}</span><div><h3>{zh ? categoryZh[category]?.name : category}</h3><p>{zh ? categoryZh[category]?.copy : categoryMeta[category]?.copy}</p></div><b>→</b></Link>)}</div>
+        <div className="category-grid">{homepageCategories.map(category => <Link key={category.slug} to={`/category/${category.slug}`} className="category-card"><span>{category.icon}</span><div><h3>{zh ? category.zhName : category.name}</h3><p>{zh ? category.zhCopy : category.copy}</p></div><b>→</b></Link>)}</div>
       </section>
 
       <section className="section section--tint"><div className="container"><div className="section-heading"><div><span className="eyebrow">{zh ? "客户喜爱" : "CUSTOMER FAVOURITES"}</span><h2>{zh ? "精选商品" : "Featured products"}</h2></div><Link to="/products">{zh ? "浏览全部系列" : "Browse the full range"} →</Link></div><ProductGrid products={products.slice(0, 8)} /></div></section>
