@@ -4,17 +4,7 @@ import { useCart } from "../context/CartContext";
 import { SearchBar } from "./SearchBar";
 import { CategoryNav } from "./CategoryNav";
 import { useLanguage } from "../context/LanguageContext";
-
-const mobileMenuLinks = [
-  ["Installs", "/installation-services"],
-  ["Alarm Systems", "/products?category=Alarm%20Systems"],
-  ["CCTV Cameras", "/products?category=CCTV%20Cameras"],
-  ["Intercoms", "/products?category=Intercoms"],
-  ["Networking", "/products?category=Networking"],
-  ["Recorders", "/products?category=Recorders"],
-  ["Security Kits", "/products?category=Security%20Kits"],
-  ["Get a quote", "/contact"],
-];
+import { catalogueCategories } from "../lib/catalogue";
 
 export function Header() {
   const { itemCount } = useCart();
@@ -33,7 +23,9 @@ export function Header() {
           <NavLink className="desktop-nav-link" to="/products" onClick={() => setMenuOpen(false)}>{t("products")}</NavLink>
           <NavLink className="desktop-nav-link" to="/about" onClick={() => setMenuOpen(false)}>{t("about")}</NavLink>
           <NavLink className="desktop-nav-link" to="/contact" onClick={() => setMenuOpen(false)}>{t("contact")}</NavLink>
-          {mobileMenuLinks.map(([label, to]) => <Link className="mobile-menu-link" key={label} to={to} onClick={() => setMenuOpen(false)}>{label}<span>›</span></Link>)}
+          <Link className="mobile-menu-link" to="/installation-services" onClick={() => setMenuOpen(false)}>Installs<span>›</span></Link>
+          {catalogueCategories.map(root => <details className="mobile-catalogue" key={root.id}><summary>{root.title}<span>＋</span></summary><Link to={`/category/${root.links}`} onClick={() => setMenuOpen(false)}>View all {root.title}</Link>{root.sub_cat.map(child => <details key={child.id}><summary>{child.title}<span>＋</span></summary><Link to={`/category/${child.links}`} onClick={() => setMenuOpen(false)}>View all {child.title}</Link>{child.sub_cat.map(grandchild => <Link key={grandchild.id} to={`/category/${grandchild.links}`} onClick={() => setMenuOpen(false)}>{grandchild.title}</Link>)}</details>)}</details>)}
+          <Link className="mobile-menu-link" to="/contact" onClick={() => setMenuOpen(false)}>Get a quote<span>›</span></Link>
         </nav>
         <div className="language-toggle" role="group" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>中文</button></div>
         <Link className="staff-link" to="/staff/products" aria-label="Staff sign in">♙ <span>Staff sign in</span></Link>

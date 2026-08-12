@@ -3,6 +3,8 @@ export type Product = {
   name: string;
   brand: string;
   category: string;
+  categoryIds?: number[];
+  tagIds?: number[];
   price: number;
   oldPrice?: number;
   sku: string;

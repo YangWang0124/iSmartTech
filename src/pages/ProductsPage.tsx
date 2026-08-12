@@ -1,53 +1,33 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
-import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
-
-const categoryZh: Record<string, string> = { "CCTV Cameras":"监控摄像头", "Security Kits":"安防套装", "Alarm Systems":"报警系统", "Intercoms":"可视对讲", "Networking":"网络设备", "Recorders":"录像机", "Storage":"存储设备" };
+import { categoryBySlug, descendantIds, technicalFilters } from "../lib/catalogue";
 
 export function ProductsPage() {
-  const { products, categories, brands } = useProducts();
-  const { language } = useLanguage();
-  const zh = language === "zh";
+  const { products, brands } = useProducts();
+  const { categorySlug } = useParams();
+  const categoryEntry = categorySlug ? categoryBySlug.get(categorySlug) : undefined;
   const [params, setParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const query = params.get("q") ?? "";
-  const category = params.get("category") ?? "";
   const brand = params.get("brand") ?? "";
-  const sort = params.get("sort") ?? "featured";
-
-  const update = (key: string, value: string) => {
-    const next = new URLSearchParams(params);
-    value ? next.set(key, value) : next.delete(key);
-    setParams(next);
-  };
-
+  const sort = params.get("sort") ?? "default";
+  const selectedTags = technicalFilters.map(filter => Number(params.get(filter.key))).filter(Boolean);
+  const update = (key: string, value: string) => { const next = new URLSearchParams(params); value ? next.set(key, value) : next.delete(key); setParams(next); };
+  const categoryIds = categoryEntry ? descendantIds(categoryEntry.category) : [];
   const filtered = useMemo(() => {
-    const term = query.toLowerCase();
-    const result = products.filter((product) =>
-      (!term || `${product.name} ${product.brand} ${product.category} ${product.shortDescription}`.toLowerCase().includes(term)) &&
-      (!category || product.category === category) && (!brand || product.brand === brand));
-    return [...result].sort((a, b) => sort === "price-low" ? a.price - b.price : sort === "price-high" ? b.price - a.price : sort === "rating" ? b.rating - a.rating : 0);
-  }, [products, query, category, brand, sort]);
-
-  return (
-    <main className="page container">
-      <div className="breadcrumb">{zh ? "首页" : "Home"} <span>›</span> {zh ? "产品" : "Products"}</div>
-      <div className="page-title"><div><span className="eyebrow">{zh ? "产品系列" : "OUR RANGE"}</span><h1>{category ? (zh ? categoryZh[category] : category) : (zh ? "全部商品" : "All products")}</h1><p>{zh ? "为新西兰可靠安装精心挑选的专业技术产品。" : "Professional technology selected for dependable New Zealand installations."}</p></div><div className="results-count"><strong>{filtered.length}</strong> {zh ? "件商品" : "products"}</div></div>
-      <div className="catalogue-toolbar">
-        <button className="filter-toggle" onClick={() => setFiltersOpen(!filtersOpen)}>☰ {zh ? "筛选" : "Filters"}</button>
-        <label>{zh ? "排序" : "Sort by"} <select value={sort} onChange={(e) => update("sort", e.target.value)}><option value="featured">{zh ? "精选" : "Featured"}</option><option value="price-low">{zh ? "价格：从低到高" : "Price: low to high"}</option><option value="price-high">{zh ? "价格：从高到低" : "Price: high to low"}</option><option value="rating">{zh ? "最高评分" : "Top rated"}</option></select></label>
-      </div>
-      <div className="catalogue">
-        <aside className={`filters ${filtersOpen ? "filters--open" : ""}`}>
-          <div className="filters__head"><h2>{zh ? "筛选商品" : "Filter products"}</h2><button onClick={() => setParams({})}>{zh ? "清除全部" : "Clear all"}</button></div>
-          <label className="filter-search">{zh ? "搜索" : "Search"}<input value={query} onChange={(e) => update("q", e.target.value)} placeholder={zh ? "商品或关键词" : "Product or keyword"} /></label>
-          <fieldset><legend>{zh ? "类别" : "Category"}</legend><label><input type="radio" name="category" checked={!category} onChange={() => update("category", "")} /> {zh ? "全部类别" : "All categories"}</label>{categories.map((item) => <label key={item}><input type="radio" name="category" checked={category === item} onChange={() => update("category", item)} /> {zh ? categoryZh[item] : item}<small>{products.filter((p) => p.category === item).length}</small></label>)}</fieldset>
-          <fieldset><legend>{zh ? "品牌" : "Brand"}</legend><label><input type="radio" name="brand" checked={!brand} onChange={() => update("brand", "")} /> {zh ? "全部品牌" : "All brands"}</label>{brands.map((item) => <label key={item}><input type="radio" name="brand" checked={brand === item} onChange={() => update("brand", item)} /> {item}</label>)}</fieldset>
-        </aside>
-        <div className="catalogue__results"><div className="active-filters">{query && <button onClick={() => update("q", "")}>Search: {query} ×</button>}{category && <button onClick={() => update("category", "")}>{category} ×</button>}{brand && <button onClick={() => update("brand", "")}>{brand} ×</button>}</div><ProductGrid products={filtered} /></div>
-      </div>
-    </main>
-  );
+    const term = query.trim().toLowerCase();
+    const result = products.filter(product => (!term || term.length < 2 || `${product.name} ${product.sku} ${product.brand} ${product.shortDescription} ${product.description}`.toLowerCase().includes(term)) && (!categoryIds.length || product.categoryIds?.some(id => categoryIds.includes(id))) && (!brand || product.brand === brand) && (!params.get("stock") || product.stock > 0) && selectedTags.every(tag => product.tagIds?.includes(tag)));
+    return [...result].sort((a, b) => sort === "price-asc" ? a.price - b.price : sort === "price-desc" ? b.price - a.price : sort === "rating-desc" ? b.rating - a.rating : 0);
+  }, [products, query, brand, sort, categorySlug, params.toString()]);
+  const crumbs = categoryEntry ? [...categoryEntry.ancestors, categoryEntry.category] : [];
+  const isCamera = crumbs.some(item => item.id === 9);
+  return <main className="page container catalogue-page">
+    <div className="breadcrumb"><Link to="/">Home</Link><span>›</span><Link to="/products">Products</Link>{crumbs.map(item => <span className="breadcrumb__pair" key={item.id}><span>›</span><Link to={`/category/${item.links}`}>{item.title}</Link></span>)}</div>
+    <div className="page-title"><div><span className="eyebrow">CATALOGUE</span><h1>{categoryEntry?.category.title || "All products"}</h1><p>Browse iSmartTech products using the complete catalogue structure and technical filters.</p></div><div className="results-count"><strong>{filtered.length}</strong> products</div></div>
+    {categoryEntry?.category.sub_cat.length ? <div className="subcategory-chips">{categoryEntry.category.sub_cat.map(child => <Link key={child.id} to={`/category/${child.links}`}>{child.title}<span>›</span></Link>)}</div> : null}
+    <div className="catalogue-toolbar"><button className="filter-toggle" onClick={() => setFiltersOpen(!filtersOpen)}>☰ Filters</button><div className="view-switch" aria-label="View style"><button className="active">▦ Grid</button><button>☷ List</button></div><label>Sort by <select value={sort} onChange={e => update("sort", e.target.value)}><option value="default">Default</option><option value="price-desc">Price - High to Low</option><option value="price-asc">Price - Low to High</option><option value="sales-desc">Sales Count - High to Low</option><option value="rating-desc">Rating - High to Low</option></select></label></div>
+    <div className="catalogue"><aside className={`filters catalogue-filters ${filtersOpen ? "filters--open" : ""}`}><div className="filters__head"><h2>Filter products</h2><button onClick={() => setParams({})}>Clear all</button></div><label className="filter-search">Search<input value={query} onChange={e => update("q", e.target.value)} placeholder="Name, SKU or brand" /><small>Enter at least 2 characters</small></label><fieldset><legend>Brand</legend><label><input type="radio" name="brand" checked={!brand} onChange={() => update("brand", "")} /> All brands</label>{brands.map(item => <label key={item}><input type="radio" name="brand" checked={brand === item} onChange={() => update("brand", item)} /> {item}</label>)}</fieldset><fieldset><legend>Availability</legend><label><input type="checkbox" checked={params.get("stock") === "1"} onChange={e => update("stock", e.target.checked ? "1" : "")} /> In stock</label></fieldset>{isCamera && technicalFilters.map(filter => <fieldset key={filter.key}><legend>{filter.label}</legend>{filter.options.map(([id, label]) => <label key={id}><input type="radio" name={filter.key} checked={params.get(filter.key) === String(id)} onChange={() => update(filter.key, String(id))} /> {label}</label>)}</fieldset>)}</aside><div className="catalogue__results"><ProductGrid products={filtered} />{!filtered.length && <div className="catalogue-empty"><h2>No matching products</h2><p>Try another category or clear the selected filters.</p></div>}</div></div>
+  </main>;
 }

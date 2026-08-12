@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "name": "ISmartTech prototype catalogue",
+  "backend": {
+    "baseUrlEnvironmentVariable": "REACT_APP_Backend_URL",
+    "defaultBaseUrl": "https://api.ismarttech.co.nz",
+    "endpoints": {
+      "products": "/Product/All",
+      "product": "/Product?id={productId}",
+      "categories": "/Product/AllCategory",
+      "brands": "/Product/AllBrand"
+    }
+  },
+  "routing": {
+    "categoryPattern": "/category/{slug}",
+    "brandPattern": "/brand/{brandSlug}",
+    "productPattern": "/product/{productSlug}",
+    "searchPattern": "/shop?search={query}"
+  },
+  "categoryDataFile": "categories-full.json",
+  "categoryFields": {
+    "id": "Stable backend category ID",
+    "title": "Visible category name",
+    "links": "URL slug",
+    "sub_cat": "Nested child categories"
+  },
+  "product": {
+    "requiredFields": ["id", "name", "url", "sku", "price", "stock", "category", "image"],
+    "optionalFields": ["shortDescription", "fullDescription", "discount", "tag", "brand_id", "brand_name", "brand_url", "rating", "review", "reviewCount", "variation"],
+    "categoryRelation": "product.category contains category IDs",
+    "filterRelation": "product.tag contains numeric filter option IDs",
+    "imageVariants": ["photo_sm", "photo_md", "photo_bg"]
+  },
+  "search": {
+    "fields": ["name", "sku", "shortDescription", "fullDescription", "brand_name"],
+    "caseInsensitive": true,
+    "minimumQueryLength": 2
+  },
+  "sorting": [
+    {"id": "default", "label": "Default"},
+    {"id": "price-desc", "label": "Price - High to Low", "field": "price", "direction": "desc"},
+    {"id": "price-asc", "label": "Price - Low to High", "field": "price", "direction": "asc"},
+    {"id": "sales-desc", "label": "Sales Count - High to Low", "field": "salesCount", "direction": "desc"},
+    {"id": "rating-desc", "label": "Rating - High to Low", "field": "rating", "direction": "desc"}
+  ],
+  "commonFilters": [
+    {"id": "category", "label": "Category", "source": "categories"},
+    {"id": "brand", "label": "Brand", "source": "brands"},
+    {"id": "price", "label": "Price", "type": "range", "productField": "price"},
+    {"id": "stock", "label": "Availability", "type": "boolean", "productField": "stock", "operator": "greaterThanZero"}
+  ],
+  "technicalFilters": {
+    "pixel_filter": {
+      "label": "Resolution",
+      "options": [
+        {"id": 216, "label": "2 MP"}, {"id": 217, "label": "4 MP"},
+        {"id": 245, "label": "5 MP"}, {"id": 218, "label": "6 MP"},
+        {"id": 219, "label": "8 MP"}
+      ]
+    },
+    "indoor_outdoor": {
+      "label": "Environment",
+      "options": [{"id": 246, "label": "Indoor"}, {"id": 247, "label": "Outdoor"}]
+    },
+    "connection_method": {
+      "label": "Connection",
+      "options": [
+        {"id": 251, "label": "Wired"}, {"id": 249, "label": "Analog"},
+        {"id": 248, "label": "Wi-Fi"}, {"id": 224, "label": "4G"}
+      ]
+    },
+    "camera_special_function": {
+      "label": "Camera Features",
+      "options": [{"id": 223, "label": "Solar"}, {"id": 252, "label": "Alarm LED"}]
+    },
+    "colorful": {
+      "label": "Colour Mode",
+      "options": [{"id": 222, "label": "Full Colour"}, {"id": 250, "label": "Not Full Colour"}]
+    },
+    "appearance": {
+      "label": "Camera Shape",
+      "options": [
+        {"id": 234, "label": "Turret"}, {"id": 233, "label": "Dome"},
+        {"id": 232, "label": "Bullet"}, {"id": 192, "label": "PTZ"}
+      ]
+    },
+    "number_channel": {
+      "label": "Recorder Channels",
+      "options": [
+        {"id": 225, "label": "4 Channel"}, {"id": 226, "label": "8 Channel"},
+        {"id": 227, "label": "16 Channel"}, {"id": 261, "label": "24 Channel"},
+        {"id": 228, "label": "32 Channel"}, {"id": 229, "label": "64 Channel"}
+      ]
+    },
+    "number_sata": {
+      "label": "SATA Bays",
+      "options": [
+        {"id": 257, "label": "1 SATA"}, {"id": 258, "label": "2 SATA"},
+        {"id": 259, "label": "4 SATA"}, {"id": 260, "label": "8 SATA"}
+      ]
+    },
+    "number_camera_kit": {
+      "label": "Kit Camera Count",
+      "options": [
+        {"id": 257, "label": "2 Camera"}, {"id": 258, "label": "4 Camera"},
+        {"id": 259, "label": "6 Camera"}, {"id": 260, "label": "8 Camera"}
+      ],
+      "warning": "These IDs overlap number_sata IDs in the old frontend configuration; confirm backend tag semantics before production use."
+    }
+  },
+  "categoryFilterAssignments": {
+    "camera": ["brand", "price", "stock", "pixel_filter", "indoor_outdoor", "connection_method", "camera_special_function", "colorful", "appearance"],
+    "recorder": ["brand", "price", "stock", "number_channel", "number_sata"],
+    "cctvKit": ["brand", "price", "stock", "number_camera_kit", "pixel_filter", "connection_method"],
+    "default": ["category", "brand", "price", "stock"]
+  },
+  "menu": {
+    "source": "categoryTree",
+    "maximumVisibleDepth": 3,
+    "desktopMode": "mega-menu",
+    "mobileMode": "accordion",
+    "itemKey": "id",
+    "itemLabel": "title",
+    "itemUrl": "/category/{links}",
+    "childrenKey": "sub_cat"
+  },
+  "productDisplay": {
+    "cardFields": ["image.photo_sm", "name", "sku", "price", "discount", "stock", "rating"],
+    "listFields": ["image.photo_md", "name", "sku", "shortDescription", "brand_name", "price", "stock", "rating"],
+    "detailFields": ["image.photo_bg", "name", "sku", "brand_name", "price", "discount", "stock", "shortDescription", "fullDescription", "variation", "review"]
+  }
+}
