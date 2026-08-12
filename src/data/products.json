@@ -35,5 +35,42 @@
       "Power": "PoE / 12V DC",
       "Warranty": "3 years"
     }
+  },
+  {
+    "id": "hikvision-ax-pro-security-kit",
+    "name": "Hikvision DS-PWA96-Kit-WB AX PRO Alarm Security Kit",
+    "brand": "Hikvision",
+    "category": "Smart Security Kits",
+    "categoryIds": [5, 34, 42, 82],
+    "tagIds": [],
+    "price": 429,
+    "oldPrice": 479,
+    "sku": "DS-PWA96-Kit-WB",
+    "rating": 4.9,
+    "reviews": 18,
+    "stock": 12,
+    "badge": "New",
+    "icon": "ALM",
+    "accent": "orange",
+    "image": "/assets/hikvision-ax-pro-kit.jpg",
+    "colors": ["White"],
+    "shortDescription": "Wireless AX PRO alarm starter kit with control panel, PIR detector, magnetic contact and keyfob.",
+    "description": "A flexible wireless alarm system for homes and small businesses. The AX PRO platform combines encrypted two-way wireless communication with app control, multi-network connectivity and room to expand as your security needs grow.",
+    "features": [
+      "Complete four-piece starter kit",
+      "Up to 96 wireless zones",
+      "AES-128 encrypted two-way wireless",
+      "Ethernet, Wi-Fi and 4G connectivity",
+      "Hik-Connect app control",
+      "12-hour backup battery"
+    ],
+    "specifications": {
+      "Wireless frequency": "433 MHz",
+      "Zones": "Up to 96 wireless zones / outputs",
+      "Connectivity": "Ethernet, Wi-Fi and 3G / 4G",
+      "Included devices": "Panel, PIR detector, magnetic contact and keyfob",
+      "Backup battery": "Up to 12 hours",
+      "Warranty": "3 years"
+    }
   }
 ]

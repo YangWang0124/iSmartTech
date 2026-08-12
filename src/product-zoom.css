@@ -1,0 +1,25 @@
+.product-visual--zoomable {
+  --zoom-x: 50%;
+  --zoom-y: 50%;
+  cursor: zoom-in;
+}
+
+.product-visual--zoomable .product-photo {
+  transform-origin: var(--zoom-x) var(--zoom-y);
+  transition: transform 160ms ease-out;
+  will-change: transform;
+}
+
+.product-visual--zoomable:hover .product-photo {
+  transform: scale(2.15);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .product-visual--zoomable {
+    cursor: default;
+  }
+
+  .product-visual--zoomable:hover .product-photo {
+    transform: none;
+  }
+}

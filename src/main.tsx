@@ -7,5 +7,6 @@ import { LanguageProvider } from "./context/LanguageContext";
 import "./styles.css";
 import "./palette.css";
 import "./installation.css";
+import "./product-zoom.css";
 
 createRoot(document.getElementById("root")!).render(<StrictMode><BrowserRouter><LanguageProvider><CartProvider><App /></CartProvider></LanguageProvider></BrowserRouter></StrictMode>);
