@@ -10,6 +10,9 @@ export type Product = {
   reviews: number;
   stock: number;
   image?: string;
+  galleryImages?: string[];
+  featureImages?: string[];
+  colors?: string[];
   published?: boolean;
   badge?: string;
   icon: string;

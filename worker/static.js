@@ -6,7 +6,7 @@ const schema = `CREATE TABLE IF NOT EXISTS products (
   rating REAL NOT NULL DEFAULT 0, reviews INTEGER NOT NULL DEFAULT 0, stock INTEGER NOT NULL DEFAULT 0,
   badge TEXT, icon TEXT NOT NULL DEFAULT 'CAM', accent TEXT NOT NULL DEFAULT 'blue', image_key TEXT,
   short_description TEXT NOT NULL, description TEXT NOT NULL, features TEXT NOT NULL DEFAULT '[]',
-  specifications TEXT NOT NULL DEFAULT '{}', published INTEGER NOT NULL DEFAULT 0,
+  specifications TEXT NOT NULL DEFAULT '{}', gallery_images TEXT NOT NULL DEFAULT '[]', feature_images TEXT NOT NULL DEFAULT '[]', colors TEXT NOT NULL DEFAULT '[]', published INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )`;
 const metaSchema = `CREATE TABLE IF NOT EXISTS catalogue_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)`;
@@ -61,6 +61,11 @@ function getUser(request, env) {
 
 async function ensureDatabase(db) {
   await db.batch([db.prepare(schema), db.prepare(metaSchema)]);
+  const columns = await db.prepare("PRAGMA table_info(products)").all();
+  const names = new Set(columns.results.map(column => column.name));
+  for (const [name, definition] of [["gallery_images", "TEXT NOT NULL DEFAULT '[]'"], ["feature_images", "TEXT NOT NULL DEFAULT '[]'"], ["colors", "TEXT NOT NULL DEFAULT '[]'"]]) {
+    if (!names.has(name)) await db.prepare(`ALTER TABLE products ADD COLUMN ${name} ${definition}`).run();
+  }
   const seeded = await db.prepare("SELECT value FROM catalogue_state WHERE key = ?").bind("seeded").first();
   if (seeded) return;
   const inserts = seedProducts.map(product => db.prepare(`INSERT OR IGNORE INTO products
@@ -81,7 +86,7 @@ function toProduct(row) {
     sku: row.sku, rating: row.rating, reviews: row.reviews, stock: row.stock, badge: row.badge ?? undefined, icon: row.icon,
     accent: row.accent, image: row.image_key ? `/api/product-images/${encodeURIComponent(row.image_key)}` : undefined,
     shortDescription: row.short_description, description: row.description, features: JSON.parse(row.features || "[]"),
-    specifications: JSON.parse(row.specifications || "{}"), published: Boolean(row.published) };
+    specifications: JSON.parse(row.specifications || "{}"), galleryImages: JSON.parse(row.gallery_images || "[]"), featureImages: JSON.parse(row.feature_images || "[]"), colors: JSON.parse(row.colors || "[]"), published: Boolean(row.published) };
 }
 
 async function saveProduct(request, env, existingId) {
@@ -109,11 +114,11 @@ async function saveProduct(request, env, existingId) {
   const values = [product.id, product.name, product.brand, product.category, Number(product.price) || 0, product.oldPrice ? Number(product.oldPrice) : null,
     product.sku, Number(product.rating) || 0, Number(product.reviews) || 0, Math.max(0, Number(product.stock) || 0), product.badge || null,
     product.icon || "CAM", product.accent || "blue", imageKey, product.shortDescription, product.description,
-    JSON.stringify(product.features || []), JSON.stringify(product.specifications || {}), product.published ? 1 : 0];
+    JSON.stringify(product.features || []), JSON.stringify(product.specifications || {}), JSON.stringify(product.galleryImages || []), JSON.stringify(product.featureImages || []), JSON.stringify(product.colors || []), product.published ? 1 : 0];
   if (existingId) {
-    await env.DB.prepare(`UPDATE products SET id=?,name=?,brand=?,category=?,price=?,old_price=?,sku=?,rating=?,reviews=?,stock=?,badge=?,icon=?,accent=?,image_key=?,short_description=?,description=?,features=?,specifications=?,published=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(...values, existingId).run();
+    await env.DB.prepare(`UPDATE products SET id=?,name=?,brand=?,category=?,price=?,old_price=?,sku=?,rating=?,reviews=?,stock=?,badge=?,icon=?,accent=?,image_key=?,short_description=?,description=?,features=?,specifications=?,gallery_images=?,feature_images=?,colors=?,published=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(...values, existingId).run();
   } else {
-    await env.DB.prepare(`INSERT INTO products (id,name,brand,category,price,old_price,sku,rating,reviews,stock,badge,icon,accent,image_key,short_description,description,features,specifications,published) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(...values).run();
+    await env.DB.prepare(`INSERT INTO products (id,name,brand,category,price,old_price,sku,rating,reviews,stock,badge,icon,accent,image_key,short_description,description,features,specifications,gallery_images,feature_images,colors,published) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(...values).run();
   }
   const saved = await env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(product.id).first();
   return json(toProduct(saved), existingId ? 200 : 201);

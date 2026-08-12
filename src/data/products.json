@@ -1,10 +1,10 @@
 [
   {
-    "id": "dahua-4k-turret", "name": "Dahua 8MP 4K Smart Dual Light Turret Camera", "brand": "Dahua", "category": "CCTV Cameras", "price": 289, "oldPrice": 329, "sku": "DH-IPC-HDW3849H", "rating": 4.8, "reviews": 24, "stock": 18, "badge": "Popular", "icon": "CAM", "accent": "blue",
-    "shortDescription": "Crisp 4K surveillance with intelligent detection and full-colour night vision.",
-    "description": "A versatile outdoor turret camera for homes and small businesses. Smart dual-light technology delivers clear colour detail at night, while person and vehicle detection helps reduce unnecessary alerts.",
-    "features": ["8MP ultra-HD resolution", "Smart person and vehicle detection", "Full-colour night vision", "IP67 weather-resistant housing"],
-    "specifications": { "Resolution": "3840 × 2160", "Lens": "2.8 mm fixed", "Night vision": "Up to 30 m", "Power": "PoE / 12V DC", "Warranty": "3 years" }
+    "id": "dahua-4k-turret", "name": "Dahua 6MP Dual Light Turret Network Camera", "brand": "Dahua", "category": "CCTV Cameras", "price": 289, "oldPrice": 329, "sku": "DH-IPC-HDW3667EM-S-IL-ANZ", "rating": 4.8, "reviews": 24, "stock": 18, "badge": "Popular", "icon": "CAM", "accent": "blue", "image": "/assets/dahua-dh-ipc-hdw3667em.png",
+    "shortDescription": "6MP dual-light surveillance with intelligent detection and clear colour detail at night.",
+    "description": "A weatherproof outdoor turret camera for homes and businesses, with smart dual-light technology, a built-in microphone and accurate human and vehicle detection.",
+    "features": ["6MP full HD resolution", "30m night vision", "Weather proof", "Built-in microphone", "False alarm filter", "Colour night vision", "H.265+ compression", "Built-in light"],
+    "specifications": { "Resolution": "6MP", "Lens": "2.8 mm fixed", "Night vision": "Up to 30 m", "Power": "PoE / 12V DC", "Warranty": "3 years" }
   },
   {
     "id": "hikvision-colorvu", "name": "Hikvision 6MP ColorVu Network Camera", "brand": "Hikvision", "category": "CCTV Cameras", "price": 249, "sku": "HK-DS2CD2367", "rating": 4.7, "reviews": 18, "stock": 9, "badge": "Staff pick", "icon": "CAM", "accent": "navy",
