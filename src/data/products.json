@@ -1,8 +1,8 @@
 [
   {
     "id": "dahua-4k-turret", "name": "Dahua 6MP Dual Light Turret Network Camera", "brand": "Dahua", "category": "CCTV Cameras", "price": 289, "oldPrice": 329, "sku": "DH-IPC-HDW3667EM-S-IL-ANZ", "rating": 4.8, "reviews": 24, "stock": 18, "badge": "Popular", "icon": "CAM", "accent": "blue", "image": "/assets/dahua-dh-ipc-hdw3667em.png",
-    "shortDescription": "6MP dual-light surveillance with intelligent detection and clear colour detail at night.",
-    "description": "A weatherproof outdoor turret camera for homes and businesses, with smart dual-light technology, a built-in microphone and accurate human and vehicle detection.",
+    "shortDescription": "Dahua DH-IPC-HDW3667EM-S-IL-ANZ | 6MP Dual Light Turret | Built-in Mic | SMD 4.0 | IP67",
+    "description": "The Dahua DH-IPC-HDW3667EM-S-IL-ANZ delivers 6MP WizSense surveillance in a compact turret form, designed for both residential and commercial installations. Featuring smart dual-light technology, it automatically switches between infrared and warm white illumination based on motion, providing full-colour detail and effective deterrence when needed. Equipped with an integrated microphone and H.265+ compression, it captures clear audio alongside high-resolution video while minimising storage and bandwidth demands. Its IP67-rated housing ensures reliable performance across Australia’s harshest outdoor environments.",
     "features": ["6MP full HD resolution", "30m night vision", "Weather proof", "Built-in microphone", "False alarm filter", "Colour night vision", "H.265+ compression", "Built-in light"],
     "specifications": { "Resolution": "6MP", "Lens": "2.8 mm fixed", "Night vision": "Up to 30 m", "Power": "PoE / 12V DC", "Warranty": "3 years" }
   },
