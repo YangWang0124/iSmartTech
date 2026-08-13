@@ -5,11 +5,13 @@ import { SearchBar } from "./SearchBar";
 import { CategoryNav } from "./CategoryNav";
 import { useLanguage } from "../context/LanguageContext";
 import { catalogueCategories } from "../lib/catalogue";
+import { useAuth } from "../context/AuthContext";
 
 export function Header() {
   const { itemCount } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <header>
@@ -28,6 +30,7 @@ export function Header() {
           <Link className="mobile-menu-link" to="/contact" onClick={() => setMenuOpen(false)}>Get a quote<span>›</span></Link>
         </nav>
         <div className="language-toggle" role="group" aria-label="Language"><button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button><button className={language === "zh" ? "active" : ""} onClick={() => setLanguage("zh")}>中文</button></div>
+        <Link className="customer-link" to={user ? "/account" : "/signin"} aria-label={user ? "Customer account" : "Customer sign in"}>♙ <span>{user ? "My account" : "Sign in"}</span></Link>
         <Link className="staff-link" to="/staff/products" aria-label="Staff sign in">♙ <span>Staff sign in</span></Link>
         <Link className="cart-link" to="/cart" aria-label={`Cart with ${itemCount} items`}>
           <span aria-hidden="true">▰</span><span>{t("cart")}</span>{itemCount > 0 && <b>{itemCount}</b>}

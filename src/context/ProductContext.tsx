@@ -15,7 +15,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
-  const products = useMemo(() => managed.length ? managed : seedProducts as unknown as Product[], [managed]);
+  const products = useMemo(() => {
+    const bundled = seedProducts as unknown as Product[];
+    if (!managed.length) return bundled;
+    const managedIds = new Set(managed.map(product => product.id));
+    return [...managed, ...bundled.filter(product => !managedIds.has(product.id))];
+  }, [managed]);
   const value = useMemo(() => ({ products, categories: [...new Set(products.map(p => p.category))].sort(), brands: [...new Set(products.map(p => p.brand))].sort(), loading, refresh }), [products, loading]);
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
 }
