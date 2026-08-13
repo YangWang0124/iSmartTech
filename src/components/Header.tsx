@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { SearchBar } from "./SearchBar";
@@ -11,7 +11,26 @@ export function Header() {
   const { itemCount } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!menuRef.current?.contains(target) && !menuButtonRef.current?.contains(target)) setMenuOpen(false);
+    };
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeWithEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeWithEscape);
+    };
+  }, [menuOpen]);
 
   return (
     <header>
@@ -21,7 +40,7 @@ export function Header() {
           <img className="brand__logo" src="/assets/ismarttech-logo.gif?v=4" alt="iSmartTech — Smart Home Shop" />
         </Link>
         <div className="desktop-search"><SearchBar compact /></div>
-        <nav className={`main-nav ${menuOpen ? "main-nav--open" : ""}`} aria-label="Main navigation">
+        <nav ref={menuRef} className={`main-nav ${menuOpen ? "main-nav--open" : ""}`} aria-label="Main navigation">
           <NavLink className="desktop-nav-link" to="/products" onClick={() => setMenuOpen(false)}>{t("products")}</NavLink>
           <NavLink className="desktop-nav-link" to="/about" onClick={() => setMenuOpen(false)}>{t("about")}</NavLink>
           <NavLink className="desktop-nav-link" to="/contact" onClick={() => setMenuOpen(false)}>{t("contact")}</NavLink>
@@ -35,7 +54,7 @@ export function Header() {
         <Link className="cart-link" to="/cart" aria-label={`Cart with ${itemCount} items`}>
           <span aria-hidden="true">▰</span><span>{t("cart")}</span>{itemCount > 0 && <b>{itemCount}</b>}
         </Link>
-        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation" aria-expanded={menuOpen}>☰</button>
+        <button ref={menuButtonRef} className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation" aria-expanded={menuOpen}>☰</button>
       </div>
       <div className="mobile-search container"><SearchBar compact /></div>
       <CategoryNav />
