@@ -18,8 +18,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const products = useMemo(() => {
     const bundled = seedProducts as unknown as Product[];
     if (!managed.length) return bundled;
+    const bundledById = new Map(bundled.map(product => [product.id, product]));
+    const mergedManaged = managed.map(product => ({
+      ...bundledById.get(product.id),
+      ...product,
+    } as Product));
     const managedIds = new Set(managed.map(product => product.id));
-    return [...managed, ...bundled.filter(product => !managedIds.has(product.id))];
+    return [...mergedManaged, ...bundled.filter(product => !managedIds.has(product.id))];
   }, [managed]);
   const value = useMemo(() => ({ products, categories: [...new Set(products.map(p => p.category))].sort(), brands: [...new Set(products.map(p => p.brand))].sort(), loading, refresh }), [products, loading]);
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
