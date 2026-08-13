@@ -1,4 +1,5 @@
 /* Sacramento green retail palette — colour-only refresh. */
+@media(max-width:1200px){.main-nav>.mobile-menu-link,.main-nav>.mobile-catalogue>summary{font-weight:600!important}.mobile-catalogue>a,.mobile-catalogue details summary,.mobile-catalogue details>a{font-weight:400!important}}
 html,body,button,input,select,textarea,h1,h2,h3,h4,h5,h6,a,p,span,strong,small,label,summary,li,dt,dd{font-family:'Open Sans',Arial,sans-serif!important}
 .home-slide--installation .home-slide__content h1{font-size:25px;font-weight:700;letter-spacing:-.5px}
 .section-heading h2,.advice-banner h2{font-size:20px;font-weight:600;letter-spacing:-.35px}
