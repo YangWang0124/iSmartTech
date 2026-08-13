@@ -11,7 +11,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { language } = useLanguage();
   const displayed = localizeProduct(product, language);
   return (
-    <article className="product-card">
+    <article className={`product-card ${product.id === "dahua-4k-turret" ? "product-card--dahua" : ""}`}>
       <Link className="product-card__visual" to={`/products/${product.id}`}>
         {product.badge && <span className="badge">{product.badge}</span>}
         <ProductVisual icon={displayed.icon} accent={displayed.accent} image={displayed.image} alt={displayed.name} />
