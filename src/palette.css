@@ -53,6 +53,10 @@ body{background:#fff}.top-strip{background:#e8e7e3;color:#013334}.brand__mark{ba
 .home-slide--alarm-banner img{object-fit:cover;object-position:center}
 .home-slide--dahua-banner>img{object-fit:cover;object-position:57% 38%}
 .carousel-dots{bottom:9px}
+.carousel-dots button:not(.active){background:#b7b7b7;border-color:#b7b7b7}
+.carousel-arrow{display:grid;place-items:center;padding:0;background:rgba(174,181,181,.3);color:#fff;line-height:1}
+.carousel-arrow>span{display:block;transform:translateY(-3px)}
+.carousel-arrow:hover{background:rgba(150,159,159,.5)}
 @media(max-width:700px){.home-carousel{height:clamp(175px,30vw,245px)}.home-slide--installation .home-slide__content{padding:12px 52px}.home-slide--installation .home-slide__content h1{font-size:clamp(17px,4.7vw,28px);max-width:76%;margin-bottom:8px}.home-slide--installation .home-slide__content .button{font-size:clamp(8px,2vw,11px);padding:7px 9px;max-width:72%}.home-slide--dahua-banner>img{object-position:58% 38%}.carousel-dots{bottom:6px}}
 .product-grid--list .product-card{display:grid;grid-template-columns:220px minmax(0,1fr)}
 .product-grid--list .product-card__visual{height:100%;min-height:210px}

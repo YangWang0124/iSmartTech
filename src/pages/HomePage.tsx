@@ -29,7 +29,7 @@ function HomeCarousel() {
       <Link className="home-slide home-slide--camera-banner home-slide--alarm-banner" to="/products/hikvision-ax-pro-security-kit" aria-label="View the Hikvision AX PRO Alarm Security Kit" aria-hidden={slide !== 1}><img src="/assets/hikvision-ax-pro-banner-outpainted.png" alt="Hikvision AX PRO alarm kit in a wide natural home entrance with DS-PWA96-Kit-WB model number" /></Link>
       <Link className="home-slide home-slide--camera-banner home-slide--dahua-banner" to="/products/dahua-4k-turret" aria-label="View the Dahua 6MP Dual Light Turret Network Camera" aria-hidden={slide !== 2}><img src="/assets/dahua-camera-banner-complete.png" alt="Dahua DH-IPC-HDW3667EM-S-IL-ANZ turret camera installed beneath a modern residential roof eave" /></Link>
     </div>
-    <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner">‹</button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner">›</button>
+    <button className="carousel-arrow carousel-arrow--previous" onClick={() => move(-1)} aria-label="Previous banner"><span aria-hidden="true">‹</span></button><button className="carousel-arrow carousel-arrow--next" onClick={() => move(1)} aria-label="Next banner"><span aria-hidden="true">›</span></button>
     <div className="carousel-dots">{[0,1,2].map(index => <button key={index} className={slide === index ? "active" : ""} onClick={() => setSlide(index)} aria-label={`Show banner ${index + 1}`} aria-current={slide === index ? "true" : undefined} />)}</div>
   </section>;
 }
