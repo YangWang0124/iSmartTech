@@ -19,7 +19,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="product-card__content">
         <span className="eyebrow">{displayed.brand} · {displayed.category}</span>
         <Link to={`/products/${displayed.id}`}><h3>{displayed.name}</h3></Link>
-        <div className="rating" aria-label={`${product.rating} out of 5 stars`}><span>★★★★★</span> {product.rating} <small>({product.reviews})</small></div>
+        {product.reviews > 0 ? <div className="rating" aria-label={`${product.rating} out of 5 stars`}><span>★★★★★</span> {product.rating} <small>({product.reviews})</small></div> : <div className="rating">New product</div>}
         <div className="product-card__buy">
           <div><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>inc GST</small></div>
           <button className="icon-button" onClick={() => addItem(product.id)} aria-label={`Add ${product.name} to cart`}>＋</button>
