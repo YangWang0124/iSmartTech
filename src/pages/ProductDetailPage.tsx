@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductVisual } from "../components/ProductVisual";
 import { useCart } from "../context/CartContext";
@@ -6,6 +6,7 @@ import { money } from "../lib/products";
 import { localizeProduct } from "../lib/product-i18n";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
+import type { Product } from "../types";
 
 const dahuaFeatureBadges = [
   ["/assets/product-features/6mp-resolution.png", "6MP full HD resolution"],
@@ -67,9 +68,21 @@ export function ProductDetailPage() {
   const { id } = useParams();
   const { products } = useProducts();
   const baseProduct = products.find((item) => item.id === id);
+  const [sourceDetail, setSourceDetail] = useState<Partial<Product>>();
+  useEffect(() => {
+    let cancelled = false;
+    setSourceDetail(undefined);
+    if (!id?.startsWith("source-")) return () => { cancelled = true; };
+    fetch(`/api/catalogue-source/${encodeURIComponent(id)}`)
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("Product details unavailable")))
+      .then(detail => { if (!cancelled) setSourceDetail(detail); })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [id]);
   const { language } = useLanguage();
   const zh = language === "zh";
-  const product = baseProduct ? localizeProduct(baseProduct, language) : undefined;
+  const detailedBaseProduct = baseProduct ? { ...baseProduct, ...sourceDetail, category: baseProduct.category, categoryIds: baseProduct.categoryIds, tagIds: baseProduct.tagIds, icon: baseProduct.icon, accent: baseProduct.accent } as Product : undefined;
+  const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("White");
   const [selectedPower, setSelectedPower] = useState("NZ power supply");
@@ -84,6 +97,7 @@ export function ProductDetailPage() {
   const usesParadoxKitLayout = Boolean(paradoxModel);
   const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
+  const usesSourceLayout = product.id.startsWith("source-");
   const previewImages: Array<string | undefined> = [
     product.image,
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
@@ -102,7 +116,7 @@ export function ProductDetailPage() {
           <span className="eyebrow">{product.brand} · SKU {product.sku}</span>
           <h1>{product.name}</h1>
           <div className="detail-price"><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{zh ? "含商品及服务税" : "inc GST"}</small></div>
-          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : product.description}</p></div>
+          {usesSourceLayout ? <div className="product-summary source-product-summary"><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></div> : <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : product.description}</p></div>}
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
@@ -114,7 +128,7 @@ export function ProductDetailPage() {
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
-          <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>
+          {!usesSourceLayout && <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>}
           <div className="purchase-row purchase-row--new"><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></div>
         </div>
       </section>

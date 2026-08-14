@@ -33,6 +33,29 @@ function readableName(product) {
   return String(product.name || product.sku || product.url || `Product ${product.id}`).trim();
 }
 
+function decodeText(value = "") {
+  return String(value)
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\r/g, "")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+}
+
+function featureLines(value) {
+  return decodeText(value).split("\n").map(line => line.replace(/^[•·*-]\s*/, "").trim()).filter(Boolean);
+}
+
+function pricing(product) {
+  const regular = Number(product.price) || 0;
+  const sale = Number(product.discount) || 0;
+  return { price: sale > 0 ? sale : regular, oldPrice: sale > 0 ? regular : undefined };
+}
+
 export async function fetchCatalogue(fetcher = fetch) {
   const endpoints = ["/Product/All", "/Product/AllBrand", "/Product/AllCategory"];
   const responses = await Promise.all(endpoints.map(path => fetcher(`${API_ORIGIN}${path}`, { headers: { Accept: "application/json" } })));
@@ -57,8 +80,7 @@ export async function fetchCatalogue(fetcher = fetch) {
       category,
       categoryIds,
       tagIds: (product.tag || []).map(Number).filter(Boolean),
-      price: Number(product.price) || 0,
-      oldPrice: Number(product.discount) > 0 ? Number(product.price) + Number(product.discount) : undefined,
+      ...pricing(product),
       sku: String(product.sku || product.id),
       rating: Number(product.rating) || 0,
       reviews: Array.isArray(product.review) ? product.review.length : 0,
@@ -77,4 +99,31 @@ export async function fetchCatalogue(fetcher = fetch) {
       specifications: { SKU: String(product.sku || product.id), Brand: brand, Category: category },
     };
   });
+}
+
+export async function fetchCatalogueProduct(id, fetcher = fetch) {
+  const response = await fetcher(`${API_ORIGIN}/Product?id=${encodeURIComponent(id)}`, { headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error("The iSmartTech product service is unavailable.");
+  const product = await response.json();
+  const features = featureLines(product.shortDescription);
+  const images = (product.image || []).map(image => imageUrl(image.photo_bg || image.photo_md || image.photo_sm)).filter(Boolean);
+  const brand = product.brand_name || "iSmartTech";
+  const name = readableName(product);
+  return {
+    id: `source-${product.id}`,
+    name,
+    brand,
+    ...pricing(product),
+    sku: String(product.sku || product.id),
+    rating: Number(product.rating) || 0,
+    reviews: Array.isArray(product.review) ? product.review.length : 0,
+    stock: Math.max(0, Number(product.stock) || 0),
+    image: images[0],
+    galleryImages: images.slice(1),
+    colors: [],
+    shortDescription: features[0] || `${brand} product information`,
+    description: features.join(" • ") || `${name} is supplied through the iSmartTech catalogue.`,
+    features,
+    specifications: { SKU: String(product.sku || product.id), Brand: brand },
+  };
 }
