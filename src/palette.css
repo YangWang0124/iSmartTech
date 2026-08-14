@@ -1,8 +1,15 @@
 /* Sacramento green retail palette — colour-only refresh. */
+.catalogue-mega-nav .category-nav__inner>a,.catalogue-mega-nav .mega-menu>a{font-size:14px}
 @media(max-width:1200px){.main-nav>.mobile-menu-link,.main-nav>.mobile-catalogue>summary{font-weight:600!important}.mobile-catalogue>a,.mobile-catalogue details summary,.mobile-catalogue details>a{font-weight:400!important}}
 html,body,button,input,select,textarea,h1,h2,h3,h4,h5,h6,a,p,span,strong,small,label,summary,li,dt,dd{font-family:'Open Sans',Arial,sans-serif!important}
 .home-slide--installation .home-slide__content h1{font-size:25px;font-weight:700;letter-spacing:-.5px}
 .section-heading h2,.advice-banner h2{font-size:20px;font-weight:600;letter-spacing:-.35px}
+.home-product-section{padding-top:30px;padding-bottom:30px}
+.section.home-category-section{padding-top:30px;padding-bottom:40px}
+.home-product-section+.advice-banner{margin-top:40px}
+@media(max-width:700px){.home-product-section{padding-top:38px;padding-bottom:38px}}
+@media(max-width:700px){.section.home-category-section{padding-top:38px;padding-bottom:48px}}
+@media(max-width:700px){.home-product-section+.advice-banner{margin-top:38px}}
 .benefits__grid>div{justify-content:center;text-align:left;gap:0}.benefits__grid>div:first-child{padding-left:28px}
 @media(max-width:980px){.benefits__grid>div,.benefits__grid>div:first-child,.benefits__grid>div:nth-child(odd){justify-content:flex-start;padding-left:16px;padding-right:16px}}
 @media(max-width:430px){.benefits__grid>div,.benefits__grid>div:first-child,.benefits__grid>div:nth-child(odd){padding-left:14px;padding-right:14px}}
