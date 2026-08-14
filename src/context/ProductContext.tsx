@@ -7,25 +7,33 @@ const ProductContext = createContext<ProductState | null>(null);
 
 export function ProductProvider({ children }: { children: ReactNode }) {
   const [managed, setManaged] = useState<Product[]>([]);
+  const [sourceProducts, setSourceProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
     try {
-      const response = await fetch("/api/products", { headers: { Accept: "application/json" } });
-      if (response.ok) setManaged(await response.json());
+      const [managedResult, sourceResult] = await Promise.allSettled([
+        fetch("/api/products", { headers: { Accept: "application/json" } }),
+        fetch("/api/catalogue-source", { headers: { Accept: "application/json" } }),
+      ]);
+      if (managedResult.status === "fulfilled" && managedResult.value.ok) setManaged(await managedResult.value.json());
+      if (sourceResult.status === "fulfilled" && sourceResult.value.ok) setSourceProducts(await sourceResult.value.json());
     } finally { setLoading(false); }
   };
   useEffect(() => { void refresh(); }, []);
   const products = useMemo(() => {
     const bundled = seedProducts as unknown as Product[];
-    if (!managed.length) return bundled;
-    const bundledById = new Map(bundled.map(product => [product.id, product]));
-    const mergedManaged = managed.map(product => ({
-      ...bundledById.get(product.id),
-      ...product,
-    } as Product));
-    const managedIds = new Set(managed.map(product => product.id));
-    return [...mergedManaged, ...bundled.filter(product => !managedIds.has(product.id))];
-  }, [managed]);
+    const coreProducts = !managed.length ? bundled : (() => {
+      const bundledById = new Map(bundled.map(product => [product.id, product]));
+      const mergedManaged = managed.map(product => ({
+        ...bundledById.get(product.id),
+        ...product,
+      } as Product));
+      const managedIds = new Set(managed.map(product => product.id));
+      return [...mergedManaged, ...bundled.filter(product => !managedIds.has(product.id))];
+    })();
+    const existingSkus = new Set(coreProducts.map(product => product.sku.trim().toLowerCase()));
+    return [...coreProducts, ...sourceProducts.filter(product => !existingSkus.has(product.sku.trim().toLowerCase()))];
+  }, [managed, sourceProducts]);
   const value = useMemo(() => ({ products, categories: [...new Set(products.map(p => p.category))].sort(), brands: [...new Set(products.map(p => p.brand))].sort(), loading, refresh }), [products, loading]);
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
 }
