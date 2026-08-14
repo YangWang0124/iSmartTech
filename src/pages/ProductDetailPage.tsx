@@ -45,6 +45,24 @@ const hikvisionKeyFeatures = [
   ["Flexible for home or business", "A compact starter system that can expand with additional detectors, sounders and accessories."],
 ];
 
+const paradoxKitContents = (model: "SP4000" | "SP5500") => [
+  ["Alarm panel", `1 × Paradox ${model} alarm panel in cabinet with fuse and transformer`],
+  ["Backup battery", "1 × 7.0 Ah backup battery"],
+  ["Keypad", "1 × K10H horizontal keypad"],
+  ["Motion detection", "2 × standard Paradox Pro PIR detectors"],
+  ["Internal siren", "1 × flush-mount internal siren"],
+  ["External siren", "1 × external siren"],
+];
+
+const arrowheadKitContents = (keypad: "LCD" | "LED") => [
+  ["Alarm panel", "1 × Arrowhead EC hardwired 8-zone control panel in a plastic cabinet with transformer and fuse"],
+  ["Keypad", keypad === "LCD" ? "1 × full-English vertical LCD keypad" : "1 × white slimline LED keypad"],
+  ["Backup battery", "1 × 7.0 Ah backup battery"],
+  ["Motion detection", "2 × Optex FLX-S-ST pet-friendly PIR detectors (up to 18 kg)"],
+  ["Sirens", "1 × EC external siren and 1 × internal flush-mount siren"],
+  ["Cable", "1 × 100 metre box of 0.2 alarm cable"],
+];
+
 export function ProductDetailPage() {
   const { id } = useParams();
   const { products } = useProducts();
@@ -62,6 +80,10 @@ export function ProductDetailPage() {
   const add = () => { addItem(product.id, quantity); setAdded(true); window.setTimeout(() => setAdded(false), 1800); };
   const usesDahuaBadges = product.id === "dahua-4k-turret";
   const usesHikvisionKitLayout = product.id === "hikvision-ax-pro-security-kit";
+  const paradoxModel = product.id === "paradox-sp4000-alarm-kit" ? "SP4000" : product.id === "paradox-sp5500-alarm-kit" ? "SP5500" : undefined;
+  const usesParadoxKitLayout = Boolean(paradoxModel);
+  const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
+  const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
   const previewImages: Array<string | undefined> = [
     product.image,
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
@@ -82,9 +104,13 @@ export function ProductDetailPage() {
           <div className="detail-price"><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{zh ? "含商品及服务税" : "inc GST"}</small></div>
           <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : product.description}</p></div>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
-          {!usesHikvisionKitLayout && <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{(product.featureImages?.length ? product.featureImages.map((src, index) => [src, product.features[index] || `Feature ${index + 1}`]) : dahuaFeatureBadges).map(([src, label]) => <img key={src} src={src} alt={label} />)}</div>}
+          {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
+          {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
+          {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{(product.featureImages?.length ? product.featureImages.map((src, index) => [src, product.features[index] || `Feature ${index + 1}`]) : dahuaFeatureBadges).map(([src, label]) => <img key={src} src={src} alt={label} />)}</div>}
           {usesDahuaBadges && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesHikvisionKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{hikvisionKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
+          {usesParadoxKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
+          {usesArrowheadKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
