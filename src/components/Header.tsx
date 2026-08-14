@@ -6,6 +6,7 @@ import { CategoryNav } from "./CategoryNav";
 import { useLanguage } from "../context/LanguageContext";
 import { catalogueCategories } from "../lib/catalogue";
 import { useAuth } from "../context/AuthContext";
+import { catalogueBrandGroups } from "../lib/brands";
 
 export function Header() {
   const { itemCount } = useCart();
@@ -45,6 +46,7 @@ export function Header() {
           <NavLink className="desktop-nav-link" to="/about" onClick={() => setMenuOpen(false)}>{t("about")}</NavLink>
           <NavLink className="desktop-nav-link" to="/contact" onClick={() => setMenuOpen(false)}>{t("contact")}</NavLink>
           <Link className="mobile-menu-link" to="/installation-services" onClick={() => setMenuOpen(false)}>Installs<span>›</span></Link>
+          <details className="mobile-catalogue mobile-brand-menu"><summary>Brands<span>＋</span></summary>{catalogueBrandGroups.map(group => <details key={group.title}><summary>{group.title}<span>＋</span></summary>{group.brands.map(brand => <Link key={brand.label} to={`/category/${group.category}?brand=${encodeURIComponent(brand.value)}`} onClick={() => setMenuOpen(false)}>{brand.label}</Link>)}</details>)}</details>
           {catalogueCategories.map(root => <details className="mobile-catalogue" key={root.id}><summary>{root.title}<span>＋</span></summary><Link to={`/category/${root.links}`} onClick={() => setMenuOpen(false)}>View all {root.title}</Link>{root.sub_cat.map(child => <details key={child.id}><summary>{child.title}<span>＋</span></summary><Link to={`/category/${child.links}`} onClick={() => setMenuOpen(false)}>View all {child.title}</Link>{child.sub_cat.map(grandchild => <Link key={grandchild.id} to={`/category/${grandchild.links}`} onClick={() => setMenuOpen(false)}>{grandchild.title}</Link>)}</details>)}</details>)}
           <Link className="mobile-menu-link" to="/contact" onClick={() => setMenuOpen(false)}>Get a quote<span>›</span></Link>
         </nav>

@@ -30,7 +30,7 @@ export function ProductsPage() {
   const categoryIds = categoryEntry ? descendantIds(categoryEntry.category) : [];
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
-    const result = products.filter(product => (!term || term.length < 2 || `${product.name} ${product.sku} ${product.brand} ${product.shortDescription} ${product.description}`.toLowerCase().includes(term)) && (!categoryIds.length || product.categoryIds?.some(id => categoryIds.includes(id))) && (!brand || product.brand === brand) && (!params.get("stock") || product.stock > 0) && selectedTags.every(tag => product.tagIds?.includes(tag)));
+    const result = products.filter(product => (!term || term.length < 2 || `${product.name} ${product.sku} ${product.brand} ${product.shortDescription} ${product.description}`.toLowerCase().includes(term)) && (!categoryIds.length || product.categoryIds?.some(id => categoryIds.includes(id))) && (!brand || product.brand.toLowerCase() === brand.toLowerCase()) && (!params.get("stock") || product.stock > 0) && selectedTags.every(tag => product.tagIds?.includes(tag)));
     return [...result].sort((a, b) => sort === "price-asc" ? a.price - b.price : sort === "price-desc" ? b.price - a.price : sort === "rating-desc" ? b.rating - a.rating : 0);
   }, [products, query, brand, sort, categorySlug, params.toString()]);
   const crumbs = categoryEntry ? [...categoryEntry.ancestors, categoryEntry.category] : [];
