@@ -56,6 +56,20 @@ function pricing(product) {
   return { price: sale > 0 ? sale : regular, oldPrice: sale > 0 ? regular : undefined };
 }
 
+function productVariants(value) {
+  const entries = Array.isArray(value) ? value : value && typeof value === "object" ? Object.values(value) : [];
+  return entries.map((entry, index) => {
+    if (typeof entry === "string") return { id: String(index), name: entry };
+    return {
+      id: String(entry.id ?? entry.product_id ?? index),
+      name: String(entry.name ?? entry.sku ?? entry.title ?? `Option ${index + 1}`),
+      sku: entry.sku ? String(entry.sku) : undefined,
+      price: Number.isFinite(Number(entry.discount)) && Number(entry.discount) > 0 ? Number(entry.discount) : Number.isFinite(Number(entry.price)) ? Number(entry.price) : undefined,
+      stock: Number.isFinite(Number(entry.stock)) ? Number(entry.stock) : undefined,
+    };
+  });
+}
+
 export async function fetchCatalogue(fetcher = fetch) {
   const endpoints = ["/Product/All", "/Product/AllBrand", "/Product/AllCategory"];
   const responses = await Promise.all(endpoints.map(path => fetcher(`${API_ORIGIN}${path}`, { headers: { Accept: "application/json" } })));
@@ -85,6 +99,8 @@ export async function fetchCatalogue(fetcher = fetch) {
       rating: Number(product.rating) || 0,
       reviews: Array.isArray(product.review) ? product.review.length : 0,
       stock: Math.max(0, Number(product.stock) || 0),
+      isAssembled: Boolean(product.is_assembled),
+      subProducts: productVariants(product.sub_products),
       badge: product.promotion ? "Promotion" : product.hot ? "Popular" : product.new ? "New" : undefined,
       icon,
       accent,
@@ -118,6 +134,8 @@ export async function fetchCatalogueProduct(id, fetcher = fetch) {
     rating: Number(product.rating) || 0,
     reviews: Array.isArray(product.review) ? product.review.length : 0,
     stock: Math.max(0, Number(product.stock) || 0),
+    isAssembled: Boolean(product.is_assembled),
+    subProducts: productVariants(product.sub_products),
     image: images[0],
     galleryImages: images.slice(1),
     colors: [],

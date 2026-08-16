@@ -6,7 +6,7 @@ import { money } from "../lib/products";
 import { localizeProduct } from "../lib/product-i18n";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
-import type { Product } from "../types";
+import type { Product, ProductVariant } from "../types";
 
 const dahuaFeatureBadges = [
   ["/assets/product-features/6mp-resolution.png", "6MP full HD resolution"],
@@ -98,6 +98,8 @@ export function ProductDetailPage() {
   const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
   const usesSourceLayout = product.id.startsWith("source-");
+  const variants: ProductVariant[] = product.subProducts?.length ? product.subProducts : (product.colors || []).map(color => ({ id: color, name: color }));
+  const assemblyStatus = product.isAssembled === true ? (zh ? "已组装套装" : "Pre-assembled kit") : product.isAssembled === false ? (zh ? "单独产品" : "Individual product") : (zh ? "未提供" : "Not specified");
   const previewImages: Array<string | undefined> = [
     product.image,
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
@@ -117,6 +119,11 @@ export function ProductDetailPage() {
           <h1>{product.name}</h1>
           <div className="detail-price"><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{zh ? "含商品及服务税" : "inc GST"}</small></div>
           {usesSourceLayout ? <div className="product-summary source-product-summary"><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></div> : <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : product.description}</p></div>}
+          <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}>
+            <div><span>{zh ? "库存" : "Stock"}</span><strong className={product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div>
+            <div><span>{zh ? "产品选项" : "Product variations"}</span>{variants.length ? <ul>{variants.map(variant => <li key={variant.id || variant.name}><b>{variant.name}</b>{variant.sku && <small>SKU {variant.sku}</small>}{typeof variant.stock === "number" && <small>{variant.stock > 0 ? (zh ? `库存 ${variant.stock}` : `${variant.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</small>}</li>)}</ul> : <strong>{zh ? "没有列出的选项" : "No variations listed"}</strong>}</div>
+            <div><span>{zh ? "组装状态" : "Assembly status"}</span><strong>{assemblyStatus}</strong></div>
+          </section>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}

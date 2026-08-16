@@ -1,3 +1,11 @@
+export type ProductVariant = {
+  id?: string;
+  name: string;
+  sku?: string;
+  price?: number;
+  stock?: number;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -11,6 +19,8 @@ export type Product = {
   rating: number;
   reviews: number;
   stock: number;
+  isAssembled?: boolean;
+  subProducts?: ProductVariant[];
   image?: string;
   galleryImages?: string[];
   featureImages?: string[];
