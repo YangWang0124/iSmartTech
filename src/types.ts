@@ -14,6 +14,9 @@ export type Product = {
   categoryIds?: number[];
   tagIds?: number[];
   price: number;
+  priceOnRequest?: boolean;
+  /** Source catalogue record used to enrich a curated product page when an exact SKU exists. */
+  sourceProductId?: string;
   oldPrice?: number;
   sku: string;
   rating: number;

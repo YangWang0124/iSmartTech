@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
+import { isCuratedProduct } from "../data/curatedProducts";
 
 const homepageCategories = [
   { name: "CCTV", slug: "category_cctv", image: "/assets/category-products/cctv.png", product: "Dahua DH-IPC-HDW3667EM-S-IL-ANZ camera", copy: "See every detail, day or night", zhName: "监控系统", zhCopy: "昼夜看清每个细节" },
@@ -49,7 +50,7 @@ export function HomePage() {
         <div className="category-grid">{homepageCategories.map(category => <Link key={category.slug} to={`/category/${category.slug}`} className="category-card"><span className="category-card__product"><img src={category.image} alt={category.product} /></span><div><h3>{zh ? category.zhName : category.name}</h3><p>{zh ? category.zhCopy : category.copy}</p></div><b>→</b></Link>)}</div>
       </section>
 
-      <section className="section section--tint home-product-section"><div className="container"><div className="section-heading"><div><span className="eyebrow">{zh ? "客户喜爱" : "CUSTOMER FAVOURITES"}</span><h2>{zh ? "精选商品" : "Featured products"}</h2></div><Link to="/products">{zh ? "浏览全部系列" : "Browse the full range"} →</Link></div><ProductGrid products={products.slice(0, 8)} /></div></section>
+      <section className="section section--tint home-product-section"><div className="container"><div className="section-heading"><div><span className="eyebrow">{zh ? "客户喜爱" : "CUSTOMER FAVOURITES"}</span><h2>{zh ? "精选商品" : "Featured products"}</h2></div><Link to="/products">{zh ? "浏览全部系列" : "Browse the full range"} →</Link></div><ProductGrid products={products.filter(isCuratedProduct).slice(0, 8)} /></div></section>
 
       <section className="container advice-banner"><div><span className="eyebrow">{zh ? "不知道从哪里开始？" : "NOT SURE WHERE TO START?"}</span><h2>{zh ? "让我们一起设计合适的方案。" : "Let's design the right setup together."}</h2><p>{zh ? "告诉我们您需要保护什么，友好的团队会为您推荐实用且易懂的解决方案。" : "Tell our friendly team what you need to protect. We'll recommend a practical solution without the jargon."}</p></div><Link className="button button--light" to="/contact">{zh ? "获取免费建议" : "Get free advice"} <span>→</span></Link></section>
 

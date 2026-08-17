@@ -21,10 +21,10 @@ export function ProductCard({ product }: { product: Product }) {
         <Link to={`/products/${displayed.id}`}><h3>{displayed.name}</h3></Link>
         {product.reviews > 0 ? <div className="rating" aria-label={`${product.rating} out of 5 stars`}><span>★★★★★</span> {product.rating} <small>({product.reviews})</small></div> : <div className="rating">New product</div>}
         <div className="product-card__buy">
-          <div><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>inc GST</small></div>
-          <button className="icon-button" onClick={() => addItem(product.id)} aria-label={`Add ${product.name} to cart`}>＋</button>
+          <div><strong>{product.priceOnRequest ? "Price on request" : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? "Contact us for a quote" : "inc GST"}</small></div>
+          {product.priceOnRequest ? <Link className="icon-button" to="/contact" aria-label={`Request a quote for ${product.name}`}>→</Link> : <button className="icon-button" onClick={() => addItem(product.id)} aria-label={`Add ${product.name} to cart`}>＋</button>}
         </div>
-        <p className="stock"><i /> {language === "zh" ? "有货 · 今日发货" : "In stock · Ships today"}</p>
+        <p className="stock"><i /> {product.priceOnRequest ? (language === "zh" ? "库存请询问" : "Stock on request") : product.stock > 0 ? (language === "zh" ? "有货 · 今日发货" : "In stock · Ships today") : (language === "zh" ? "暂时缺货" : "Currently unavailable")}</p>
       </div>
     </article>
   );

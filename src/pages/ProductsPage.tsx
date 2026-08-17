@@ -7,6 +7,7 @@ import {
   descendantIds,
   technicalFilters,
 } from "../lib/catalogue";
+import { isCuratedProduct } from "../data/curatedProducts";
 
 export function ProductsPage() {
   const { products, brands } = useProducts();
@@ -18,6 +19,7 @@ export function ProductsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [listDisabled, setListDisabled] = useState(false);
+  const [showFullCatalogue, setShowFullCatalogue] = useState(false);
   const query = params.get("q") ?? "";
   const brand = params.get("brand") ?? "";
   const sort = params.get("sort") ?? "default";
@@ -48,6 +50,7 @@ export function ProductsPage() {
     const term = query.trim().toLowerCase();
     const result = products.filter(
       (product) =>
+        (showFullCatalogue ? !isCuratedProduct(product) : isCuratedProduct(product)) &&
         (!term ||
           term.length < 2 ||
           `${product.name} ${product.sku} ${product.brand} ${product.shortDescription} ${product.description}`
@@ -68,7 +71,7 @@ export function ProductsPage() {
         ? b.rating - a.rating
         : 0
     );
-  }, [products, query, brand, sort, categorySlug, params.toString()]);
+  }, [products, query, brand, sort, categorySlug, params.toString(), showFullCatalogue]);
   const crumbs = categoryEntry
     ? [...categoryEntry.ancestors, categoryEntry.category]
     : [];
@@ -144,6 +147,15 @@ export function ProductsPage() {
             ☷ List
           </button>
         </div>
+        <label className="catalogue-mode-toggle">
+          <input
+            type="checkbox"
+            checked={showFullCatalogue}
+            onChange={(event) => setShowFullCatalogue(event.target.checked)}
+          />
+          <span aria-hidden="true" />
+          {showFullCatalogue ? "Full API catalogue" : "Selected products"}
+        </label>
         <label>
           Sort by{" "}
           <select value={sort} onChange={(e) => update("sort", e.target.value)}>
