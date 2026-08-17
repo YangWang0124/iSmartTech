@@ -1,4 +1,4 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { ProductVisual } from "../components/ProductVisual";
 import { useCart } from "../context/CartContext";
@@ -20,6 +20,10 @@ const compatible = (product: Product, brand: string) => norm(product.brand) === 
 const drive = (product: Product) => hardDriveIds.has(product.id) || /hard\s*drive|hdd|skyhawk|wd purple/i.test(`${product.name} ${product.category}`);
 const capacity = (count: number) => count <= 4 ? 4 : count <= 8 ? 8 : count <= 16 ? 16 : count <= 24 ? 24 : count <= 32 ? 32 : 64;
 const tagValue = (product: Product, values: Record<number, unknown>) => Object.keys(values).map(Number).find(tag => product.tagIds?.includes(tag));
+const matchesSelectedFilters = (product: Product, selectedTags: number[]) => technicalFilters.every(filter => {
+  const selectedInGroup = filter.options.map(([id]) => id).filter(id => selectedTags.includes(id));
+  return !selectedInGroup.length || selectedInGroup.some(tag => product.tagIds?.includes(tag));
+});
 
 export function CustomCctvKitPage() {
   const { products, loading } = useProducts();
@@ -35,7 +39,34 @@ export function CustomCctvKitPage() {
   const [noRoofAccess, setNoRoofAccess] = useState<boolean | null>(null);
   const [installation, setInstallation] = useState(false);
   const [added, setAdded] = useState(false);
-  const cameras = useMemo(() => products.filter(p => cameraCategoryIds.some(id => p.categoryIds?.includes(id)) && p.stock > 0 && (!brand || compatible(p, brand)) && filters.every(tag => p.tagIds?.includes(tag))), [products, brand, filters]);
+  useEffect(() => {
+    document.querySelectorAll<HTMLSelectElement>(".kit-filters select").forEach((select, index) => {
+      if (!Array.from(select.options).some(option => option.value === "__clear_filter")) {
+        const clearOption = new Option("Clear", "__clear_filter");
+        select.add(clearOption, 0);
+      }
+      const selectedLabels = technicalFilters[index].options
+        .filter(([id]) => filters.includes(id))
+        .map(([, label]) => label);
+      select.value = "";
+      const displayOption = Array.from(select.options).find(option => option.value === "");
+      if (displayOption) displayOption.text = selectedLabels.length ? selectedLabels.join(", ") : "Add filter";
+    });
+  }, [filters, step]);
+  useEffect(() => {
+    const bindings = Array.from(document.querySelectorAll<HTMLSelectElement>(".kit-filters select")).map((select, index) => {
+      const clearFilter = (event: Event) => {
+        if ((event.currentTarget as HTMLSelectElement).value !== "__clear_filter") return;
+        event.stopPropagation();
+        const tagIds = new Set<number>(technicalFilters[index].options.map(([id]) => id));
+        setFilters(current => current.filter(tag => !tagIds.has(tag)));
+      };
+      select.addEventListener("change", clearFilter, true);
+      return () => select.removeEventListener("change", clearFilter, true);
+    });
+    return () => bindings.forEach(remove => remove());
+  }, [step]);
+  const cameras = useMemo(() => products.filter(p => cameraCategoryIds.some(id => p.categoryIds?.includes(id)) && p.stock > 0 && (!brand || compatible(p, brand)) && matchesSelectedFilters(p, filters)), [products, brand, filters]);
   const selectedCameras = cameras.map(product => ({ product, quantity: cameraQty[product.id] || 0 })).filter(item => item.quantity > 0);
   const cameraCount = selectedCameras.reduce((total, item) => total + item.quantity, 0);
   const recorders = useMemo(() => products.filter(p => recorderCategoryIds.some(id => p.categoryIds?.includes(id)) && p.stock > 0 && !!brand && compatible(p, brand) && (channels[tagValue(p, channels) || 0] || 0) >= capacity(cameraCount)), [products, brand, cameraCount]);
