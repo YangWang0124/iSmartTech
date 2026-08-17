@@ -35,4 +35,11 @@ export type Product = {
   specifications: Record<string, string>;
 };
 
-export type CartItem = { productId: string; quantity: number };
+export type CartItem = {
+  productId: string;
+  quantity: number;
+  customKitId?: string;
+  unitPrice?: number;
+  installationCost?: number;
+  installation?: { storeys: number; noRoofAccess: boolean };
+};
