@@ -1,3 +1,11 @@
+export type ProductVariant = {
+  id?: string;
+  name: string;
+  sku?: string;
+  price?: number;
+  stock?: number;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -11,6 +19,8 @@ export type Product = {
   rating: number;
   reviews: number;
   stock: number;
+  isAssembled?: boolean;
+  subProducts?: ProductVariant[];
   image?: string;
   galleryImages?: string[];
   featureImages?: string[];
@@ -25,4 +35,11 @@ export type Product = {
   specifications: Record<string, string>;
 };
 
-export type CartItem = { productId: string; quantity: number };
+export type CartItem = {
+  productId: string;
+  quantity: number;
+  customKitId?: string;
+  unitPrice?: number;
+  installationCost?: number;
+  installation?: { storeys: number; noRoofAccess: boolean };
+};

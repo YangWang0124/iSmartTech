@@ -1,4 +1,5 @@
 import seedProducts from "../src/data/products.json";
+import { fetchCatalogue, fetchCatalogueProduct } from "./catalogue-source.js";
 
 const schema = `CREATE TABLE IF NOT EXISTS products (
   id TEXT PRIMARY KEY, name TEXT NOT NULL, brand TEXT NOT NULL, category TEXT NOT NULL,
@@ -28,6 +29,11 @@ export default {
 
 async function handleApi(request, env, url) {
   try {
+    if (url.pathname.startsWith("/api/catalogue-source") && request.method === "GET") {
+      const match = url.pathname.match(/^\/api\/catalogue-source\/(?:source-)?([^/]+)$/);
+      const payload = match ? await fetchCatalogueProduct(decodeURIComponent(match[1])) : await fetchCatalogue();
+      return Response.json(payload, { headers: { "Cache-Control": "public, max-age=300, s-maxage=900" } });
+    }
     if (!env.DB) return json({ error: "Product storage is not configured." }, 503);
     await ensureDatabase(env.DB);
     if (url.pathname.startsWith("/api/product-images/")) return serveImage(env, url.pathname.slice(20));

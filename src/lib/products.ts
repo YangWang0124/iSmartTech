@@ -6,4 +6,4 @@ export const categories = [...new Set(products.map((product) => product.category
 export const brands = [...new Set(products.map((product) => product.brand))].sort();
 
 export const money = (value: number) =>
-  new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD", maximumFractionDigits: 0 }).format(value);
+  new Intl.NumberFormat("en-NZ", { style: "currency", currency: "NZD", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
