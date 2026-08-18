@@ -126,6 +126,25 @@ const tiandyProductContent: TiandyProductContent[] = [
 
 const normaliseProductCode = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+function productSummaryHeading(product: Product) {
+  const highlights = product.features.slice(0, 2).join(" | ");
+  return highlights ? `${product.brand} ${product.sku} | ${highlights}` : `${product.brand} ${product.sku} | Product overview`;
+}
+
+function productOverview(product: Product) {
+  const overview = product.description.trim();
+  if (overview.length >= 420) return overview;
+  const highlights = product.features.slice(0, 5).join("; ");
+  const productUse = product.category.toLowerCase().includes("nvr")
+    ? "It is intended for practical video recording, camera management and local playback in a security system."
+    : product.category.toLowerCase().includes("accessor")
+      ? "It is intended to support a neat, compatible and dependable security-system installation."
+      : "It is suited to residential or commercial security installations where dependable day-to-day operation is important.";
+  const verifiedDetail = highlights ? ` Key specifications include ${highlights}.` : "";
+  const guidance = " Check the linked datasheet for full compatibility, environmental limits and installation requirements before ordering.";
+  return `${overview} ${productUse}${verifiedDetail}${guidance}`;
+}
+
 export function ProductDetailPage() {
   const { id } = useParams();
   const { products } = useProducts();
@@ -144,7 +163,8 @@ export function ProductDetailPage() {
   }, [id, baseProduct?.sourceProductId]);
   const { language } = useLanguage();
   const zh = language === "zh";
-  const detailedBaseProduct = baseProduct ? { ...sourceDetail, ...baseProduct, image: baseProduct.image ?? sourceDetail?.image, galleryImages: baseProduct.galleryImages?.length ? baseProduct.galleryImages : sourceDetail?.galleryImages, featureImages: baseProduct.featureImages?.length ? baseProduct.featureImages : sourceDetail?.featureImages, features: sourceDetail?.features?.length ? sourceDetail.features : baseProduct.features, description: sourceDetail?.description || baseProduct.description, shortDescription: sourceDetail?.shortDescription || baseProduct.shortDescription } as Product : undefined;
+  const keepsVerifiedCuratedCopy = Boolean(baseProduct?.id.startsWith("curated-"));
+  const detailedBaseProduct = baseProduct ? { ...sourceDetail, ...baseProduct, image: baseProduct.image ?? sourceDetail?.image, galleryImages: baseProduct.galleryImages?.length ? baseProduct.galleryImages : sourceDetail?.galleryImages, featureImages: baseProduct.featureImages?.length ? baseProduct.featureImages : sourceDetail?.featureImages, features: keepsVerifiedCuratedCopy ? baseProduct.features : (sourceDetail?.features?.length ? sourceDetail.features : baseProduct.features), description: keepsVerifiedCuratedCopy ? baseProduct.description : (sourceDetail?.description || baseProduct.description), shortDescription: keepsVerifiedCuratedCopy ? baseProduct.shortDescription : (sourceDetail?.shortDescription || baseProduct.shortDescription) } as Product : undefined;
   const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("White");
@@ -160,10 +180,9 @@ export function ProductDetailPage() {
   const usesParadoxKitLayout = Boolean(paradoxModel);
   const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
-  const usesSourceLayout = product.id.startsWith("source-");
-  const tiandyDetail = product.brand.toLowerCase() === "tiandy"
-    ? tiandyProductContent.find(item => normaliseProductCode(product.sku).includes(normaliseProductCode(item.model)))
-    : undefined;
+  // Curated records now carry supplier-verified descriptions and features directly.
+  // Keep the legacy Tiandy layout only for any future product that explicitly needs it.
+  const tiandyDetail = undefined as TiandyProductContent | undefined;
   const displayName = tiandyDetail?.name ?? product.name;
   const displaySku = tiandyDetail?.model ?? product.sku;
   const previewImages: Array<string | undefined> = [
@@ -184,7 +203,7 @@ export function ProductDetailPage() {
           <span className="eyebrow">{product.brand} · SKU {displaySku}</span>
           <h1>{displayName}</h1>
           <div className="detail-price"><strong>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small></div>
-          {usesSourceLayout && !tiandyDetail ? <div className="product-summary source-product-summary"><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></div> : <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : tiandyDetail?.descriptionTitle ?? product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : tiandyDetail?.overview ?? product.description}</p></div>}
+          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{usesDahuaBadges ? dahuaDescription : tiandyDetail?.overview ?? productOverview(product)}</p></div>
           <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}>
             <div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div>
           </section>
@@ -197,10 +216,12 @@ export function ProductDetailPage() {
           {usesHikvisionKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{hikvisionKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesArrowheadKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
+          {!usesDahuaBadges && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
+          {!usesDahuaBadges && !usesHikvisionKitLayout && product.datasheetUrl && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
-          {!usesSourceLayout && <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>}
+          <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>
           <div className="purchase-row purchase-row--new">{product.priceOnRequest ? <Link className="button button--primary add-to-cart" to="/contact">{zh ? "获取报价" : "Request a quote"}</Link> : <><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></>}</div>
         </div>
       </section>

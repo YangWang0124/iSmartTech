@@ -17,6 +17,10 @@ export type Product = {
   priceOnRequest?: boolean;
   /** Source catalogue record used to enrich a curated product page when an exact SKU exists. */
   sourceProductId?: string;
+  /** Public supplier page used to verify this curated product's content. */
+  sourceUrl?: string;
+  /** Public manufacturer or supplier datasheet, where available. */
+  datasheetUrl?: string;
   oldPrice?: number;
   sku: string;
   rating: number;
