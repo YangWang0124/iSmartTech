@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import seedProducts from "../data/products.json";
+import { createCuratedProducts } from "../data/curatedProducts";
 import type { Product } from "../types";
 
 type ProductState = { products: Product[]; categories: string[]; brands: string[]; loading: boolean; refresh: () => Promise<void> };
@@ -32,7 +33,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       return [...mergedManaged, ...bundled.filter(product => !managedIds.has(product.id))];
     })();
     const existingSkus = new Set(coreProducts.map(product => product.sku.trim().toLowerCase()));
-    return [...coreProducts, ...sourceProducts.filter(product => !existingSkus.has(product.sku.trim().toLowerCase()))];
+    const sourceCatalogue = sourceProducts.filter(product => !existingSkus.has(product.sku.trim().toLowerCase()));
+    return [...coreProducts, ...sourceCatalogue, ...createCuratedProducts([...coreProducts, ...sourceCatalogue])];
   }, [managed, sourceProducts]);
   const value = useMemo(() => ({ products, categories: [...new Set(products.map(p => p.category))].sort(), brands: [...new Set(products.map(p => p.brand))].sort(), loading, refresh }), [products, loading]);
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;

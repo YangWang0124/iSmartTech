@@ -6,7 +6,7 @@ import { money } from "../lib/products";
 import { localizeProduct } from "../lib/product-i18n";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
-import type { Product, ProductVariant } from "../types";
+import type { Product } from "../types";
 
 const dahuaFeatureBadges = [
   ["/assets/product-features/6mp-resolution.png", "6MP full HD resolution"],
@@ -64,6 +64,87 @@ const arrowheadKitContents = (keypad: "LCD" | "LED") => [
   ["Cable", "1 × 100 metre box of 0.2 alarm cable"],
 ];
 
+type TiandyProductContent = {
+  model: string;
+  name: string;
+  descriptionTitle: string;
+  overview: string;
+  features: string[];
+};
+
+const tiandyProductContent: TiandyProductContent[] = [
+  {
+    model: "TC-C36XN",
+    name: "Tiandy 6MP DualLight Turret Camera",
+    descriptionTitle: "Tiandy TC-C36XN 2ENA-28 | 6MP DualLight Turret | Built-in Mic | IP66",
+    overview: "The Tiandy TC-C36XN 2ENA-28 is a 6MP turret network camera with a 1/2.7-inch CMOS sensor and 2.8mm fixed lens. It combines infrared illumination up to 30m with white-light illumination up to 15m, plus Smart IR, WDR, human and vehicle detection, a built-in microphone and PoE power in an IP66 housing.",
+    features: ["6MP resolution up to 3200 × 1800 at 30fps", "Dual illumination: infrared up to 30m and white light up to 15m", "2.8mm fixed lens with 112.1° horizontal field of view", "Human and vehicle smart-alarm detection", "Built-in microphone with S+265 / H.265 / H.264 compression", "PoE IEEE 802.3af, ONVIF Profile S/T and IP66 protection"],
+  },
+  {
+    model: "TC-C34XN",
+    name: "Tiandy 4MP Fixed Turret Camera",
+    descriptionTitle: "Tiandy TC-C34XN 2ENA-28 | 4MP Fixed Turret | Built-in Mic | IP66",
+    overview: "The Tiandy TC-C34XN 2ENA-28 is a 4MP fixed turret camera with a 1/3-inch CMOS sensor and 2.8mm fixed lens. It provides Smart IR up to 30m, white-light illumination up to 15m, human and vehicle detection, a built-in microphone and PoE support for dependable indoor or outdoor surveillance.",
+    features: ["4MP resolution, 2560 × 1440 at 30fps", "Infrared illumination up to 30m and white light up to 15m", "2.8mm fixed lens with 91.5° horizontal field of view", "DWDR, 3D DNR and Smart IR", "Human and vehicle smart-alarm detection", "Built-in microphone, ONVIF Profile S/T, PoE and IP66 protection"],
+  },
+  {
+    model: "TC-R3105",
+    name: "Tiandy 1 HDD 5-Channel PSE NVR",
+    descriptionTitle: "Tiandy TC-R3105 | 5-Channel PSE NVR | 4 PoE Ports | 1 HDD",
+    overview: "The Tiandy TC-R3105 is a 5-channel PSE network video recorder supporting camera input up to 8MP, 60Mbps incoming bandwidth and local HDD storage. Four integrated PoE ports simplify camera connection, while Smart Alarm and human/vehicle classification support efficient monitoring.",
+    features: ["5 camera channels with up to 8MP input", "60Mbps incoming and 40Mbps outgoing bandwidth", "Four PoE ports with a 45W total PoE budget", "One HDD bay supporting drives up to 8TB", "4-channel simultaneous playback with HDMI and VGA outputs", "S+265 / H.265 / H.264, ONVIF Profile S/T and RTSP support"],
+  },
+  {
+    model: "TC-R3110",
+    name: "Tiandy 1 HDD 10-Channel Advanced PSE NVR",
+    descriptionTitle: "Tiandy TC-R3110 | 10-Channel PSE NVR | 8 PoE Ports | 4K HDMI",
+    overview: "The Tiandy TC-R3110 is a 10-channel PSE network video recorder with 60Mbps incoming bandwidth, local HDD recording and 4K HDMI output. Eight integrated PoE ports provide a 70W budget for connected cameras, and Smart Motion analytics are supported through compatible cameras.",
+    features: ["10 camera channels with up to 6MP supported resolution", "60Mbps incoming and 40Mbps outgoing bandwidth", "Eight PoE ports with a 70W total PoE budget", "4K HDMI output and up to 10-camera multi-screen display", "One HDD bay supporting drives up to 6TB", "S+265 / H.265 / H.264, ONVIF Profile S/T and RTSP support"],
+  },
+  {
+    model: "TC-R3104",
+    name: "Tiandy 1 HDD 4-Channel PSE NVR",
+    descriptionTitle: "Tiandy TC-R3104 | 4-Channel PSE NVR | 4 PoE Ports | 1 HDD",
+    overview: "The Tiandy TC-R3104 is a compact 4-channel PSE network video recorder that supports camera input up to 6MP, 60Mbps incoming bandwidth and local HDD recording. Its four integrated PoE ports provide a tidy single-cable camera installation, with Smart Motion and ONVIF Profile S/T support.",
+    features: ["4 camera channels with up to 6MP input", "60Mbps incoming and 40Mbps outgoing bandwidth", "Four PoE ports with a 28W total PoE budget", "One HDD bay supporting drives up to 6TB", "HDMI and VGA output with 4-channel playback", "Smart Motion, RTSP and ONVIF Profile S/T support"],
+  },
+  {
+    model: "TC-H343K",
+    name: "Tiandy 4MP Color Maker 4G Solar PT Camera",
+    descriptionTitle: "Tiandy TC-H343K 8DA-4 | 4MP Solar 4G PT Camera | Auto Tracking | IP65",
+    overview: "The official Tiandy model is TC-H343K 8DA-4. It is a 4MP Color Maker PT camera for Tiandy's solar and battery integrated range, with human and vehicle detection, auto-tracking, infrared and white-light illumination, two-way audio and microSD storage.",
+    features: ["4MP resolution up to 2560 × 1440 at 20fps", "Pan/tilt movement with 64 presets and auto-tracking", "Infrared illumination up to 30m and white light up to 15m", "Human and vehicle detection with red/blue alarm flashing", "Built-in microphone, loudspeaker and microSD storage up to 256GB", "IP65 protection for solar and battery-integrated deployments"],
+  },
+  {
+    model: "TC-C34CN",
+    name: "Tiandy 4MP Color Maker Wi-Fi Bullet Camera",
+    descriptionTitle: "Tiandy TC-C34CN 9ATA-28 | 4MP Wi-Fi Bullet | Two-Way Audio | IP65",
+    overview: "The Tiandy TC-C34CN 9ATA-28 is a 4MP Color Maker Wi-Fi bullet camera with a 2.8mm fixed lens, infrared illumination up to 30m and white-light illumination up to 20m. It includes Wi-Fi connectivity, two-way audio, microSD storage and IP65 protection.",
+    features: ["4MP resolution up to 2560 × 1440 at 20fps", "2.8mm fixed lens with 103.8° horizontal field of view", "Infrared illumination up to 30m and white light up to 20m", "Wi-Fi 802.11b/g/n with WPA-PSK / WPA2-PSK security", "Built-in microphone, loudspeaker and microSD storage up to 256GB", "Smart Alarm, 3D DNR, DWDR and IP65 protection"],
+  },
+];
+
+const normaliseProductCode = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function productSummaryHeading(product: Product) {
+  const highlights = product.features.slice(0, 2).join(" | ");
+  return highlights ? `${product.brand} ${product.sku} | ${highlights}` : `${product.brand} ${product.sku} | Product overview`;
+}
+
+function productOverview(product: Product) {
+  const overview = product.description.trim();
+  if (overview.length >= 420) return overview;
+  const highlights = product.features.slice(0, 5).join("; ");
+  const productUse = product.category.toLowerCase().includes("nvr")
+    ? "It is intended for practical video recording, camera management and local playback in a security system."
+    : product.category.toLowerCase().includes("accessor")
+      ? "It is intended to support a neat, compatible and dependable security-system installation."
+      : "It is suited to residential or commercial security installations where dependable day-to-day operation is important.";
+  const verifiedDetail = highlights ? ` Key specifications include ${highlights}.` : "";
+  const guidance = " Check the linked datasheet for full compatibility, environmental limits and installation requirements before ordering.";
+  return `${overview} ${productUse}${verifiedDetail}${guidance}`;
+}
+
 export function ProductDetailPage() {
   const { id } = useParams();
   const { products } = useProducts();
@@ -72,16 +153,18 @@ export function ProductDetailPage() {
   useEffect(() => {
     let cancelled = false;
     setSourceDetail(undefined);
-    if (!id?.startsWith("source-")) return () => { cancelled = true; };
-    fetch(`/api/catalogue-source/${encodeURIComponent(id)}`)
+    const sourceId = id?.startsWith("source-") ? id : baseProduct?.sourceProductId;
+    if (!sourceId) return () => { cancelled = true; };
+    fetch(`/api/catalogue-source/${encodeURIComponent(sourceId)}`)
       .then(response => response.ok ? response.json() : Promise.reject(new Error("Product details unavailable")))
       .then(detail => { if (!cancelled) setSourceDetail(detail); })
       .catch(() => undefined);
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, baseProduct?.sourceProductId]);
   const { language } = useLanguage();
   const zh = language === "zh";
-  const detailedBaseProduct = baseProduct ? { ...baseProduct, ...sourceDetail, category: baseProduct.category, categoryIds: baseProduct.categoryIds, tagIds: baseProduct.tagIds, icon: baseProduct.icon, accent: baseProduct.accent } as Product : undefined;
+  const keepsVerifiedCuratedCopy = Boolean(baseProduct?.id.startsWith("curated-"));
+  const detailedBaseProduct = baseProduct ? { ...sourceDetail, ...baseProduct, image: baseProduct.image ?? sourceDetail?.image, galleryImages: baseProduct.galleryImages?.length ? baseProduct.galleryImages : sourceDetail?.galleryImages, featureImages: baseProduct.featureImages?.length ? baseProduct.featureImages : sourceDetail?.featureImages, features: keepsVerifiedCuratedCopy ? baseProduct.features : (sourceDetail?.features?.length ? sourceDetail.features : baseProduct.features), description: keepsVerifiedCuratedCopy ? baseProduct.description : (sourceDetail?.description || baseProduct.description), shortDescription: keepsVerifiedCuratedCopy ? baseProduct.shortDescription : (sourceDetail?.shortDescription || baseProduct.shortDescription) } as Product : undefined;
   const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("White");
@@ -97,9 +180,11 @@ export function ProductDetailPage() {
   const usesParadoxKitLayout = Boolean(paradoxModel);
   const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
-  const usesSourceLayout = product.id.startsWith("source-");
-  const variants: ProductVariant[] = product.subProducts?.length ? product.subProducts : (product.colors || []).map(color => ({ id: color, name: color }));
-  const assemblyStatus = product.isAssembled === true ? (zh ? "已组装套装" : "Pre-assembled kit") : product.isAssembled === false ? (zh ? "单独产品" : "Individual product") : (zh ? "未提供" : "Not specified");
+  // Curated records now carry supplier-verified descriptions and features directly.
+  // Keep the legacy Tiandy layout only for any future product that explicitly needs it.
+  const tiandyDetail = undefined as TiandyProductContent | undefined;
+  const displayName = tiandyDetail?.name ?? product.name;
+  const displaySku = tiandyDetail?.model ?? product.sku;
   const previewImages: Array<string | undefined> = [
     product.image,
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
@@ -108,35 +193,36 @@ export function ProductDetailPage() {
 
   return (
     <main className="page container">
-      <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={`/products?category=${encodeURIComponent(baseProduct!.category)}`}>{product.category}</Link><span>›</span>{product.name}</div>
+      <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={`/products?category=${encodeURIComponent(baseProduct!.category)}`}>{product.category}</Link><span>›</span>{displayName}</div>
       <section className="product-detail product-detail--commerce">
         <div className="product-preview">
-          <div className="product-detail__gallery">{product.badge && <span className="badge">{product.badge}</span>}<ProductVisual icon={product.icon} accent={product.accent} image={displayedImage} alt={product.name} large />{!displayedImage && <div className="gallery-note">{zh ? "产品预览" : "PRODUCT PREVIEW"}</div>}</div>
+          <div className="product-detail__gallery">{product.badge && <span className="badge">{product.badge}</span>}<ProductVisual icon={product.icon} accent={product.accent} image={displayedImage} alt={displayName} large />{!displayedImage && <div className="gallery-note">{zh ? "产品预览" : "PRODUCT PREVIEW"}</div>}</div>
           <div className="product-preview__thumbs">{previewImages.map((image, index) => <button type="button" key={`${image || "product-placeholder"}-${index}`} className={index === previewIndex ? "active" : ""} onClick={() => setPreviewIndex(index)} aria-label={`${zh ? "显示产品图片" : "Show product image"} ${index + 1}`}><ProductVisual icon={product.icon} accent={product.accent} image={image} alt="" /></button>)}</div>
         </div>
         <div className="product-detail__info product-purchase">
-          <span className="eyebrow">{product.brand} · SKU {product.sku}</span>
-          <h1>{product.name}</h1>
-          <div className="detail-price"><strong>{money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{zh ? "含商品及服务税" : "inc GST"}</small></div>
-          {usesSourceLayout ? <div className="product-summary source-product-summary"><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></div> : <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : product.shortDescription}</h2><p>{usesDahuaBadges ? dahuaDescription : product.description}</p></div>}
+          <span className="eyebrow">{product.brand} · SKU {displaySku}</span>
+          <h1>{displayName}</h1>
+          <div className="detail-price"><strong>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small></div>
+          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{usesDahuaBadges ? dahuaDescription : tiandyDetail?.overview ?? productOverview(product)}</p></div>
           <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}>
-            <div><span>{zh ? "库存" : "Stock"}</span><strong className={product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div>
-            <div><span>{zh ? "产品选项" : "Product variations"}</span>{variants.length ? <ul>{variants.map(variant => <li key={variant.id || variant.name}><b>{variant.name}</b>{variant.sku && <small>SKU {variant.sku}</small>}{typeof variant.stock === "number" && <small>{variant.stock > 0 ? (zh ? `库存 ${variant.stock}` : `${variant.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</small>}</li>)}</ul> : <strong>{zh ? "没有列出的选项" : "No variations listed"}</strong>}</div>
-            <div><span>{zh ? "组装状态" : "Assembly status"}</span><strong>{assemblyStatus}</strong></div>
+            <div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div>
           </section>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && (usesDahuaBadges || product.featureImages?.length) ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{(product.featureImages?.length ? product.featureImages.map((src, index) => [src, product.features[index] || `Feature ${index + 1}`]) : dahuaFeatureBadges).map(([src, label]) => <img key={src} src={src} alt={label} />)}</div> : null}
           {usesDahuaBadges && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
+          {tiandyDetail && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{tiandyDetail.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesHikvisionKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{hikvisionKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesArrowheadKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
+          {!usesDahuaBadges && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
+          {!usesDahuaBadges && !usesHikvisionKitLayout && product.datasheetUrl && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
-          {!usesSourceLayout && <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>}
-          <div className="purchase-row purchase-row--new"><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></div>
+          <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>
+          <div className="purchase-row purchase-row--new">{product.priceOnRequest ? <Link className="button button--primary add-to-cart" to="/contact">{zh ? "获取报价" : "Request a quote"}</Link> : <><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></>}</div>
         </div>
       </section>
     </main>
