@@ -34,7 +34,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     })();
     const existingSkus = new Set(coreProducts.map(product => product.sku.trim().toLowerCase()));
     const sourceCatalogue = sourceProducts.filter(product => !existingSkus.has(product.sku.trim().toLowerCase()));
-    return [...coreProducts, ...sourceCatalogue, ...createCuratedProducts([...coreProducts, ...sourceCatalogue])];
+    // Curated products must only inherit price, stock and imagery from an exact
+    // live catalogue match. Do not let bundled or staff-managed prototype
+    // records provide commercial values for these selected products.
+    return [...coreProducts, ...sourceCatalogue, ...createCuratedProducts(sourceProducts)];
   }, [managed, sourceProducts]);
   const value = useMemo(() => ({ products, categories: [...new Set(products.map(p => p.category))].sort(), brands: [...new Set(products.map(p => p.brand))].sort(), loading, refresh }), [products, loading]);
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;
