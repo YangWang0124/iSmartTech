@@ -72,6 +72,66 @@ type TiandyProductContent = {
   features: string[];
 };
 
+const tiandyC36Content = {
+  descriptionTitle: "Tiandy TC-C36XN 2ENA-28 | 6MP DualLight Turret | 2.8mm Lens | Built-in Mic | 30m IR | IP66",
+  description:
+    "The Tiandy TC-C36XN 2ENA-28 delivers 6MP DualLight surveillance in a compact turret design for residential and commercial installations. Its 2.8 mm fixed lens provides a wide field of view for entrances, driveways and other general monitoring areas, while intelligent DualLight combines infrared and white-light illumination to keep the scene visible after dark. Choose discreet black-and-white monitoring, continuous full-colour night vision, or white light that activates when a smart event is detected. Human and vehicle detection helps focus attention on relevant activity, and the built-in microphone adds audio context to recorded footage. IEEE 802.3af PoE carries power and data through one network cable, while the IP66-rated housing supports demanding indoor and outdoor environments.",
+  features: [
+    ["6MP High Resolution", "Captures sharp, detailed footage that makes people, vehicles, and important scene details easier to identify."],
+    ["Smart DualLight", "Combines infrared and white-light illumination to provide discreet night monitoring, full-colour visibility, or active light-based deterrence when needed."],
+    ["Smart Human & Vehicle Detection", "Helps distinguish people and vehicles from general movement, reducing irrelevant events and making security alerts more useful."],
+    ["Built-in Microphone", "Captures on-site audio alongside video, providing additional context when reviewing incidents or suspicious activity."],
+    ["Wide-Angle 2.8mm Lens", "Provides broad scene coverage, making it well suited to entrances, driveways, walkways, and other areas where a wider view is important."],
+    ["IP66 Weatherproof", "Protects the camera against dust, rain and outdoor conditions for dependable long-term surveillance."],
+  ],
+  overview:
+    "Combining 6MP imaging with intelligent DualLight illumination, the TC-C36XN 2ENA-28 is designed for broad coverage and flexible night visibility. Its 2.8 mm lens provides a 112.1° horizontal field of view, making it well suited to nearby entrances, driveways and general monitoring areas. The camera records at up to 3200 × 1800 at 30 fps, while Smart IR, WDR and 3D DNR help retain clear footage in changing light. Infrared reaches up to 30 m, white light reaches up to 15 m, and the alert mode can activate white light after a smart event is detected. With built-in audio, IEEE 802.3af PoE, IP66 protection and an operating range of -30°C to 60°C, it is a practical fixed-camera choice for everyday indoor or outdoor security coverage.",
+  capabilities: [
+    ["Smart DualLight night vision", "Select infrared, full-colour or alert night modes to suit the scene and the level of visible deterrence required."],
+    ["6MP image quality", "High-resolution imaging provides detailed video for general surveillance and incident review, helping retain useful visual information when people, vehicles and other important details need to be identified."],
+    ["Wide-angle coverage", "The 2.8 mm lens prioritises a broad nearby view where expansive scene coverage matters more than long-distance magnification."],
+    ["Smart human and vehicle detection", "Intelligent detection helps distinguish people and vehicles from general movement, making security events more relevant and reducing unnecessary attention on routine activity."],
+    ["Built-in audio", "The integrated microphone captures audio alongside video, providing additional environmental and event information when reviewing recorded footage."],
+    ["Efficient PoE installation", "A compatible PoE switch or NVR can provide network data and power through one Ethernet cable."],
+  ],
+  recommendedApplications: [
+    ["Residential properties", "Suitable for driveways, entrances, walkways, garages and other areas requiring broad day-and-night surveillance."],
+    ["Small businesses", "Well suited to shop entrances, offices, reception areas and other commercial premises where detailed video and intelligent detection are important."],
+    ["Outdoor perimeter monitoring", "The combination of infrared night vision and an IP66-rated housing makes the camera suitable for general outdoor perimeter coverage."],
+    ["Driveways and vehicle areas", "The wide-angle lens provides broad coverage for vehicle approaches, parking areas and property entrances."],
+    ["PoE surveillance systems", "A practical choice for installations using compatible PoE switches or NVRs where straightforward network and power connectivity is preferred."],
+  ],
+  why:
+    "The TC-C36XN 2ENA-28 provides a balanced combination of high-resolution imaging, broad coverage, smart detection and flexible night vision in a compact turret design. Its DualLight system offers more flexibility than conventional infrared-only cameras, allowing surveillance to remain discreet when required while still providing full-colour visibility or active light-based deterrence when appropriate. The combination of a wide-angle lens, human and vehicle detection, built-in audio and PoE connectivity makes it a versatile option for everyday residential and commercial surveillance. Its IP66-rated construction and wide operating temperature range further support dependable use in demanding indoor and outdoor environments.",
+  specifications: [
+    ["Image sensor", '1/2.7" CMOS'],
+    ["Maximum resolution", "Up to 6MP, 3200 × 1800 @ 30 fps"],
+    ["Lens", "2.8 mm fixed focal lens"],
+    ["Field of view", "112.1° horizontal / 60.4° vertical / 128.7° diagonal"],
+    ["Aperture", "F1.6"],
+    ["Minimum illumination", "Colour 0.001 Lux @ F1.6, AGC ON; B/W 0 Lux with IR"],
+    ["IR / white-light range", "Up to 30 m IR / 15 m white light"],
+    ["Night vision modes", "Infrared / Full Colour / Alert"],
+    ["Image enhancement", "Smart IR, WDR and 3D DNR"],
+    ["Smart detection", "Human and vehicle detection"],
+    ["Video compression", "S+265 / H.265 / H.264B / H.264M / H.264H"],
+    ["Audio", "1 × built-in microphone; G.711A / G.711U"],
+    ["Network", "RJ-45 10/100 Base-T"],
+    ["Power", "IEEE 802.3af PoE; maximum power consumption 5 W"],
+    ["Housing", "Metal + plastic; IP66"],
+    ["Operating conditions", "-30°C to 60°C; ≤95% RH"],
+    ["Default IP address", "192.168.1.2"],
+    ["Video standard", "NTSC / PAL"],
+  ],
+  idealUseCases: [
+    ["Driveways and front entrances", "The wide-angle lens provides broad coverage of approaching vehicles and visitors, while DualLight provides flexible night-time visibility."],
+    ["Residential perimeters", "Infrared illumination and smart detection provide practical monitoring of general perimeter areas around homes and other properties."],
+    ["Retail and shopfronts", "Detailed imaging and human and vehicle detection make the camera suitable for monitoring customer entrances, shopfronts and surrounding activity."],
+    ["Small commercial premises", "The compact turret design, built-in audio and PoE connectivity suit offices, reception areas and other commercial environments."],
+    ["Indoor and outdoor general surveillance", "The wide-angle lens, adaptable night vision and weather-resistant housing provide a flexible solution for general-purpose surveillance across a range of locations."],
+  ],
+} as const;
+
 const tiandyProductContent: TiandyProductContent[] = [
   {
     model: "TC-C36XN",
@@ -180,6 +240,7 @@ export function ProductDetailPage() {
   const usesParadoxKitLayout = Boolean(paradoxModel);
   const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
+  const usesTiandyC36Layout = product.id === "curated-tiandy-tc-c36xn";
   // Curated records now carry supplier-verified descriptions and features directly.
   // Keep the legacy Tiandy layout only for any future product that explicitly needs it.
   const tiandyDetail = undefined as TiandyProductContent | undefined;
@@ -203,7 +264,7 @@ export function ProductDetailPage() {
           <span className="eyebrow">{product.brand} · SKU {displaySku}</span>
           <h1>{displayName}</h1>
           <div className="detail-price"><strong>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small></div>
-          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{usesDahuaBadges ? dahuaDescription : tiandyDetail?.overview ?? productOverview(product)}</p></div>
+          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesTiandyC36Layout ? tiandyC36Content.descriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{usesDahuaBadges ? dahuaDescription : usesTiandyC36Layout ? tiandyC36Content.description : tiandyDetail?.overview ?? productOverview(product)}</p></div>
           <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}>
             <div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div>
           </section>
@@ -211,12 +272,13 @@ export function ProductDetailPage() {
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && (usesDahuaBadges || product.featureImages?.length) ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{(product.featureImages?.length ? product.featureImages.map((src, index) => [src, product.features[index] || `Feature ${index + 1}`]) : dahuaFeatureBadges).map(([src, label]) => <img key={src} src={src} alt={label} />)}</div> : null}
+          {usesTiandyC36Layout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{tiandyC36Content.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {tiandyDetail && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{tiandyDetail.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesHikvisionKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{hikvisionKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesArrowheadKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
-          {!usesDahuaBadges && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
+          {!usesDahuaBadges && !usesTiandyC36Layout && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
           {!usesDahuaBadges && !usesHikvisionKitLayout && product.datasheetUrl && <section className="additional-information"><h2>{zh ? "附加信息" : "Additional Information"}</h2><a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a></section>}
@@ -225,6 +287,13 @@ export function ProductDetailPage() {
           <div className="purchase-row purchase-row--new">{product.priceOnRequest ? <Link className="button button--primary add-to-cart" to="/contact">{zh ? "获取报价" : "Request a quote"}</Link> : <><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></>}</div>
         </div>
       </section>
+      {usesTiandyC36Layout && <>
+        <section className="product-overview product-overview--tiandy"><div><span className="eyebrow">{zh ? "产品概览" : "Product Overview"}</span><h2>{zh ? "广角覆盖与灵活夜视" : "Broad coverage with flexible night visibility"}</h2></div><p>{tiandyC36Content.overview}</p></section>
+        <section className="key-features key-features--tiandy"><h2>{zh ? "主要能力" : "Key Capabilities"}</h2><ul>{tiandyC36Content.capabilities.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>
+        <section className="product-content-grid product-content-grid--tiandy"><article><span className="eyebrow">{zh ? "推荐应用" : "Recommended Applications"}</span><h2>{zh ? "适合日常监控的位置" : "Suited to everyday monitoring"}</h2><ul>{tiandyC36Content.recommendedApplications.map(([title, description]) => <li key={title}><strong>{title}</strong><span>{description}</span></li>)}</ul></article><article><span className="eyebrow">{zh ? "为什么选择此型号" : "Why the TC-C36XN 2ENA-28?"}</span><h2>{zh ? "适合灵活夜视的全能炮塔机" : "A versatile DualLight turret camera"}</h2><p>{tiandyC36Content.why}</p></article></section>
+        <section className="product-specifications"><div><span className="eyebrow">{zh ? "技术规格" : "Technical Specifications"}</span><h2>{zh ? "核心技术参数" : "Core technical specifications"}</h2></div><dl>{tiandyC36Content.specifications.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl></section>
+        <section className="product-uses product-uses--tiandy"><span className="eyebrow">{zh ? "理想使用场景" : "Ideal Use Cases"}</span><h2>{zh ? "从入口到周界的灵活覆盖" : "Flexible coverage from entry to perimeter"}</h2><div>{tiandyC36Content.idealUseCases.map(([title, description]) => <article key={title}><h3>{title}</h3><p>{description}</p></article>)}</div></section>
+      </>}
     </main>
   );
 }
