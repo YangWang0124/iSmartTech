@@ -87,6 +87,7 @@ const items: Curated[] = [
     ["10-channel PSE NVR", "One HDD position", "Advanced PSE model"],
     ["TC-R3110"],
     "https://www.iottech.co.nz/product/tiandy-1hdd-10ch-advanced-pse-nvr-spec-3A-i-b-p8-eu-l-s-v2.0",
+    "/assets/R3110.pdf",
   ],
   [
     "tiandy-tc-r3104",

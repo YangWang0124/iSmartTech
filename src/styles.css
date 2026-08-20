@@ -2305,3 +2305,30 @@ textarea:focus {
     transition: none;
   }
 }
+.kit-brand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.kit-brand-grid button {
+  min-height: 100px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.kit-brand-grid button img {
+  width: 100%;
+  max-width: 150px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.kit-brand-grid button.selected {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px #1672df20;
+}
