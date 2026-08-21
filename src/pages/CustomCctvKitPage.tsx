@@ -88,6 +88,8 @@ const matchesSelectedFilters = (product: Product, selectedTags: number[]) =>
       selectedInGroup.some((tag) => product.tagIds?.includes(tag))
     );
   });
+const availableForKit = (product: Product) =>
+  product.priceOnRequest || product.stock > 0;
 
 export function CustomCctvKitPage() {
   const { products, loading } = useProducts();
@@ -153,7 +155,7 @@ export function CustomCctvKitPage() {
       products.filter(
         (p) =>
           cameraCategoryIds.some((id) => p.categoryIds?.includes(id)) &&
-          p.stock > 0 &&
+          availableForKit(p) &&
           (!brand || compatible(p, brand)) &&
           matchesSelectedFilters(p, filters)
       ),
@@ -171,7 +173,7 @@ export function CustomCctvKitPage() {
       products.filter(
         (p) =>
           recorderCategoryIds.some((id) => p.categoryIds?.includes(id)) &&
-          p.stock > 0 &&
+          availableForKit(p) &&
           !!brand &&
           compatible(p, brand) &&
           (channels[tagValue(p, channels) || 0] || 0) >= capacity(cameraCount)
@@ -181,7 +183,7 @@ export function CustomCctvKitPage() {
   const recorder = recorders.find((p) => p.id === recorderId);
   const maxDrives = recorder ? sata[tagValue(recorder, sata) || 0] || 0 : 0;
   const drives = useMemo(
-    () => products.filter((p) => p.stock > 0 && drive(p)),
+    () => products.filter((p) => availableForKit(p) && drive(p)),
     [products]
   );
   const selectedDrives = drives
@@ -196,7 +198,7 @@ export function CustomCctvKitPage() {
       products.filter(
         (p) =>
           p.categoryIds?.includes(12) &&
-          p.stock > 0 &&
+          availableForKit(p) &&
           !!brand &&
           compatible(p, brand)
       ),
@@ -276,6 +278,14 @@ export function CustomCctvKitPage() {
     setRecorderId("");
     setDriveQty({});
     setAccessoryQty({});
+    setFilters([]);
+    setNoRoofAccess(null);
+    setInstallation(false);
+    setAdded(false);
+  };
+  const goToStep = (nextStep: number) => {
+    if (nextStep === 0) resetForBrand("");
+    setStep(nextStep);
   };
   const submit = () => {
     if (
@@ -338,7 +348,7 @@ export function CustomCctvKitPage() {
             key={name}
             className={index === step ? "active" : ""}
             disabled={index > step}
-            onClick={() => setStep(index)}
+            onClick={() => goToStep(index)}
           >
             <span>{index + 1}</span>
             {name}
@@ -614,10 +624,14 @@ function Rows({
               {product.brand} · {product.sku}
             </span>
             <h3>{product.name}</h3>
-            <strong>{money(product.price)}</strong>
-            <small>{product.stock} in stock</small>
+            <strong>{product.priceOnRequest ? "Price on request" : money(product.price)}</strong>
+            <small>{product.priceOnRequest ? "Stock on request" : `${product.stock} in stock`}</small>
           </div>
-          {selectOne ? (
+          {product.priceOnRequest ? (
+            <Link className="button button--secondary" to="/contact">
+              Request quote
+            </Link>
+          ) : selectOne ? (
             <button
               className="button button--secondary"
               onClick={() => onSelect?.(product.id)}
