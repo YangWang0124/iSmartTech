@@ -23,22 +23,25 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
       <div className="product-card__content">
         <span className="eyebrow">
-          {displayed.brand} · {displayed.category}
+          {displayed.category} · {displayed.sku}
         </span>
         <Link to={`/products/${displayed.id}`}>
           <h3>{displayed.name}</h3>
         </Link>
-        {product.reviews > 0 ? (
-          <div
-            className="rating"
-            aria-label={`${product.rating} out of 5 stars`}
-          >
-            <span>★★★★★</span> {product.rating}{" "}
-            <small>({product.reviews})</small>
-          </div>
-        ) : (
-          <div className="rating">New product</div>
-        )}
+        <p className="stock">
+          <i />{" "}
+          {product.priceOnRequest
+            ? language === "zh"
+              ? "库存请询问"
+              : "Stock on request"
+            : product.stock > 0
+            ? language === "zh"
+              ? "有货"
+              : "In stock"
+            : language === "zh"
+            ? "暂时缺货"
+            : "Currently unavailable"}
+        </p>
         <div className="product-card__buy">
           <div>
             <strong>
@@ -69,20 +72,6 @@ export function ProductCard({ product }: { product: Product }) {
             </button>
           )}
         </div>
-        <p className="stock">
-          <i />{" "}
-          {product.priceOnRequest
-            ? language === "zh"
-              ? "库存请询问"
-              : "Stock on request"
-            : product.stock > 0
-            ? language === "zh"
-              ? "有货"
-              : "In stock"
-            : language === "zh"
-            ? "暂时缺货"
-            : "Currently unavailable"}
-        </p>
       </div>
     </article>
   );
