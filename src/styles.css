@@ -880,6 +880,9 @@ button {
   display: flex;
   justify-content: flex-end;
 }
+.catalogue-mode-toggle {
+  margin-right: 25px;
+}
 .catalogue-toolbar label {
   font-size: 12px;
   color: var(--muted);

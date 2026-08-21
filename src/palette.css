@@ -859,25 +859,6 @@ textarea:focus {
 .product-detail--tiandy-c36 .detail-price small {
   margin-left: 0;
 }
-.product-status--price {
-  display: block;
-  margin: 0 0 0 auto;
-  padding: 0;
-  border: 0;
-  text-align: right;
-}
-.product-status--price > div {
-  padding: 0;
-  border: 0;
-}
-.product-status--price span {
-  display: none;
-}
-.product-status--price strong {
-  white-space: nowrap;
-  color: var(--muted);
-  font: 400 10px/1.35 "Open Sans", sans-serif;
-}
 @media (max-width: 760px) {
   .product-detail--tiandy-c36 {
     grid-template-columns: 1fr;
@@ -886,10 +867,6 @@ textarea:focus {
   .product-detail--tiandy-c36 .product-preview,
   .product-detail--tiandy-c36 .product-detail__gallery {
     width: min(320px, 100%);
-  }
-  .product-status--price {
-    text-align: left;
-    margin-left: 0;
   }
 }
 @media (min-width: 761px) and (max-width: 980px) {

@@ -63,17 +63,43 @@ export function ProductProvider({ children }: { children: ReactNode }) {
             ...bundled.filter((product) => !managedIds.has(product.id)),
           ];
         })();
+    const normaliseSku = (sku: string) => sku.trim().toLowerCase();
+    const sourceBySku = new Map(
+      sourceProducts.map((product) => [normaliseSku(product.sku), product])
+    );
+    const coreWithLiveCommercialData = coreProducts.map((product) => {
+      if (!product.requiresLiveCatalogue) return product;
+
+      const liveProduct = sourceBySku.get(normaliseSku(product.sku));
+      return liveProduct
+        ? {
+            ...product,
+            price: liveProduct.price,
+            oldPrice: liveProduct.oldPrice,
+            stock: liveProduct.stock,
+            priceOnRequest: false,
+            sourceProductId: liveProduct.id,
+          }
+        : {
+            ...product,
+            price: 0,
+            oldPrice: undefined,
+            stock: 0,
+            priceOnRequest: true,
+            sourceProductId: undefined,
+          };
+    });
     const existingSkus = new Set(
-      coreProducts.map((product) => product.sku.trim().toLowerCase())
+      coreWithLiveCommercialData.map((product) => normaliseSku(product.sku))
     );
     const sourceCatalogue = sourceProducts.filter(
-      (product) => !existingSkus.has(product.sku.trim().toLowerCase())
+      (product) => !existingSkus.has(normaliseSku(product.sku))
     );
     // Curated products must only inherit price, stock and imagery from an exact
     // live catalogue match. Do not let bundled or staff-managed prototype
     // records provide commercial values for these selected products.
     return [
-      ...coreProducts,
+      ...coreWithLiveCommercialData,
       ...sourceCatalogue,
       ...createCuratedProducts(sourceProducts),
     ];

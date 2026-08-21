@@ -15,6 +15,8 @@ export type Product = {
   tagIds?: number[];
   price: number;
   priceOnRequest?: boolean;
+  /** Use live catalogue commercial data only; never display bundled placeholder price or stock. */
+  requiresLiveCatalogue?: boolean;
   /** Source catalogue record used to enrich a curated product page when an exact SKU exists. */
   sourceProductId?: string;
   /** Public supplier page used to verify this curated product's content. */
