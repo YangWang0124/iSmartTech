@@ -678,6 +678,8 @@ button {
   font-size: 9px;
   letter-spacing: 1px;
   font-weight: 400;
+  display: block;
+  line-height: 1.2;
 }
 .product-card h3 {
   font: 700 14px/1.45 Manrope;

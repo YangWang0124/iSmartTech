@@ -179,13 +179,6 @@ export function Header() {
           ♙ <span>{user ? "My account" : "Sign in"}</span>
         </Link>
         <Link
-          className="staff-link"
-          to="/staff/products"
-          aria-label="Staff sign in"
-        >
-          ♙ <span>Staff sign in</span>
-        </Link>
-        <Link
           className="cart-link"
           to="/cart"
           aria-label={`Cart with ${itemCount} items`}
