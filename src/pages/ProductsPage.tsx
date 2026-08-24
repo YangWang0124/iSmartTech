@@ -240,12 +240,6 @@ export function ProductsPage() {
         </aside>
         <div className="catalogue__results">
           <ProductGrid products={filtered} view={view} />
-          {!filtered.length && (
-            <div className="catalogue-empty">
-              <h2>No matching products</h2>
-              <p>Try another category or clear the selected filters.</p>
-            </div>
-          )}
         </div>
       </div>
     </main>

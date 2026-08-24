@@ -11,7 +11,7 @@ export function Footer() {
         <div><h3>{t("help")}</h3><Link to="/about">{t("aboutUs")}</Link><Link to="/contact">{t("contact")}</Link><Link to="/contact">{t("requestQuote")}</Link><span>{t("shipping")}</span></div>
         <div><h3>{t("specialist")}</h3><a href="tel:092154111">09 215 4111</a><a href="mailto:sales@iottech.co.nz">sales@iottech.co.nz</a><span>{t("hours")}</span></div>
       </div>
-      <div className="container footer__bottom"><span>© 2026 IoT Technologies. {t("prototype")}</span><span>{t("prices")}</span></div>
+      <div className="container footer__bottom"><span>© 2026 iSmartTech. {t("prototype")}</span><span>{t("prices")}</span></div>
     </footer>
   );
 }

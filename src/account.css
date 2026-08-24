@@ -1,1 +1,138 @@
-.account-shell{min-height:650px;display:grid;place-items:center}.account-card{width:min(100%,480px);border:1px solid var(--line);border-radius:10px;padding:38px;background:#fff;box-shadow:0 18px 50px #01333412}.account-card h1,.account-page h1{font:800 36px/1.15 Manrope;color:var(--navy);margin:10px 0}.account-card>p,.account-page p{color:var(--muted);line-height:1.6}.account-card form{display:grid;gap:16px;margin:28px 0 20px}.account-card label{font-size:11px;font-weight:750;color:#435364}.account-card input:not([type=checkbox]){display:block;width:100%;margin-top:6px;border:1px solid #cfd9e2;border-radius:6px;padding:13px;font:14px Inter}.remember-row{display:flex;align-items:center;gap:9px}.account-card .button{width:100%}.account-error{background:#fff0f0;color:#a33e45;padding:11px 13px;border-radius:5px;font-size:11px}.account-switch{font-size:12px;margin-bottom:18px}.account-switch a{color:var(--blue);font-weight:700}.account-card>small{display:block;color:var(--muted);font-size:9px;line-height:1.5}.account-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:35px}.account-signout{color:var(--navy);border-color:var(--navy)}.account-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.account-grid section{border:1px solid var(--line);border-radius:8px;padding:24px;min-height:190px}.account-grid h2{font:750 18px Manrope;color:var(--navy);margin:0 0 17px}.account-grid dl{margin:0}.account-grid dl>div{padding:10px 0;border-top:1px solid var(--line)}.account-grid dt{font-size:9px;color:var(--muted);text-transform:uppercase}.account-grid dd{margin:4px 0 0;font-size:12px}.account-grid small{color:var(--muted);font-size:10px;line-height:1.5}.customer-link{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:750;white-space:nowrap;color:var(--navy)}@media(max-width:1080px){.customer-link span{display:none}}@media(max-width:700px){.account-card{padding:25px}.account-heading{display:block}.account-signout{margin-top:15px}.account-grid{grid-template-columns:1fr}}
+.account-shell {
+  min-height: 650px;
+  display: grid;
+  place-items: center;
+}
+.account-card {
+  width: min(100%, 480px);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 38px;
+  background: #fff;
+  box-shadow: 0 18px 50px #01333412;
+}
+.account-card h1,
+.account-page h1 {
+  font: 800 36px/1.15 Manrope;
+  color: var(--navy);
+  margin: 10px 0;
+}
+.account-card > p,
+.account-page p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.account-card form {
+  display: grid;
+  gap: 16px;
+  margin: 28px 0 20px;
+}
+.account-card label {
+  font-size: 11px;
+  font-weight: 750;
+  color: #435364;
+}
+.account-card input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid #cfd9e2;
+  border-radius: 6px;
+  padding: 13px;
+  font: 14px Inter;
+}
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.account-card .button {
+  width: 100%;
+}
+.account-error {
+  background: #fff0f0;
+  color: #a33e45;
+  padding: 11px 13px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.account-switch {
+  font-size: 12px;
+  margin-bottom: 18px;
+}
+.account-switch a {
+  color: var(--blue);
+  font-weight: 700;
+}
+.account-card > small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.account-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+.account-signout {
+  color: var(--navy);
+  border-color: var(--navy);
+}
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.account-grid section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 190px;
+}
+.account-grid h2 {
+  font: 750 18px Manrope;
+  color: var(--navy);
+  margin: 0 0 17px;
+}
+.account-grid dl {
+  margin: 0;
+}
+.account-grid dl > div {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.account-grid dt {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.account-grid dd {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+.account-grid small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+@media (max-width: 1080px) {
+  .customer-link span {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .account-card {
+    padding: 25px;
+  }
+  .account-heading {
+    display: block;
+  }
+  .account-signout {
+    margin-top: 15px;
+  }
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+}
