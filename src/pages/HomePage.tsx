@@ -43,7 +43,7 @@ export function HomePage() {
     <>
       <HomeCarousel />
 
-      <section className="benefits"><div className="container benefits__grid"><div><span><strong>{zh ? "专业建议" : "Expert advice"}</strong><small>{zh ? "真人服务，实用解答" : "Real people, practical answers"}</small></span></div><div><span><strong>{zh ? "新西兰快速配送" : "Fast NZ shipping"}</strong><small>{zh ? "全国可追踪配送" : "Tracked delivery nationwide"}</small></span></div><div><span><strong>{zh ? "轻松退货" : "Easy returns"}</strong><small>{zh ? "简单友好的支持" : "Simple, friendly support"}</small></span></div><div><span><strong>{zh ? "安心购物" : "Secure shopping"}</strong><small>{zh ? "放心选购" : "Shop with confidence"}</small></span></div></div></section>
+      <section className="benefits"><div className="container benefits__grid"><div><span><strong>{zh ? "本地专业团队" : "Local specialist team"}</strong><small>{zh ? "服务住宅和商业项目" : "Residential and commercial projects"}</small></span></div><div><span><strong>{zh ? "一站式服务" : "End-to-end service"}</strong><small>{zh ? "从设计、供货到安装" : "From design and supply to installation"}</small></span></div><div><span><strong>{zh ? "可靠施工" : "Reliable workmanship"}</strong><small>{zh ? "重视质量与细节" : "A focus on quality and detail"}</small></span></div><div><span><strong>{zh ? "清晰沟通" : "Clear communication"}</strong><small>{zh ? "清楚了解每一步" : "Know what to expect at every step"}</small></span></div></div></section>
 
       <section className="section container home-product-section home-category-section">
         <div className="section-heading"><div><span className="eyebrow">{zh ? "找到适合您的方案" : "FIND YOUR SOLUTION"}</span><h2>{zh ? "按类别选购" : "Shop by category"}</h2></div><Link to="/products">{zh ? "查看全部商品" : "View all products"} →</Link></div>

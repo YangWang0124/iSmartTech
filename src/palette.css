@@ -489,6 +489,17 @@ textarea:focus {
   gap: 64px;
   align-items: start;
 }
+/* Keep product information comfortably inset on tablet and phone screens. */
+@media (max-width: 980px) {
+  .page.container.product-page {
+    width: min(1180px, calc(100% - 56px));
+  }
+}
+@media (max-width: 540px) {
+  .page.container.product-page {
+    width: min(1180px, calc(100% - 40px));
+  }
+}
 .product-preview {
   min-width: 0;
 }
@@ -1782,7 +1793,7 @@ textarea:focus {
   font: 700 14px/1.45 "Open Sans", sans-serif;
 }
 .product-detail--tiandy-c36 .product-summary p {
-  font: 400 14px/1.72 "Open Sans", sans-serif;
+  font: 400 14px/1.5 "Open Sans", sans-serif;
 }
 .product-detail--tiandy-c36 .key-features:not(.key-features--tiandy) h2 {
   font: 700 14px/1.3 "Open Sans", sans-serif;
@@ -2266,4 +2277,52 @@ textarea:focus {
     order: 3;
     width: 100%;
   }
+}
+
+/* Product detail length toggle */
+.product-details-toggle {
+  display: inline-flex;
+  gap: 2px;
+  margin: 14px 0 6px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+.product-details-toggle button {
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: 600 12px/1.2 "Open Sans", sans-serif;
+  padding: 8px 11px;
+}
+.product-details-toggle button.active {
+  background: #013334;
+  color: #fff;
+}
+.product-details-toggle button:hover:not(.active) {
+  color: #fd5e02;
+}
+
+/* Keep the Tiandy sample page's 14px copy on one consistent rhythm. */
+.product-detail--tiandy-c36 .product-summary h2,
+.product-detail--tiandy-c36 .product-summary p,
+.product-detail--tiandy-c36 .key-features:not(.key-features--tiandy) h2,
+.product-detail--tiandy-c36 .key-features:not(.key-features--tiandy) li,
+.product-detail--tiandy-c36 .additional-information h2,
+.product-detail--tiandy-c36 .additional-information a,
+.product-detail--tiandy-c36 .additional-information a span,
+.product-detail--tiandy-c36 .colour-picker > div > strong,
+.product-detail--tiandy-c36 .quantity-stepper > span,
+.product-detail--tiandy-c36 + .product-overview--tiandy p,
+.product-detail--tiandy-c36 + .product-overview--tiandy .key-features--tiandy h2,
+.product-detail--tiandy-c36 + .product-overview--tiandy .key-features--tiandy li,
+.product-detail--tiandy-c36 + .product-overview--tiandy .product-content-grid--tiandy li,
+.product-detail--tiandy-c36 + .product-overview--tiandy .product-content-grid--tiandy li strong,
+.product-detail--tiandy-c36 + .product-overview--tiandy .product-content-grid--tiandy article:last-child p,
+.product-detail--tiandy-c36 + .product-overview--tiandy .product-uses--tiandy article h3,
+.product-detail--tiandy-c36 + .product-overview--tiandy .product-uses--tiandy article p {
+  line-height: 1.5;
 }
