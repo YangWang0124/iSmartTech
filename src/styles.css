@@ -178,9 +178,13 @@ button {
   font-weight: 700;
   position: relative;
 }
-.cart-link > span:first-child {
-  font-size: 24px;
-  color: var(--blue);
+.cart-link__icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  background: var(--blue);
+  -webkit-mask: url("/assets/cart-icon.webp") center / contain no-repeat;
+  mask: url("/assets/cart-icon.webp") center / contain no-repeat;
 }
 .cart-link b {
   display: grid;
@@ -1772,12 +1776,27 @@ textarea:focus {
   font-weight: 600;
   white-space: nowrap;
 }
+.customer-link__icon {
+  display: none;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--blue);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
 .staff-link:first-letter {
   color: var(--blue);
 }
 @media (max-width: 1080px) {
-  .staff-link span {
+  .staff-link span,
+  .customer-link > span {
     display: none;
+  }
+  .customer-link__icon {
+    display: block;
   }
 }
 .product-photo {

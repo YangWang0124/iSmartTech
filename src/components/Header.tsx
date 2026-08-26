@@ -176,14 +176,18 @@ export function Header() {
           to={user ? "/account" : "/signin"}
           aria-label={user ? "Customer account" : "Customer sign in"}
         >
-          ♙ <span>{user ? "My account" : "Sign in"}</span>
+          <svg className="customer-link__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="7" r="4.4" />
+            <path d="M3.4 21v-1.2a8.6 8.6 0 0 1 8.6-8.6h0a8.6 8.6 0 0 1 8.6 8.6V21" />
+          </svg>
+          <span>{user ? "My account" : "Sign in"}</span>
         </Link>
         <Link
           className="cart-link"
           to="/cart"
           aria-label={`Cart with ${itemCount} items`}
         >
-          <span aria-hidden="true">▰</span>
+          <span className="cart-link__icon" aria-hidden="true" />
           <span>{t("cart")}</span>
           {itemCount > 0 && <b>{itemCount}</b>}
         </Link>
