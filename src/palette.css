@@ -1888,6 +1888,34 @@ textarea:focus {
 .product-specifications {
   margin-bottom: 0px;
 }
+.product-accessory-details {
+  max-width: 1080px;
+  margin: 34px auto 54px;
+}
+.product-accessory-details .product-specifications {
+  margin-bottom: 28px;
+}
+.product-accessory-section {
+  margin: 0 0 28px;
+  padding: 0;
+}
+.product-accessory-section h2 {
+  margin: 0 0 12px;
+  color: #013334;
+  font: 700 14px/1.5 "Open Sans", sans-serif;
+}
+.product-accessory-section ul {
+  gap: 10px;
+}
+.product-accessory-section li {
+  color: var(--muted);
+  font: 400 14px/1.5 "Open Sans", sans-serif;
+}
+@media (max-width: 760px) {
+  .product-accessory-details {
+    margin: 28px auto 36px;
+  }
+}
 /* Custom CCTV kit builder */
 .custom-kit-button {
   margin: -6px 0 26px;
