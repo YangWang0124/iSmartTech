@@ -48,7 +48,7 @@ export function Header() {
         <Link className="brand" to="/" aria-label="iSmartTech home">
           <img
             className="brand__logo"
-            src="/assets/ismarttech-logo.gif?v=4"
+            src="/assets/ismarttech-logo-slate.png?v=3"
             alt="iSmartTech — Smart Home Shop"
           />
         </Link>

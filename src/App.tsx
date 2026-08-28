@@ -1,5 +1,5 @@
-import { Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Route, Routes, useLocation, useNavigationType } from "react-router-dom";
+import { useLayoutEffect } from "react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { HomePage } from "./pages/HomePage";
@@ -16,10 +16,21 @@ import { CustomCctvKitPage } from "./pages/CustomCctvKitPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (navigationType === "POP") return;
+
+    const root = document.documentElement;
+    const body = document.body;
+    const rootScrollBehavior = root.style.scrollBehavior;
+    const bodyScrollBehavior = body.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    body.style.scrollBehavior = "auto";
     window.scrollTo(0, 0);
-  }, [pathname]);
+    root.style.scrollBehavior = rootScrollBehavior;
+    body.style.scrollBehavior = bodyScrollBehavior;
+  }, [pathname, navigationType]);
 
   return null;
 }

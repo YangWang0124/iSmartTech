@@ -1,11 +1,16 @@
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
 export function SearchBar({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    if (!new URLSearchParams(location.search).has("q")) setQuery("");
+  }, [location.pathname, location.search]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
