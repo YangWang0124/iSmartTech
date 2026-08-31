@@ -8,6 +8,7 @@ import {
   technicalFilters,
 } from "../lib/catalogue";
 import { isCuratedProduct } from "../data/curatedProducts";
+import { Seo } from "../components/Seo";
 
 export function ProductsPage() {
   const { products, brands } = useProducts();
@@ -76,8 +77,14 @@ export function ProductsPage() {
     ? [...categoryEntry.ancestors, categoryEntry.category]
     : [];
   const isCamera = crumbs.some((item) => item.id === 9);
+  const categoryTitle = categoryEntry?.category.title;
   return (
     <main className="page container catalogue-page">
+      {categorySlug && <Seo
+        title={`${categoryTitle || "Products"} | iSmartTech NZ`}
+        description={`Browse ${categoryTitle || "security and smart-home products"} from iSmartTech for New Zealand homes and businesses.`}
+        canonicalPath={`/category/${categorySlug}`}
+      />}
       <div className="breadcrumb">
         <Link to="/">Home</Link>
         <span>›</span>

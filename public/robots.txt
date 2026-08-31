@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /signin
+Disallow: /signup
+Disallow: /cart
+
+Sitemap: https://ismarttech-demo.yangwang02885215668.chatgpt.site/sitemap.xml

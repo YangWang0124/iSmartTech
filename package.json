@@ -9,7 +9,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --config vite.worker.config.ts && node scripts/copy-hosting-metadata.mjs",
     "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx",
+    "generate:seo": "node scripts/generate-seo.mjs",
+    "prebuild": "npm run generate:seo"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

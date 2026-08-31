@@ -7,6 +7,7 @@ import { localizeProduct } from "../lib/product-i18n";
 import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 import type { Product } from "../types";
+import { Seo } from "../components/Seo";
 
 type DetailedTiandyContent = {
   descriptionTitle: string;
@@ -856,9 +857,57 @@ export function ProductDetailPage() {
   ];
   const displayedImage = previewImages[previewIndex] ?? product.image;
   const fullSummary = usesDahuaBadges ? dahuaDescription : usesDetailedProductLayout ? detailedLayoutContent!.description : tiandyDetail?.overview ?? productOverview(product);
+  const seoDescriptionSource = fullSummary || product.description || product.shortDescription;
+  const seoDescription = seoDescriptionSource.length > 158
+    ? `${seoDescriptionSource.slice(0, 155).replace(/\s+\S*$/, "")}…`
+    : seoDescriptionSource;
+  const preferredTitle = `${displayName} | iSmartTech NZ`;
+  const seoTitle = preferredTitle.length <= 65
+    ? preferredTitle
+    : `${product.brand} ${displaySku} | iSmartTech NZ`;
+  const canonicalPath = `/products/${product.id}`;
+  const canonicalUrl = new URL(canonicalPath, window.location.origin).toString();
+  const productJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `${canonicalUrl}#product`,
+        name: displayName,
+        description: seoDescription,
+        sku: displaySku,
+        brand: { "@type": "Brand", name: product.brand },
+        category: product.category,
+        image: previewImages
+          .filter(Boolean)
+          .map((image) => new URL(image!, window.location.origin).toString()),
+        url: canonicalUrl,
+        ...(product.priceOnRequest ? {} : {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "NZD",
+            price: product.price.toFixed(2),
+            availability: product.stock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            url: canonicalUrl,
+          },
+        }),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", window.location.origin).toString() },
+          { "@type": "ListItem", position: 2, name: "Products", item: new URL("/products", window.location.origin).toString() },
+          { "@type": "ListItem", position: 3, name: displayName, item: canonicalUrl },
+        ],
+      },
+    ],
+  };
 
   return (
     <main className="page container product-page">
+      <Seo title={seoTitle} description={seoDescription} canonicalPath={canonicalPath} image={product.image} type="product" jsonLd={productJsonLd} />
       <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={`/products?category=${encodeURIComponent(baseProduct!.category)}`}>{product.category}</Link><span>›</span>{displayName}</div>
       <section className={`product-detail product-detail--commerce ${usesDetailedProductLayout ? "product-detail--tiandy-c36" : ""}`}>
         <div className="product-preview">
@@ -874,7 +923,7 @@ export function ProductDetailPage() {
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
-          {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && !usesDahuaBadges && product.featureImages?.length ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{product.featureImages.map((src, index) => <img key={src} src={src} alt={product.features[index] || `Feature ${index + 1}`} />)}</div> : null}
+          {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && !usesDahuaBadges && product.featureImages?.length ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{product.featureImages.map((src, index) => <img key={src} src={src} alt={product.features[index] || `Feature ${index + 1}`} loading="lazy" decoding="async" />)}</div> : null}
           {usesDetailedProductLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{detailedLayoutContent!.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesDahuaBadges && !detailedDahuaLayoutContent && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {tiandyDetail && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{tiandyDetail.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}

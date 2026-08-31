@@ -13,6 +13,7 @@ import { ProductProvider } from "./context/ProductContext";
 import { CustomerAuthPage } from "./pages/CustomerAuthPage";
 import { AccountPage } from "./pages/AccountPage";
 import { CustomCctvKitPage } from "./pages/CustomCctvKitPage";
+import { RouteSeo } from "./components/Seo";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -36,5 +37,5 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  return <ProductProvider><ScrollToTop /><Header /><Routes><Route path="/" element={<HomePage />} /><Route path="/products" element={<ProductsPage />} /><Route path="/custom-cctv-kit" element={<CustomCctvKitPage />} /><Route path="/category/:categorySlug" element={<ProductsPage />} /><Route path="/products/:id" element={<ProductDetailPage />} /><Route path="/cart" element={<CartPage />} /><Route path="/about" element={<AboutPage />} /><Route path="/contact" element={<ContactPage />} /><Route path="/installation-services" element={<InstallationServicesPage />} /><Route path="/signin" element={<CustomerAuthPage mode="signin" />} /><Route path="/signup" element={<CustomerAuthPage mode="signup" />} /><Route path="/account" element={<AccountPage />} /><Route path="*" element={<HomePage />} /></Routes><Footer /></ProductProvider>;
+  return <ProductProvider><ScrollToTop /><RouteSeo /><Header /><Routes><Route path="/" element={<HomePage />} /><Route path="/products" element={<ProductsPage />} /><Route path="/custom-cctv-kit" element={<CustomCctvKitPage />} /><Route path="/category/:categorySlug" element={<ProductsPage />} /><Route path="/products/:id" element={<ProductDetailPage />} /><Route path="/cart" element={<CartPage />} /><Route path="/about" element={<AboutPage />} /><Route path="/contact" element={<ContactPage />} /><Route path="/installation-services" element={<InstallationServicesPage />} /><Route path="/signin" element={<CustomerAuthPage mode="signin" />} /><Route path="/signup" element={<CustomerAuthPage mode="signup" />} /><Route path="/account" element={<AccountPage />} /><Route path="*" element={<HomePage />} /></Routes><Footer /></ProductProvider>;
 }

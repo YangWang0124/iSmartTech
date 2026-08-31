@@ -9,8 +9,8 @@ export function ProductVisual({ icon, accent, image, alt = "", large = false }: 
   };
 
   return (
-    <div className={`product-visual product-visual--${accent} ${large ? "product-visual--large" : ""} ${large && image ? "product-visual--zoomable" : ""}`} onMouseMove={moveZoom} aria-hidden="true">
-      {image ? <img className="product-photo" src={image} alt={alt} referrerPolicy="no-referrer" /> : <><div className="product-device"><span>{icon}</span><i /></div><div className="product-shadow" /></>}
+    <div className={`product-visual product-visual--${accent} ${large ? "product-visual--large" : ""} ${large && image ? "product-visual--zoomable" : ""}`} onMouseMove={moveZoom} aria-hidden={image ? undefined : true}>
+      {image ? <img className="product-photo" src={image} alt={alt} loading={large ? "eager" : "lazy"} decoding="async" fetchPriority={large ? "high" : "auto"} referrerPolicy="no-referrer" /> : <><div className="product-device"><span>{icon}</span><i /></div><div className="product-shadow" /></>}
     </div>
   );
 }

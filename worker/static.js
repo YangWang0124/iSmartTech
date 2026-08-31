@@ -1,4 +1,5 @@
 import seedProducts from "../src/data/products.json";
+import { createCuratedProducts } from "../src/data/curatedProducts.ts";
 import { fetchCatalogue, fetchCatalogueProduct } from "./catalogue-source.js";
 
 const schema = `CREATE TABLE IF NOT EXISTS products (
@@ -12,16 +13,17 @@ const schema = `CREATE TABLE IF NOT EXISTS products (
 )`;
 const metaSchema = `CREATE TABLE IF NOT EXISTS catalogue_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)`;
 const retiredSampleIds = ["hikvision-colorvu", "uniview-4ch-kit", "ajax-starter-kit", "ubiquiti-g5-bullet", "tp-link-vigi-nvr", "ezviz-doorbell", "seagate-skyhawk-4tb", "dahua-16ch-nvr", "hikvision-intercom-kit", "reolink-solar-camera", "ruijie-poe-switch", "ajax-motioncam", "tp-link-outdoor-ap", "western-digital-8tb", "uniview-thermal-sensor"];
+const seoProducts = [...seedProducts, ...createCuratedProducts([])];
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/")) return handleApi(request, env, url);
     const response = await env.ASSETS.fetch(request);
-    if (response.status !== 404) return preventHtmlCaching(response);
+    if (response.status !== 404) return injectSeo(response, url);
     if (request.method === "GET" && !url.pathname.includes(".")) {
       const indexResponse = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
-      return preventHtmlCaching(indexResponse);
+      return injectSeo(indexResponse, url);
     }
     return response;
   },
@@ -158,6 +160,91 @@ async function serveImage(env, key) {
 }
 
 function json(value, status = 200) { return Response.json(value, { status, headers: { "Cache-Control": "no-store" } }); }
+async function injectSeo(response, url) {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("text/html")) return response;
+
+  const match = url.pathname.match(/^\/products\/([^/]+)\/?$/);
+  const requestedId = match ? decodeURIComponent(match[1]) : "";
+  const resolvedId = requestedId === "dahua-nvr4104" ? "curated-dahua-nvr4104" : requestedId;
+  const product = seoProducts.find((item) => item.id === resolvedId);
+  if (!product) return preventHtmlCaching(response);
+
+  const canonical = `${url.origin}/products/${product.id}`;
+  const preferredTitle = `${product.name} | iSmartTech NZ`;
+  const title = preferredTitle.length <= 65
+    ? preferredTitle
+    : `${product.brand} ${product.sku} | iSmartTech NZ`;
+  const sourceDescription = String(product.description || product.shortDescription || "").trim();
+  const description = sourceDescription.length > 158
+    ? `${sourceDescription.slice(0, 155).replace(/\s+\S*$/, "")}…`
+    : sourceDescription;
+  const image = product.image ? new URL(product.image, url.origin).toString() : `${url.origin}/og.jpg`;
+  const includeOffer = !product.priceOnRequest
+    && !product.requiresLiveCatalogue
+    && Number(product.price) > 0
+    && Number(product.price) < 1_000_000;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `${canonical}#product`,
+        name: product.name,
+        description,
+        sku: product.sku,
+        brand: { "@type": "Brand", name: product.brand },
+        category: product.category,
+        image: [image],
+        url: canonical,
+        ...(includeOffer ? {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "NZD",
+            price: Number(product.price).toFixed(2),
+            availability: Number(product.stock) > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            url: canonical,
+          },
+        } : {}),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: `${url.origin}/` },
+          { "@type": "ListItem", position: 2, name: "Products", item: `${url.origin}/products` },
+          { "@type": "ListItem", position: 3, name: product.name, item: canonical },
+        ],
+      },
+    ],
+  };
+  const attr = (value) => String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+  let html = await response.text();
+  html = html
+    .replace(/<title>[^<]*<\/title>/, `<title>${attr(title)}</title>`)
+    .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${attr(description)}" />`)
+    .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${attr(canonical)}" />`)
+    .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${attr(title)}" />`)
+    .replace(/<meta property="og:description"[^>]*>/, `<meta property="og:description" content="${attr(description)}" />`)
+    .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${attr(image)}" />`)
+    .replace(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${attr(canonical)}" />`)
+    .replace(/<meta property="og:type"[^>]*>/, '<meta property="og:type" content="product" />')
+    .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${attr(title)}" />`)
+    .replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${attr(description)}" />`)
+    .replace(/<meta name="twitter:image"[^>]*>/, `<meta name="twitter:image" content="${attr(image)}" />`)
+    .replace("</head>", `<script type="application/ld+json">${JSON.stringify(jsonLd).replaceAll("<", String.raw`\u003c`)}</script></head>`);
+
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  headers.set("Pragma", "no-cache");
+  return new Response(html, { status: response.status, statusText: response.statusText, headers });
+}
+
 function preventHtmlCaching(response) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return response;

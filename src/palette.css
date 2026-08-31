@@ -2378,3 +2378,65 @@ textarea:focus {
 .catalogue-mega-nav .mega-menu__panel .mega-menu__heading,
 .catalogue-mega-nav .mega-menu__panel strong { color: #253746; }
 .catalogue-mega-nav .mega-menu__panel a:hover { color: #F15A24; }
+
+/* Final installation carousel artwork override. */
+.home-slide--installation {
+  background: #f7f6f3 url("/assets/electrical-installation-hero.png") center / cover no-repeat;
+  color: var(--navy);
+}
+.home-slide--installation:after {
+  background: linear-gradient(90deg, #fff 0%, #ffffff12 55%, transparent 70%);
+  pointer-events: none;
+}
+.home-slide--installation .home-slide__content > span {
+  color: var(--orange);
+}
+.home-slide--installation .home-slide__content p {
+  color: var(--muted);
+}
+
+/* Installation slide: reserve clear space for copy as the viewport narrows. */
+.home-slide__mobile-break,
+.home-slide__medium-break {
+  display: none;
+}
+@media (min-width: 701px) and (max-width: 1200px) {
+  .home-slide__medium-break {
+    display: inline;
+  }
+  .home-slide--installation .home-slide__content h1 {
+    max-width: 520px;
+  }
+  .home-slide--installation .home-slide__content p {
+    max-width: 520px;
+  }
+}
+@media (max-width: 700px) {
+  .home-slide__mobile-break {
+    display: inline;
+  }
+  .home-slide--installation .home-slide__content h1 {
+    max-width: 300px;
+  }
+}
+
+/* Keep the installation slide controls visible at intermediate desktop widths. */
+@media (min-width: 701px) and (max-width: 1600px) {
+  .home-carousel {
+    height: 350px;
+  }
+}
+
+/* Advice banner aligned with the slate navigation and footer. */
+.advice-banner {
+  background: linear-gradient(135deg, #283547 0%, #3e4c5e 100%);
+}
+.advice-banner:after {
+  border-color: #ffffff2b;
+}
+.advice-banner .eyebrow {
+  color: #d7dce3;
+}
+.advice-banner p {
+  color: #e4e8ed;
+}

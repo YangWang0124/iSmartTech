@@ -2131,28 +2131,15 @@ textarea:focus {
   overflow: hidden;
 }
 .home-slide--installation {
-  background: linear-gradient(112deg, #061d38 0%, #0c3f75 58%, #176da7 100%);
-  color: #fff;
+  background: #f7f6f3 url("/assets/electrical-installation-hero.png") center / cover no-repeat;
+  color: var(--navy);
 }
 .home-slide--installation:after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-      90deg,
-      transparent 58%,
-      #52c7df12 58% 59%,
-      transparent 59%
-    ),
-    radial-gradient(
-      circle at 80% 50%,
-      #5bd3e926 0 2%,
-      transparent 2% 16%,
-      #66d5eb22 16% 16.4%,
-      transparent 16.4% 27%,
-      #66d5eb16 27% 27.4%,
-      transparent 27.4%
-    );
+  background: linear-gradient(90deg, #fff 0%, #ffffff12 55%, transparent 70%);
+  pointer-events: none;
 }
 .home-slide__content {
   height: 100%;
@@ -2167,7 +2154,7 @@ textarea:focus {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: #65d4e8;
+  color: var(--orange);
 }
 .home-slide__content h1 {
   font: 800 clamp(38px, 5vw, 64px) / 1.05 Manrope;
@@ -2178,7 +2165,7 @@ textarea:focus {
 .home-slide__content p {
   font-size: 18px;
   line-height: 1.55;
-  color: #d6e7f4;
+  color: var(--muted);
   max-width: 690px;
   margin: 0 0 27px;
 }

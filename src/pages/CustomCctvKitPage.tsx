@@ -373,7 +373,7 @@ export function CustomCctvKitPage() {
                     className={brand === name ? "selected" : ""}
                     onClick={() => resetForBrand(name)}
                   >
-                    <img src={brandLogos[name]} alt={name} />
+                    <img src={brandLogos[name]} alt={name} loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
