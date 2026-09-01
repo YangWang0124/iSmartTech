@@ -8,6 +8,7 @@ import {
   technicalFilters,
 } from "../lib/catalogue";
 import { isCuratedProduct } from "../data/curatedProducts";
+import { isAlarmProduct } from "../data/alarmProducts";
 import { Seo } from "../components/Seo";
 
 export function ProductsPage() {
@@ -51,7 +52,9 @@ export function ProductsPage() {
     const term = query.trim().toLowerCase();
     const result = products.filter(
       (product) =>
-        (showFullCatalogue ? !isCuratedProduct(product) : isCuratedProduct(product)) &&
+        (showFullCatalogue
+          ? !isCuratedProduct(product) && !isAlarmProduct(product)
+          : isCuratedProduct(product) || isAlarmProduct(product)) &&
         (!term ||
           term.length < 2 ||
           `${product.name} ${product.sku} ${product.brand} ${product.shortDescription} ${product.description}`

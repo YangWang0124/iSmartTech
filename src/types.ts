@@ -23,6 +23,8 @@ export type Product = {
   sourceUrl?: string;
   /** Public manufacturer or supplier datasheet, where available. */
   datasheetUrl?: string;
+  /** Additional named product documents, used when a kit has separate component PDFs. */
+  specSheetLinks?: Array<{ label: string; url: string }>;
   oldPrice?: number;
   sku: string;
   rating: number;

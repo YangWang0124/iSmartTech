@@ -1,5 +1,6 @@
 import seedProducts from "../src/data/products.json";
 import { createCuratedProducts } from "../src/data/curatedProducts.ts";
+import { alarmProducts } from "../src/data/alarmProducts.ts";
 import { fetchCatalogue, fetchCatalogueProduct } from "./catalogue-source.js";
 
 const schema = `CREATE TABLE IF NOT EXISTS products (
@@ -13,7 +14,7 @@ const schema = `CREATE TABLE IF NOT EXISTS products (
 )`;
 const metaSchema = `CREATE TABLE IF NOT EXISTS catalogue_state (key TEXT PRIMARY KEY, value TEXT NOT NULL)`;
 const retiredSampleIds = ["hikvision-colorvu", "uniview-4ch-kit", "ajax-starter-kit", "ubiquiti-g5-bullet", "tp-link-vigi-nvr", "ezviz-doorbell", "seagate-skyhawk-4tb", "dahua-16ch-nvr", "hikvision-intercom-kit", "reolink-solar-camera", "ruijie-poe-switch", "ajax-motioncam", "tp-link-outdoor-ap", "western-digital-8tb", "uniview-thermal-sensor"];
-const seoProducts = [...seedProducts, ...createCuratedProducts([])];
+const seoProducts = [...seedProducts.filter((product) => !alarmProducts.some((alarm) => alarm.id === product.id)), ...createCuratedProducts([]), ...alarmProducts];
 
 export default {
   async fetch(request, env) {

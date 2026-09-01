@@ -1404,6 +1404,12 @@ textarea:focus {
   font-size: 14px;
   text-decoration: none;
 }
+.additional-information__links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
 .key-features {
   margin: 2px 0 16px;
   padding: 15px 0 4px;

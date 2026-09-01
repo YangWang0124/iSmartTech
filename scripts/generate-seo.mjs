@@ -3,11 +3,13 @@ import { readFile, writeFile } from "node:fs/promises";
 const siteUrl = (process.env.SITE_URL || "https://ismarttech-demo.yangwang02885215668.chatgpt.site").replace(/\/$/, "");
 const products = JSON.parse(await readFile(new URL("../src/data/products.json", import.meta.url), "utf8"));
 const curatedSource = await readFile(new URL("../src/data/curatedProducts.ts", import.meta.url), "utf8");
+const alarmSource = await readFile(new URL("../src/data/alarmProducts.ts", import.meta.url), "utf8");
 const categories = JSON.parse(await readFile(new URL("../src/Catalogue/categories-full.json", import.meta.url), "utf8"));
 
 const curatedIds = [...curatedSource.matchAll(/\[\s*\n\s*"([a-z0-9-]+)",\s*\n\s*"[^"]+",\s*\n\s*"[^"]+",/g)]
   .map((match) => `curated-${match[1]}`);
-const productIds = [...new Set([...products.map((product) => product.id), ...curatedIds])];
+const alarmIds = [...alarmSource.matchAll(/id:\s*"([a-z0-9-]+)"/g)].map((match) => match[1]);
+const productIds = [...new Set([...products.map((product) => product.id), ...curatedIds, ...alarmIds])];
 
 const categorySlugs = [];
 const collectCategories = (items) => items.forEach((item) => {

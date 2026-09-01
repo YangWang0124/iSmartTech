@@ -8,6 +8,7 @@ import {
 } from "react";
 import seedProducts from "../data/products.json";
 import { createCuratedProducts } from "../data/curatedProducts";
+import { alarmProducts } from "../data/alarmProducts";
 import type { Product } from "../types";
 
 type ProductState = {
@@ -98,11 +99,13 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     // Curated products must only inherit price, stock and imagery from an exact
     // live catalogue match. Do not let bundled or staff-managed prototype
     // records provide commercial values for these selected products.
-    return [
-      ...coreWithLiveCommercialData,
-      ...sourceCatalogue,
-      ...createCuratedProducts(sourceProducts),
-    ];
+const alarmIds = new Set(alarmProducts.map((product) => product.id));
+return [
+  ...coreWithLiveCommercialData.filter((product) => !alarmIds.has(product.id)),
+  ...sourceCatalogue.filter((product) => !alarmIds.has(product.id)),
+  ...createCuratedProducts(sourceProducts),
+  ...alarmProducts,
+];
   }, [managed, sourceProducts]);
   const value = useMemo(
     () => ({

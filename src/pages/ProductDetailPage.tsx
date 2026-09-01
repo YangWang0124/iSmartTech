@@ -8,6 +8,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 import type { Product } from "../types";
 import { Seo } from "../components/Seo";
+import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, createAlarmDetailContent } from "../data/alarmProducts";
 
 type DetailedTiandyContent = {
   descriptionTitle: string;
@@ -789,16 +790,26 @@ export function ProductDetailPage() {
   const detailedDahuaLayoutContent = dahuaDetailedContent[dahuaDetailKey];
   const accessoryLayoutContent = accessoryDetailedContent[dahuaDetailKey];
   const usesAccessoryDetailedLayout = Boolean(accessoryLayoutContent);
-  const usesHikvisionKitLayout = product.id === "hikvision-ax-pro-security-kit";
-  const paradoxModel = product.id === "paradox-sp4000-alarm-kit" ? "SP4000" : product.id === "paradox-sp5500-alarm-kit" ? "SP5500" : undefined;
+const usesHikvisionKitLayout = product.id === "hikvision-ax-pro-security-kit";
+const alarmLayoutContent = createAlarmDetailContent(product);
+const alarmKitProducts = (alarmKitComponentIds[product.id] ?? [])
+  .map((id) => products.find((item) => item.id === id))
+  .filter((item): item is Product => Boolean(item));
+const arrowheadIncludedItems = arrowheadKitIncludedItems[product.id] ?? [];
+const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm-kit"
+  ? "SP4000"
+  : !alarmLayoutContent && product.id === "paradox-sp5500-alarm-kit"
+    ? "SP5500"
+    : undefined;
   const usesParadoxKitLayout = Boolean(paradoxModel);
-  const arrowheadKeypad = product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
+  const arrowheadKeypad = !alarmLayoutContent && product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : !alarmLayoutContent && product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
   const usesTiandyC36Layout = product.id === "curated-tiandy-tc-c36xn";
   const usesTiandyH333Layout = product.id === "curated-tiandy-tc-h333k";
   const additionalTiandyLayoutContent = tiandyAdditionalDetailedContent[product.id] ?? tiandyAdditionalCameraContent[product.id] ?? pdfDetailedProductContent[product.id] ?? nvrDetailedProductContent[product.id];
   const usesTiandyDetailedLayout = usesTiandyC36Layout || usesTiandyH333Layout || Boolean(additionalTiandyLayoutContent) || Boolean(detailedDahuaLayoutContent);
   const usesDetailedProductLayout = usesTiandyDetailedLayout || usesAccessoryDetailedLayout;
+  const usesStandardUpperProductStyling = usesDetailedProductLayout || Boolean(alarmLayoutContent) || usesHikvisionKitLayout;
   const usesTiandyShortToggle = usesTiandyC36Layout || usesTiandyH333Layout || Boolean(additionalTiandyLayoutContent) || Boolean(detailedDahuaLayoutContent) || usesAccessoryDetailedLayout;
   const tiandyLayoutContent = usesTiandyC36Layout ? tiandyC36Content : usesTiandyH333Layout ? tiandyH333Content : additionalTiandyLayoutContent ?? detailedDahuaLayoutContent;
   const detailedLayoutContent = tiandyLayoutContent ?? accessoryLayoutContent;
@@ -846,6 +857,7 @@ export function ProductDetailPage() {
     why: zh ? "适合灵活夜视的全能炮塔机" : "A versatile DualLight turret camera",
     uses: zh ? "从入口到周界的灵活覆盖" : "Flexible coverage from entry to perimeter",
   };
+  const resolvedPageHeadings = alarmLayoutContent ? alarmPageHeadings(product) : tiandyPageHeadings;
   // Curated records now carry supplier-verified descriptions and features directly.
   // Keep the legacy Tiandy layout only for any future product that explicitly needs it.
   const tiandyDetail = undefined as TiandyProductContent | undefined;
@@ -909,7 +921,7 @@ export function ProductDetailPage() {
     <main className="page container product-page">
       <Seo title={seoTitle} description={seoDescription} canonicalPath={canonicalPath} image={product.image} type="product" jsonLd={productJsonLd} />
       <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={`/products?category=${encodeURIComponent(baseProduct!.category)}`}>{product.category}</Link><span>›</span>{displayName}</div>
-      <section className={`product-detail product-detail--commerce ${usesDetailedProductLayout ? "product-detail--tiandy-c36" : ""}`}>
+      <section className={`product-detail product-detail--commerce ${usesStandardUpperProductStyling ? "product-detail--tiandy-c36" : ""}`}>
         <div className="product-preview">
           <div className="product-detail__gallery">{product.badge && <span className="badge">{product.badge}</span>}<ProductVisual icon={product.icon} accent={product.accent} image={displayedImage} alt={displayName} large />{!displayedImage && <div className="gallery-note">{zh ? "产品预览" : "PRODUCT PREVIEW"}</div>}</div>
           <div className="product-preview__thumbs">{previewImages.map((image, index) => <button type="button" key={`${image || "product-placeholder"}-${index}`} className={index === previewIndex ? "active" : ""} onClick={() => setPreviewIndex(index)} aria-label={`${zh ? "显示产品图片" : "Show product image"} ${index + 1}`}><ProductVisual icon={product.icon} accent={product.accent} image={image} alt="" /></button>)}</div>
@@ -922,18 +934,21 @@ export function ProductDetailPage() {
           <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
+          {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><strong>{component.sku}:</strong> <Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}</ul><p><strong>Installation note:</strong> Confirm device quantities, compatible modules and cabling for the site before installation.</p></section>}
+          {arrowheadIncludedItems.length > 0 && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadIncludedItems.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Installation note:</strong> The supplied panel uses a transformer and fuse assembly; confirm the required power arrangement, modules and site cabling before installation.</p></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && !usesDahuaBadges && product.featureImages?.length ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{product.featureImages.map((src, index) => <img key={src} src={src} alt={product.features[index] || `Feature ${index + 1}`} loading="lazy" decoding="async" />)}</div> : null}
           {usesDetailedProductLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{detailedLayoutContent!.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesDahuaBadges && !detailedDahuaLayoutContent && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {tiandyDetail && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{tiandyDetail.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesHikvisionKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{hikvisionKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
+          {alarmLayoutContent && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{alarmLayoutContent.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesArrowheadKitLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
-          {!usesDahuaBadges && !usesTiandyDetailedLayout && !usesAccessoryDetailedLayout && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
+          {!alarmLayoutContent && !usesDahuaBadges && !usesTiandyDetailedLayout && !usesAccessoryDetailedLayout && !tiandyDetail && !usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && product.features.length > 0 && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{product.features.map(feature => <li key={feature}>{feature}</li>)}</ul></section>}
           {usesDahuaBadges && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><a href="/assets/DH-IPC-HDW3667EM-S-IL-ANZ-spec-sheet.pdf" target="_blank" rel="noopener noreferrer">DH-IPC-HDW3667EM-S-IL-ANZ Spec Sheet <span aria-hidden="true">↗</span></a></section>}
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
-          {!usesDahuaBadges && !usesHikvisionKitLayout && product.datasheetUrl && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a></section>}
+          {!usesDahuaBadges && !usesHikvisionKitLayout && (product.datasheetUrl || product.specSheetLinks?.length) && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><div className="additional-information__links">{product.specSheetLinks?.map((document) => <a key={document.url} href={document.url} target="_blank" rel="noopener noreferrer">{document.label} <span aria-hidden="true">↗</span></a>)}{product.datasheetUrl && <a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a>}</div></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
           <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>
           <div className="purchase-row purchase-row--new">{product.priceOnRequest ? <Link className="button button--primary add-to-cart" to="/contact">{zh ? "获取报价" : "Request a quote"}</Link> : <><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></>}</div>
@@ -944,11 +959,11 @@ export function ProductDetailPage() {
         </div>
       </section>
       {usesTiandyDetailedLayout && (!usesTiandyShortToggle || detailLength === "full") && <>
-        <section className="product-overview product-overview--tiandy"><div><span className="eyebrow">{zh ? "产品概览" : "Product Overview"}</span><h2>{tiandyPageHeadings.overview}</h2></div><p>{tiandyLayoutContent!.overview}</p></section>
+        <section className="product-overview product-overview--tiandy"><div><span className="eyebrow">{zh ? "产品概览" : "Product Overview"}</span><h2>{resolvedPageHeadings.overview}</h2></div><p>{tiandyLayoutContent!.overview}</p></section>
         <section className="key-features key-features--tiandy"><h2>{zh ? "主要能力" : "Capabilities"}</h2><ul>{tiandyLayoutContent!.capabilities.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>
-        <section className="product-content-grid product-content-grid--tiandy"><article><span className="eyebrow">{zh ? "推荐应用" : "Recommended Applications"}</span><h2>{tiandyPageHeadings.recommended}</h2><ul>{tiandyLayoutContent!.recommendedApplications.map(([title, description]) => <li key={title}><strong>{title}</strong><span>{description}</span></li>)}</ul></article><article><span className="eyebrow">{tiandyPageHeadings.whyEyebrow}</span><h2>{tiandyPageHeadings.why}</h2><p>{tiandyLayoutContent!.why}</p></article></section>
+        <section className="product-content-grid product-content-grid--tiandy"><article><span className="eyebrow">{zh ? "推荐应用" : "Recommended Applications"}</span><h2>{resolvedPageHeadings.recommended}</h2><ul>{tiandyLayoutContent!.recommendedApplications.map(([title, description]) => <li key={title}><strong>{title}</strong><span>{description}</span></li>)}</ul></article><article><span className="eyebrow">{resolvedPageHeadings.whyEyebrow}</span><h2>{resolvedPageHeadings.why}</h2><p>{tiandyLayoutContent!.why}</p></article></section>
         <section className="product-specifications"><div><h2>{zh ? "规格" : "Specifications"}</h2></div><dl>{tiandyLayoutContent!.specifications.map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl></section>
-        <section className="product-uses product-uses--tiandy"><span className="eyebrow">{zh ? "理想使用场景" : "Ideal Use Cases"}</span><h2>{tiandyPageHeadings.uses}</h2><div>{tiandyLayoutContent!.idealUseCases.map(([title, description]) => <article key={title}><h3>{title}</h3><p>{description}</p></article>)}</div></section>
+        <section className="product-uses product-uses--tiandy"><span className="eyebrow">{zh ? "理想使用场景" : "Ideal Use Cases"}</span><h2>{resolvedPageHeadings.uses}</h2><div>{tiandyLayoutContent!.idealUseCases.map(([title, description]) => <article key={title}><h3>{title}</h3><p>{description}</p></article>)}</div></section>
       </>}
       {usesAccessoryDetailedLayout && detailLength === "full" && <>
         <section className="product-accessory-details">
