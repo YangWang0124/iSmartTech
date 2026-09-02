@@ -4,6 +4,7 @@ import { ProductGrid } from "../components/ProductGrid";
 import { useProducts } from "../context/ProductContext";
 import {
   categoryBySlug,
+  categoryDisplayTitle,
   descendantIds,
   technicalFilters,
 } from "../lib/catalogue";
@@ -80,7 +81,7 @@ export function ProductsPage() {
     ? [...categoryEntry.ancestors, categoryEntry.category]
     : [];
   const isCamera = crumbs.some((item) => item.id === 9);
-  const categoryTitle = categoryEntry?.category.title;
+  const categoryTitle = categoryEntry ? categoryDisplayTitle(categoryEntry.category) : undefined;
   return (
     <main className="page container catalogue-page">
       {categorySlug && <Seo
@@ -95,14 +96,14 @@ export function ProductsPage() {
         {crumbs.map((item) => (
           <span className="breadcrumb__pair" key={item.id}>
             <span>›</span>
-            <Link to={`/category/${item.links}`}>{item.title}</Link>
+            <Link to={`/category/${item.links}`}>{categoryDisplayTitle(item)}</Link>
           </span>
         ))}
       </div>
       <div className="page-title">
         <div>
           <span className="eyebrow">CATALOGUE</span>
-          <h1>{categoryEntry?.category.title || "All products"}</h1>
+          <h1>{categoryTitle || "All products"}</h1>
           <p>
             Browse iSmartTech products using the complete catalogue structure
             and technical filters.

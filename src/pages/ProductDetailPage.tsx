@@ -8,7 +8,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 import type { Product } from "../types";
 import { Seo } from "../components/Seo";
-import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, createAlarmDetailContent } from "../data/alarmProducts";
+import { categoryPathForProduct } from "../lib/catalogue";
+import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, createAlarmDetailContent, paradoxKitSupplementalItems } from "../data/alarmProducts";
 
 type DetailedTiandyContent = {
   descriptionTitle: string;
@@ -760,7 +761,11 @@ export function ProductDetailPage() {
   const detailedBaseProduct = baseProduct ? { ...sourceDetail, ...baseProduct, image: baseProduct.image ?? sourceDetail?.image, galleryImages: baseProduct.galleryImages?.length ? baseProduct.galleryImages : sourceDetail?.galleryImages, featureImages: baseProduct.featureImages?.length ? baseProduct.featureImages : sourceDetail?.featureImages, features: keepsVerifiedCuratedCopy ? baseProduct.features : (sourceDetail?.features?.length ? sourceDetail.features : baseProduct.features), description: keepsVerifiedCuratedCopy ? baseProduct.description : (sourceDetail?.description || baseProduct.description), shortDescription: keepsVerifiedCuratedCopy ? baseProduct.shortDescription : (sourceDetail?.shortDescription || baseProduct.shortDescription) } as Product : undefined;
   const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState("White");
+  const [selectedColor, setSelectedColor] = useState("");
+  const sourceColourOptions = [...new Set((sourceDetail?.colors ?? []).map((color) => color.trim()).filter(Boolean))];
+  useEffect(() => {
+    if (sourceColourOptions.length > 0) setSelectedColor(sourceColourOptions[0]);
+  }, [sourceDetail]);
   const [selectedPower, setSelectedPower] = useState("NZ power supply");
   const [added, setAdded] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -795,7 +800,9 @@ const alarmLayoutContent = createAlarmDetailContent(product);
 const alarmKitProducts = (alarmKitComponentIds[product.id] ?? [])
   .map((id) => products.find((item) => item.id === id))
   .filter((item): item is Product => Boolean(item));
+const paradoxSupplementalItems = paradoxKitSupplementalItems[product.id] ?? [];
 const arrowheadIncludedItems = arrowheadKitIncludedItems[product.id] ?? [];
+const usesVerifiedAlarmCopy = Boolean(alarmLayoutContent);
 const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm-kit"
   ? "SP4000"
   : !alarmLayoutContent && product.id === "paradox-sp5500-alarm-kit"
@@ -868,7 +875,7 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
   ];
   const displayedImage = previewImages[previewIndex] ?? product.image;
-  const fullSummary = usesDahuaBadges ? dahuaDescription : usesDetailedProductLayout ? detailedLayoutContent!.description : tiandyDetail?.overview ?? productOverview(product);
+  const fullSummary = usesDahuaBadges ? dahuaDescription : usesDetailedProductLayout ? detailedLayoutContent!.description : tiandyDetail?.overview ?? (usesVerifiedAlarmCopy ? product.description : productOverview(product));
   const seoDescriptionSource = fullSummary || product.description || product.shortDescription;
   const seoDescription = seoDescriptionSource.length > 158
     ? `${seoDescriptionSource.slice(0, 155).replace(/\s+\S*$/, "")}…`
@@ -879,6 +886,8 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
     : `${product.brand} ${displaySku} | iSmartTech NZ`;
   const canonicalPath = `/products/${product.id}`;
   const canonicalUrl = new URL(canonicalPath, window.location.origin).toString();
+  const productCategoryPath = categoryPathForProduct(baseProduct!);
+  const productCategoryUrl = new URL(productCategoryPath, window.location.origin).toString();
   const productJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@graph": [
@@ -910,7 +919,7 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", window.location.origin).toString() },
-          { "@type": "ListItem", position: 2, name: "Products", item: new URL("/products", window.location.origin).toString() },
+          { "@type": "ListItem", position: 2, name: product.category, item: productCategoryUrl },
           { "@type": "ListItem", position: 3, name: displayName, item: canonicalUrl },
         ],
       },
@@ -920,7 +929,7 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
   return (
     <main className="page container product-page">
       <Seo title={seoTitle} description={seoDescription} canonicalPath={canonicalPath} image={product.image} type="product" jsonLd={productJsonLd} />
-      <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={`/products?category=${encodeURIComponent(baseProduct!.category)}`}>{product.category}</Link><span>›</span>{displayName}</div>
+      <div className="breadcrumb"><Link to="/">{zh ? "首页" : "Home"}</Link><span>›</span><Link to={productCategoryPath}>{product.category}</Link><span>›</span>{displayName}</div>
       <section className={`product-detail product-detail--commerce ${usesStandardUpperProductStyling ? "product-detail--tiandy-c36" : ""}`}>
         <div className="product-preview">
           <div className="product-detail__gallery">{product.badge && <span className="badge">{product.badge}</span>}<ProductVisual icon={product.icon} accent={product.accent} image={displayedImage} alt={displayName} large />{!displayedImage && <div className="gallery-note">{zh ? "产品预览" : "PRODUCT PREVIEW"}</div>}</div>
@@ -929,14 +938,14 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
         <div className="product-detail__info product-purchase">
           <span className="eyebrow">{product.brand} · SKU {displaySku}</span>
           <h1>{displayName}</h1>
-          <div className="detail-price"><strong>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small>{usesDetailedProductLayout && <section className="product-status product-status--price" aria-label={zh ? "产品库存" : "Product stock"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}</div>
-          {!usesDetailedProductLayout && <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}
-          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
-          {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
-          {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Note:</strong> Cable must be ordered separately.</p></section>}
-          {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><strong>{component.sku}:</strong> <Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}</ul><p><strong>Installation note:</strong> Confirm device quantities, compatible modules and cabling for the site before installation.</p></section>}
-          {arrowheadIncludedItems.length > 0 && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadIncludedItems.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul><p><strong>Installation note:</strong> The supplied panel uses a transformer and fuse assembly; confirm the required power arrangement, modules and site cabling before installation.</p></section>}
-          {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
+          <div className={"detail-price" + (!usesStandardUpperProductStyling ? " detail-price--with-status" : "")}><strong>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : money(product.price)}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small>{usesStandardUpperProductStyling && <section className="product-status product-status--price" aria-label={zh ? "产品库存" : "Product stock"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}</div>
+          {!usesStandardUpperProductStyling && <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}
+          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (usesVerifiedAlarmCopy || product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
+          {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
+          {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}>{description}</li>)}</ul><p>Cable must be ordered separately.</p></section>}
+          {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}{paradoxSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
+          {arrowheadIncludedItems.length > 0 && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadIncludedItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul><p>Confirm the required power arrangement, compatible modules and site cabling before installation.</p></section>}
+          {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
           {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && !usesDahuaBadges && product.featureImages?.length ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{product.featureImages.map((src, index) => <img key={src} src={src} alt={product.features[index] || `Feature ${index + 1}`} loading="lazy" decoding="async" />)}</div> : null}
           {usesDetailedProductLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{detailedLayoutContent!.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
           {usesDahuaBadges && !detailedDahuaLayoutContent && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{dahuaKeyFeatures.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}
@@ -950,7 +959,7 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
           {usesHikvisionKitLayout && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><a href="/assets/DS-PWA96-Kit-WB_Datasheet_20230516.pdf" target="_blank" rel="noopener noreferrer">DS-PWA96-Kit-WB_Datasheet_20230516 <span aria-hidden="true">↗</span></a></section>}
           {!usesDahuaBadges && !usesHikvisionKitLayout && (product.datasheetUrl || product.specSheetLinks?.length) && <section className="additional-information"><h2>{zh ? "规格书" : "Spec Sheet"}</h2><div className="additional-information__links">{product.specSheetLinks?.map((document) => <a key={document.url} href={document.url} target="_blank" rel="noopener noreferrer">{document.label} <span aria-hidden="true">↗</span></a>)}{product.datasheetUrl && <a href={product.datasheetUrl} target="_blank" rel="noopener noreferrer">{product.sku} Datasheet <span aria-hidden="true">↗</span></a>}</div></section>}
           {usesHikvisionKitLayout && <div className="colour-picker"><div><strong>{zh ? "电源选择" : "Power supply choice"}</strong><small>{zh ? `已选择：${selectedPower}` : `Selected: ${selectedPower}`}</small></div><div className="colour-picker__options">{["NZ power supply", "Panel only"].map(option => <button key={option} className={selectedPower === option ? "active" : ""} onClick={() => setSelectedPower(option)}>{option}</button>)}</div></div>}
-          <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{(product.colors?.length ? product.colors : ["White", "Black"]).map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>
+          {sourceColourOptions.length > 0 && <div className="colour-picker"><div><strong>{zh ? "颜色" : "Colour"}</strong><small>{zh ? `已选择：${selectedColor}` : `Selected: ${selectedColor}`}</small></div><div className="colour-picker__options">{sourceColourOptions.map(color => <button key={color} className={selectedColor === color ? "active" : ""} onClick={() => setSelectedColor(color)} aria-label={`${zh ? "选择" : "Select"} ${color}`}><i className={`colour-swatch colour-swatch--${color.toLowerCase()}`} />{color}</button>)}</div></div>}
           <div className="purchase-row purchase-row--new">{product.priceOnRequest ? <Link className="button button--primary add-to-cart" to="/contact">{zh ? "获取报价" : "Request a quote"}</Link> : <><div className="quantity-stepper" aria-label={zh ? "数量" : "Quantity"}><span>{zh ? "数量" : "Quantity"}</span><div><button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label={zh ? "减少数量" : "Decrease quantity"}>−</button><b>{quantity}</b><button onClick={() => setQuantity((current) => Math.min(99, current + 1))} aria-label={zh ? "增加数量" : "Increase quantity"}>+</button></div></div><button className="button button--primary add-to-cart" onClick={add}>{added ? (zh ? "✓ 已加入购物车" : "✓ Added to cart") : (zh ? "加入购物车" : "Add to cart")}</button></>}</div>
           {usesTiandyShortToggle && <div className="product-details-toggle" role="group" aria-label={zh ? "产品详情长度" : "Product detail length"}>
             <button type="button" className={detailLength === "short" ? "active" : ""} onClick={() => setDetailLength("short")}>{zh ? "简短版本" : "Short version"}</button>

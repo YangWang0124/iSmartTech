@@ -551,6 +551,9 @@ textarea:focus {
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line);
 }
+.product-purchase .detail-price--with-status {
+  border-bottom: 0;
+}
 .product-purchase .detail-price strong {
   font-size: 38px;
   color: #FF5A1F;

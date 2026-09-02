@@ -9,6 +9,7 @@ import {
 import seedProducts from "../data/products.json";
 import { createCuratedProducts } from "../data/curatedProducts";
 import { alarmProducts } from "../data/alarmProducts";
+import { withCatalogueCategory } from "../lib/catalogue";
 import type { Product } from "../types";
 
 type ProductState = {
@@ -105,7 +106,7 @@ return [
   ...sourceCatalogue.filter((product) => !alarmIds.has(product.id)),
   ...createCuratedProducts(sourceProducts),
   ...alarmProducts,
-];
+].map(withCatalogueCategory);
   }, [managed, sourceProducts]);
   const value = useMemo(
     () => ({
