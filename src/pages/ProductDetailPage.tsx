@@ -771,6 +771,9 @@ export function ProductDetailPage() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [detailLength, setDetailLength] = useState<"short" | "full">("full");
   const { addItem } = useCart();
+  useEffect(() => {
+    setPreviewIndex(0);
+  }, [resolvedProductId]);
   if (!product) return <main className="page container empty-state"><h1>Product not found</h1><Link className="button button--primary" to="/products">Back to products</Link></main>;
   const add = () => { addItem(product.id, quantity); setAdded(true); window.setTimeout(() => setAdded(false), 1800); };
   const normalisedProductSku = product.sku.trim().toUpperCase();

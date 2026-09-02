@@ -1,0 +1,74 @@
+[
+  {
+    "id": "paradox-mg5050-k10h-alarm-kit",
+    "panel": "/assets/alarm/paradox-mg5050.jpg",
+    "keypad": "/assets/alarm/paradox-k10h.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-mg5050-k10v-alarm-kit",
+    "panel": "/assets/alarm/paradox-mg5050.jpg",
+    "keypad": "/assets/alarm/paradox-k10v.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-sp4000-alarm-kit",
+    "panel": "/assets/alarm/paradox-sp4000.jpg",
+    "keypad": "/assets/alarm/paradox-k10h.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-sp4000-k10v-alarm-kit",
+    "panel": "/assets/alarm/paradox-sp4000.jpg",
+    "keypad": "/assets/alarm/paradox-k10v.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-mg5050-tm50-alarm-kit",
+    "panel": "/assets/alarm/paradox-mg5050.jpg",
+    "keypad": "/assets/alarm/paradox-tm50.jpg",
+    "detector": "/assets/alarm/paradox-nv5.jpg",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-sp5500-alarm-kit",
+    "panel": "/assets/alarm/paradox-sp5500.jpg",
+    "keypad": "/assets/alarm/paradox-k10h.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-sp5500-k10v-alarm-kit",
+    "panel": "/assets/alarm/paradox-sp5500.jpg",
+    "keypad": "/assets/alarm/paradox-k10v.jpg",
+    "detector": "/assets/alarm/paradox-476.avif",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  },
+  {
+    "id": "paradox-sp5500-tm50-alarm-kit",
+    "panel": "/assets/alarm/paradox-sp5500.jpg",
+    "keypad": "/assets/alarm/paradox-tm50.jpg",
+    "detector": "/assets/alarm/paradox-nv5.jpg",
+    "internal": "/assets/alarm/internal-siren.png",
+    "battery": "/assets/alarm/ritar-rt1272.jpg",
+    "external": "/assets/alarm/external-siren.jpg"
+  }
+]

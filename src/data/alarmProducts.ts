@@ -393,9 +393,9 @@ const createKit = (kit: KitDefinition): Product => {
     sku: kit.sku,
     badge: "Alarm Kit",
     icon: "ALM",
-    image: panel.image,
+    image: `/assets/alarm/kits/${kit.id}.jpg`,
     galleryImages: [
-      ...members.slice(1).map((member) => member.image!).filter(Boolean),
+      ...members.map((member) => member.image!).filter(Boolean),
       "/assets/alarm/ritar-rt1272.jpg",
       "/assets/alarm/external-siren.jpg",
     ],
