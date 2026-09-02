@@ -674,7 +674,7 @@ export function createCuratedProducts(allProducts: Product[]): Product[] {
         : isAccessory
         ? "Accessories"
         : "Wired IP Cameras",
-      categoryIds: isNvr ? [18] : isAccessory ? [71] : [14],
+      categoryIds: isNvr ? [18] : isAccessory ? [12] : [14],
       price: exactSource?.price ?? 0,
       priceOnRequest: !exactSource,
       oldPrice: exactSource?.oldPrice,

@@ -70,6 +70,15 @@ function productVariants(value) {
   });
 }
 
+function productColors(product) {
+  const value = product.colors ?? product.colours ?? product.color_options ?? product.colour_options;
+  const entries = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+  return [...new Set(entries.map((entry) => {
+    if (typeof entry === "string") return entry.trim();
+    return String(entry?.name ?? entry?.title ?? entry?.value ?? "").trim();
+  }).filter(Boolean))];
+}
+
 export async function fetchCatalogue(fetcher = fetch) {
   const endpoints = ["/Product/All", "/Product/AllBrand", "/Product/AllCategory"];
   const responses = await Promise.all(endpoints.map(path => fetcher(`${API_ORIGIN}${path}`, { headers: { Accept: "application/json" } })));
@@ -107,7 +116,7 @@ export async function fetchCatalogue(fetcher = fetch) {
       image: images[0],
       galleryImages: images.slice(1),
       featureImages: [],
-      colors: [],
+      colors: productColors(product),
       published: true,
       shortDescription: `${brand} ${category}`,
       description: `${name} is supplied through the iSmartTech catalogue. Contact our team if you need compatibility, installation or specification advice.`,
@@ -138,7 +147,7 @@ export async function fetchCatalogueProduct(id, fetcher = fetch) {
     subProducts: productVariants(product.sub_products),
     image: images[0],
     galleryImages: images.slice(1),
-    colors: [],
+    colors: productColors(product),
     shortDescription: features[0] || `${brand} product information`,
     description: features.join(" • ") || `${name} is supplied through the iSmartTech catalogue.`,
     features,
