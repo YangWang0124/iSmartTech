@@ -40,6 +40,10 @@ const base = {
   accent: "orange",
 } as const;
 
+// Compatibility qualification applies to the original, non-plus panels in these kits.
+// Sources and model-specific verification: docs/alarm-feature-sources.md.
+const internetModuleQualification = "IP180 is an optional BlueEye communication module, not an Insite GOLD module. Paradox supports most panels made after 2012; the installer must verify the exact panel and firmware before selection. IP150+ app support also depends on its firmware.";
+
 const componentSources: ComponentSource[] = [
   {
     id: "paradox-mg5050-control-panel",
@@ -47,23 +51,26 @@ const componentSources: ComponentSource[] = [
     category: "Wired Alarm Control Panels",
     categoryIds: [5, 33, 35, 83],
     sku: "MG5050",
-    image: "/assets/alarm/paradox-mg5050.jpg",
+    image: "/assets/alarm/paradox-mg5050-board-hires.png",
     pdf: "https://www.paradox.com/Downloader?ID=871",
     pdfLabel: "MG5050 User Guide",
     badge: "Hybrid Panel",
-    short: "Hybrid wired and wireless protection with room to grow",
-    description: "The Paradox MG5050 provides a flexible foundation for homes and small commercial premises that need wired devices, wireless devices or a combination of both. Five onboard inputs can provide five additional ATZ zones, while the system can manage up to 32 compatible zones across two independently controlled partitions. A built-in 433 MHz transceiver supports compatible Magellan wireless equipment without requiring a separate receiver. StayD operation, RF-jamming supervision and a 256-event history support practical everyday control and servicing, while compatible communication modules can add remote reporting or connected system access when required.",
+    short: "Flexible wired and wireless protection with built-in 433 MHz communication",
+    description: "The Paradox MG5050 is a board-only hybrid alarm controller for installations that combine wired and compatible wireless devices. Five onboard zones and five additional ATZ zones provide the starting capacity, with support for up to 32 zones across two independently controlled partitions. Its built-in 433 MHz transceiver connects compatible wireless equipment, while a four-wire bus supports up to 15 keypads. StayD and Sleep arming offer different ways to protect occupied premises. Support for 32 users and 32 remote controls, wireless-jamming supervision and a 256-event history helps with everyday operation and servicing. Compatible PCS-series, IP150+ and IP180 modules can be added for the required communication arrangement; these modules and the kit accessories are not included with the board alone.",
     features: [
-      ["Hybrid 32-zone capacity", "Combines five onboard inputs, five additional ATZ zones and support for up to 32 compatible wired or wireless zones."],
-      ["Integrated wireless transceiver", "Built-in 433 MHz wireless communication supports compatible Magellan devices and remote controls."],
-      ["Partitioned protection", "Supports two independently controlled partitions."],
-      ["Wireless system growth", "Supports up to eight compatible K32RF or K37 wireless keypads and two RPT1 wireless repeaters."],
-      ["RF supervision", "Wireless-jamming supervision helps identify interference affecting the radio system."],
-      ["Event history", "Stores up to 256 system events for review and servicing."],
-      ["StayD operation", "Supports Paradox StayD for convenient perimeter and stay arming."],
-      ["Expandable communication", "Supports compatible IP, cellular and voice communication modules."],
+      ["Hybrid zone capacity", "Five onboard zones plus five ATZ zones, with support for up to 32 zones, any of which may be wireless."],
+      ["Built-in wireless communication", "A 433 MHz transceiver supports compatible wireless devices, with RF-jamming supervision."],
+      ["Separate areas and users", "Two partitions, 32 users and 32 remote controls, with one remote assigned per user."],
+      ["Keypad and repeater support", "The four-wire bus connects up to 15 keypads; wireless support includes up to eight K32RF or K37 keypads, two RPT1 repeaters and the REM3 handheld remote keypad."],
+      ["Flexible arming", "StayD and Sleep arming support different occupancy and protection needs."],
+      ["Communication module options", "Supports PCS-series cellular modules and IP150+ internet modules, supplied separately."],
+      ["Internet module compatibility", internetModuleQualification],
+      ["Programming and reporting", "Menu-based programming covers installer, master and maintenance access, with multiple telephone numbers for alarm monitoring."],
+      ["Service information", "A 256-event buffer and 9.6 kbaud WinLoad communication support system review and servicing."],
+      ["Timekeeping and reset", "Includes daylight-saving calendar adjustment and a push-button power reset."],
+      ["Warranty", "Three-year warranty."],
     ],
-    specs: { Model: "MG5050", "Product type": "Hybrid alarm control panel", "Onboard zones": "5 inputs; 5 additional zones with ATZ", "Maximum zones": "32 wired or wireless", Transceiver: "Built-in 433 MHz", Partitions: "2", "User codes": "32 total", "Remote controls": "Up to 32", "Wireless keypads": "Up to 8 compatible K32RF / K37 keypads", "Wireless repeaters": "Up to 2 compatible RPT1 repeaters", "Event buffer": "256 events", "RF supervision": "Wireless-jamming supervision", "Arming modes": "Regular, Sleep, Stay and StayD", Communications: "Compatible IP, cellular and voice modules", Ecosystem: "Paradox Magellan / Spectra" },
+    specs: { Model: "MG5050", "Product type": "Hybrid alarm control board only", "Onboard zones": "5 plus 5 ATZ zones", "Maximum zones": "32; any may be wireless", Transceiver: "Built-in 433 MHz", Partitions: "2", "User codes": "32", "Remote controls": "32; one per user", "Communication bus": "4-wire; up to 15 keypads", "Wireless keypads": "Up to 8 K32RF / K37", "Wireless repeaters": "Up to 2 RPT1", "Remote keypad": "REM3 supported", "Event buffer": "256 events", "RF supervision": "Wireless-jamming supervision", "Arming modes": "StayD and Sleep supported", Communications: "PCS series, IP150+ and IP180; optional modules", "WinLoad communication": "9.6 kbaud", "Time adjustment": "Daylight-saving calendar", Reset: "Push-button power reset", Warranty: "3 years" },
   },
   {
     id: "paradox-sp4000-control-panel",
@@ -82,32 +89,40 @@ const componentSources: ComponentSource[] = [
       ["Two partitions", "Separates the premises into independently armed areas."],
       ["User access", "Supports 32 user codes and up to 15 keypads on the expansion bus."],
       ["StayD mode", "Supports Paradox StayD for flexible everyday arming."],
-      ["Communication options", "Supports PCS Series, IP150 and VDMP3 modules."],
-      ["App support", "Compatible modules enable Insite GOLD app-based system control."],
+      ["Communication options", "Optional PCS-series cellular, IP150+ internet and VDMP3 voice modules provide different reporting paths; modules are sold separately."],
+      ["Internet module compatibility", internetModuleQualification],
+      ["Programming access", "Keypad menus provide installer, master and maintenance access; BabyWare supports PC-based setup and firmware servicing."],
+      ["Monitoring and event review", "Multiple monitoring telephone numbers and a 256-event memory support alarm reporting and investigation."],
+      ["Timekeeping and reset", "Automatic daylight-saving adjustment and a push-button software reset support ongoing maintenance."],
     ],
     specs: { Model: "SP4000", "Onboard zones": "4 (8 with ATZ)", "Maximum zones": "32", Partitions: "2", "User codes": "32", "Expansion bus": "4-wire; up to 15 keypads", Sirens: "Supports wired sirens", "Firmware upgrade": "BabyWare" },
   },
   {
     id: "paradox-sp5500-control-panel",
-    name: "Paradox SP5500+ 5–32 Zone Alarm Control Panel",
+    name: "Paradox SP5500 5–32 Zone Alarm Control Panel",
     category: "Wired Alarm Control Panels",
     categoryIds: [5, 33, 35, 83],
-    sku: "SP5500+",
-    image: "/assets/alarm/paradox-sp5500.jpg",
-    pdf: "https://www.paradox.com/Downloader?ID=11652",
-    pdfLabel: "SP5500+ User Guide",
+    sku: "SP5500",
+    image: "/assets/alarm/paradox-sp5500-board-hires.png",
+    pdf: "https://www.paradox.com/Downloader?ID=871",
+    pdfLabel: "SP5500 User Guide",
     badge: "Wired Panel",
-    short: "Scalable two-partition control with flexible communications",
-    description: "The Paradox SP5500+ is designed for homes and small commercial premises that need a wired alarm platform with capacity for a more developed installation. Five onboard zones can be expanded to 32 hardwired or compatible wireless zones, while two partitions allow independently managed areas within the same system. Support for 32 user codes, 32 remote controls and expandable programmable outputs provides flexibility for multi-user sites and connected building functions. Separate primary and backup serial communication paths also allow compatible reporting modules to be arranged with greater resilience as part of a professionally designed system.",
+    short: "Expandable two-partition protection with flexible alarm reporting",
+    description: "The Paradox Spectra SP5500 is a board-only alarm controller for installations that need room to expand. Five onboard zones and five additional ATZ zones provide the initial capacity, with expansion to 32 zones and 16 programmable outputs through compatible equipment. Two partitions and 32 user codes allow separate areas and authorised users to be managed independently, while StayD supports day-to-day protection. A four-wire expansion bus connects compatible system devices. The dual-coupler dialler circuit and support for PCS-series, IP150+ and IP180 modules provide options for alarm reporting. A 256-event history, automatic daylight-saving adjustment and direct 9.6 kbaud communication assist configuration and servicing. Communication modules and the kit accessories are not included with the board alone.",
     features: [
-      ["Expandable zones", "Five onboard zones with expansion to 32 wired or wireless zones."],
-      ["Two partitions", "Independently manages two protected areas."],
-      ["Flexible outputs", "Two onboard PGMs with expansion to 16 outputs."],
-      ["User capacity", "Supports 32 user codes and 32 remote controls."],
-      ["Dual serial ports", "Separate primary and backup communication channels."],
-      ["StayD and BabyWare", "Supports StayD operation and in-field firmware upgrades through BabyWare."],
+      ["Expandable zone capacity", "Five onboard zones plus five ATZ zones, expandable to 32 zones with compatible equipment."],
+      ["Programmable output expansion", "Supports expansion to 16 PGMs for configured alarm and control functions."],
+      ["Independent area control", "Two partitions and 32 user codes support separately managed areas and authorised users."],
+      ["StayD operation", "Supports StayD for everyday protection of occupied premises."],
+      ["Four-wire expansion bus", "Connects compatible expansion equipment to the control panel."],
+      ["Alarm reporting options", "A dual-coupler dialler circuit supports telephone reporting; PCS-series, IP150+ and IP180 modules provide additional communication options."],
+      ["Internet module compatibility", internetModuleQualification],
+      ["Accessible programming", "Menu-based programming supports installer, master and maintenance access, with multiple monitoring telephone numbers."],
+      ["Event history and servicing", "Stores 256 events and supports direct communication at 9.6 kbaud."],
+      ["Timekeeping and reset", "Automatic daylight-saving adjustment and a push-button software reset support system maintenance."],
+      ["Warranty", "Three-year warranty."],
     ],
-    specs: { Model: "SP5500+", "Onboard zones": "5", "Maximum zones": "32", PGMs: "2 onboard; expandable to 16", Partitions: "2", "User codes": "32", "Remote controls": "32", "Serial ports": "2", "BabyWare communication": "115K baud" },
+    specs: { Model: "SP5500", "Product type": "Alarm control board only", "Onboard zones": "5 plus 5 ATZ zones", "Maximum zones": "32", PGMs: "Expandable to 16", Partitions: "2", "User codes": "32", "Expansion bus": "4-wire", "Arming mode": "StayD supported", Communications: "PCS series, IP150+ and IP180; optional modules", Dialler: "Dual-coupler dialler circuit", "Reporting numbers": "Multiple monitoring telephone numbers", "Programming access": "Installer, master and maintenance", "Direct communication": "9.6 kbaud", "Event buffer": "256 events", "Time adjustment": "Automatic daylight saving", Reset: "Push-button software reset to defaults and restart", Warranty: "3 years" },
   },
   {
     id: "paradox-k10h-keypad",
@@ -305,10 +320,10 @@ const kitDefinitions: KitDefinition[] = [
   { id: "paradox-mg5050-k10v-alarm-kit", name: "Paradox MG5050 Alarm Kit with K10V Keypad", sku: "MG5050-K10V-KIT", panel: "paradox-mg5050-control-panel", keypad: "paradox-k10v-keypad", detector: "paradox-476-pir-detector" },
   { id: "paradox-sp4000-alarm-kit", name: "Paradox SP4000 Alarm Kit with K10H Keypad", sku: "SP4000-K10H-KIT", panel: "paradox-sp4000-control-panel", keypad: "paradox-k10h-keypad", detector: "paradox-476-pir-detector" },
   { id: "paradox-sp4000-k10v-alarm-kit", name: "Paradox SP4000 Alarm Kit with K10V Keypad", sku: "SP4000-K10V-KIT", panel: "paradox-sp4000-control-panel", keypad: "paradox-k10v-keypad", detector: "paradox-476-pir-detector" },
-  { id: "paradox-mg5050-tm50-alarm-kit", name: "Paradox MG5050 Alarm Kit with TM50 Touchscreen", sku: "MG5050-TM50-KIT", panel: "paradox-mg5050-control-panel", keypad: "paradox-tm50-touch-keypad", detector: "paradox-nv5-pir-detector" },
-  { id: "paradox-sp5500-alarm-kit", name: "Paradox SP5500+ Alarm Kit with K10H Keypad", sku: "SP5500-K10H-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-k10h-keypad", detector: "paradox-476-pir-detector" },
-  { id: "paradox-sp5500-k10v-alarm-kit", name: "Paradox SP5500+ Alarm Kit with K10V Keypad", sku: "SP5500-K10V-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-k10v-keypad", detector: "paradox-476-pir-detector" },
-  { id: "paradox-sp5500-tm50-alarm-kit", name: "Paradox SP5500+ Alarm Kit with TM50 Touchscreen", sku: "SP5500-TM50-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-tm50-touch-keypad", detector: "paradox-nv5-pir-detector" },
+  { id: "paradox-mg5050-tm50-alarm-kit", name: "Paradox MG5050 Alarm Kit with White TM50 Touchscreen", sku: "MG5050-TM50-KIT", panel: "paradox-mg5050-control-panel", keypad: "paradox-tm50-touch-keypad", detector: "paradox-nv5-pir-detector" },
+  { id: "paradox-sp5500-alarm-kit", name: "Paradox SP5500 Alarm Kit with K10H Keypad", sku: "SP5500-K10H-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-k10h-keypad", detector: "paradox-476-pir-detector" },
+  { id: "paradox-sp5500-k10v-alarm-kit", name: "Paradox SP5500 Alarm Kit with K10V Keypad", sku: "SP5500-K10V-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-k10v-keypad", detector: "paradox-476-pir-detector" },
+  { id: "paradox-sp5500-tm50-alarm-kit", name: "Paradox SP5500 Alarm Kit with White TM50 Touchscreen", sku: "SP5500-TM50-KIT", panel: "paradox-sp5500-control-panel", keypad: "paradox-tm50-touch-keypad", detector: "paradox-nv5-pir-detector" },
 ];
 
 const byId = new Map(components.map((product) => [product.id, product]));
@@ -346,7 +361,7 @@ const createKit = (kit: KitDefinition): Product => {
           ? "Scalable 32-zone security with space-saving vertical control"
           : "Scalable 32-zone security with clear horizontal control";
   const keypadOverview = usesTouchscreen
-    ? "The TM50's 5-inch colour touchscreen uses icon-based menus and editable labels to make everyday operation and system status easier to understand."
+    ? "The white TM50 keypad's 5-inch colour touchscreen uses icon-based menus and editable labels to make everyday operation and system status easier to understand."
     : usesVerticalLed
       ? "The vertical K10V keypad presents ten-zone LED status, illuminated open-zone keys and dedicated arming indicators in a narrow wall-mounted format."
       : "The horizontal K10H keypad presents ten-zone LED status, illuminated open-zone keys and dedicated arming indicators for straightforward daily operation.";
@@ -354,26 +369,26 @@ const createKit = (kit: KitDefinition): Product => {
     ? "NV5 motion detection adds five selectable sensitivity levels, digital temperature compensation and signal processing designed to balance responsive detection with false-alarm immunity."
     : "Paradox 476 Pro motion detection provides an 11 m by 11 m, 110-degree coverage pattern, with automatic temperature compensation, tamper protection and EMI/RFI shielding for stable indoor monitoring.";
   const systemOverview = hybrid
-    ? "Designed for homes and small commercial premises that need a combination of wired and wireless protection, this MG5050 system starts with five onboard inputs, supports five additional ATZ zones and can manage up to 32 compatible zones. Its built-in 433 MHz transceiver supports compatible wireless devices, while two partitions, RF-jamming supervision and a 256-event history provide practical control and service information."
+    ? "Designed for homes and small commercial premises that need wired and compatible wireless protection, this MG5050 system combines five onboard zones, five additional ATZ zones and capacity for up to 32 zones. Its built-in 433 MHz transceiver and four-wire bus support compatible wireless equipment and up to 15 bus-connected keypads. Two partitions, 32 users, 32 remote controls, StayD and Sleep arming provide flexible everyday control, while RF-jamming supervision and a 256-event history assist servicing."
     : panel.id.includes("sp4000")
       ? "Designed for homes and small commercial premises, this SP4000 system starts with four onboard inputs, can provide eight zones through ATZ and expands to 32 wired or compatible wireless zones. Two partitions and 32 user codes allow separate areas and authorised users to be managed around the needs of the site."
-      : "Designed for homes and small commercial premises that may need room to grow, this SP5500+ system starts with five onboard zones and expands to 32 wired or compatible wireless zones. Two partitions, 32 user codes, support for 32 remote controls and separate primary and backup communication paths provide flexibility for multi-area installations.";
+      : "Designed for homes and small commercial premises that may need room to grow, this SP5500 system starts with five onboard zones plus five ATZ zones and supports expansion to 32 zones and 16 programmable outputs. Two partitions, 32 user codes and StayD provide flexible day-to-day protection. The four-wire expansion bus connects compatible equipment, while the dual-coupler dialler circuit, multiple monitoring telephone numbers and a 256-event history support reporting and servicing.";
   const kitOverview = `${systemOverview} ${keypadOverview} ${detectorOverview} Battery-backed standby operation and separately positioned indoor and outdoor sounders provide dependable local warning, while compatible communication modules can be selected by the installer when remote reporting or connected control is required.`;
   const panelCapacityFeature = hybrid
     ? "Hybrid 32-zone protection: Five onboard inputs can provide five additional ATZ zones, while the system can manage up to 32 compatible wired or wireless zones."
     : panel.id.includes("sp4000")
       ? "Scalable zone architecture: Four onboard zones can operate as eight with ATZ and expand to 32 wired or compatible wireless zones."
-      : "Scalable zone and output capacity: Five onboard zones expand to 32 wired or compatible wireless zones, while programmable outputs can grow from two to 16.";
+      : "Scalable zone and output capacity: Five onboard zones plus five ATZ zones provide the starting capacity, with compatible expansion to 32 zones and 16 programmable outputs.";
   const panelControlFeature = hybrid
     ? "Integrated wireless supervision: A built-in 433 MHz transceiver supports compatible wireless devices, with RF-jamming supervision and capacity for up to eight K32RF or K37 keypads and two RPT1 repeaters."
     : panel.id.includes("sp4000")
       ? "Partitioned StayD control: Two partitions, 32 user codes and StayD operation support separately managed areas and practical day-to-day arming."
-      : "Partitioned user control: Two partitions, 32 user codes and support for 32 remote controls suit households or small sites with multiple users.";
+      : "Partitioned StayD control: Two partitions, 32 user codes and StayD support independently managed areas and authorised users.";
   const communicationFeature = hybrid
-    ? "Flexible communication path: Compatible IP, cellular and voice modules let an installer add app access, reporting or voice functions to suit the site."
+    ? "Flexible communication path: PCS-series cellular modules and IP150+ or IP180 internet modules can be added to suit the reporting arrangement; these optional modules are not included."
     : panel.id.includes("sp4000")
-      ? "Flexible communication path: PCS, IP150 and VDMP3 compatibility provides options for cellular reporting, internet/app control and voice dialling."
-      : "Primary and backup communications: Two serial ports allow compatible primary and backup communication modules to be configured separately.";
+      ? "Flexible communication path: Optional PCS-series cellular, IP150+ internet and VDMP3 voice modules offer reporting and remote-access options; these modules are not included."
+      : "Flexible alarm reporting: A dual-coupler dialler circuit supports telephone reporting, with optional PCS-series, IP150+ and IP180 modules available for other communication arrangements.";
   const keypadFeature = keypad.id.includes("tm50")
     ? "Touchscreen system control: A 5-inch colour display, icon-based menus, editable labels and control of up to eight programmable outputs provide a clear interactive interface."
     : keypad.id.includes("k10v")
@@ -393,7 +408,7 @@ const createKit = (kit: KitDefinition): Product => {
     sku: kit.sku,
     badge: "Alarm Kit",
     icon: "ALM",
-    image: `/assets/alarm/kits/${kit.id}.jpg`,
+    image: `/assets/alarm/kits/${kit.id}${panel.id.includes("sp4000") ? "" : "-boards-v4"}.jpg`,
     galleryImages: [
       ...members.map((member) => member.image!).filter(Boolean),
       "/assets/alarm/ritar-rt1272.jpg",
@@ -406,16 +421,28 @@ const createKit = (kit: KitDefinition): Product => {
     features: [
       panelCapacityFeature,
       panelControlFeature,
-      ...(hybrid ? ["User and event capacity: The panel supports 32 user codes, up to 32 remote controls and a 256-event history for operation and servicing."] : []),
+      ...(hybrid ? [
+        "User and event capacity: The panel supports 32 users, 32 remote controls with one per user, and a 256-event history.",
+        "Flexible control network: The four-wire bus connects up to 15 keypads, with REM3 remote-keypad support and StayD or Sleep arming for different occupancy needs.",
+        "Programming and service tools: Menu-based installer, master and maintenance access, multiple monitoring numbers, daylight-saving adjustment, a power-reset button and 9.6 kbaud WinLoad communication support setup and servicing.",
+      ] : [
+        panel.id.includes("sp4000")
+          ? "Expansion and event review: The four-wire bus supports up to 15 keypads, while a 256-event memory records system activity for review."
+          : "Expansion and event review: A four-wire expansion bus, 256-event memory and direct 9.6 kbaud communication support configuration and servicing.",
+        "Programming and reporting: Keypad menus support installer, master and maintenance access, with multiple telephone numbers available for alarm monitoring.",
+        ...(panel.id.includes("sp4000") ? ["PC-based servicing: BabyWare supports system programming and firmware updates."] : []),
+        "Timekeeping and reset: Automatic daylight-saving adjustment and a push-button software reset simplify ongoing maintenance.",
+      ]),
       keypadFeature,
       detectorFeature,
       communicationFeature,
+      `Internet module compatibility: ${internetModuleQualification}`,
       "Layered local warning: Panel-powered indoor and outdoor sounders provide audible notification across the premises when an alarm is activated.",
       "Standby power resilience: A sealed lead-acid backup battery provides maintenance-free standby support during a mains-power interruption.",
     ],
     specifications: {
       "Control panel": `1 × ${panel.name} (${panel.sku}) in cabinet with fuse and transformer`,
-      Keypad: `1 × ${keypad.name} (${keypad.sku})`,
+      Keypad: `1 × ${keypad.name} (${keypad.sku})${usesTouchscreen ? " — White" : ""}`,
       "Motion detector": `2 × ${detector.name} (${detector.sku})`,
       "Backup battery": "1 × 7.0 Ah backup battery",
       "Internal warning": "1 × flush-mount internal siren",
@@ -460,6 +487,10 @@ export const arrowheadKitIncludedItems: Record<string, Array<[string, string]>> 
     ["Internal warning", "1 x flush-mount internal siren"],
     ...(kit.includesCable ? [["Alarm cable", "1 x 100 metre box of 0.2 alarm cable"] as [string, string]] : []),
     ["Warranty", "5-year warranty"],
+    ...(kit.keypad.includes("LED")
+      ? [["Alternative keypad colour", "A white LED keypad is supplied as standard. To request a black LED keypad instead, please email us separately when placing your order."] as [string, string]]
+      : []),
+    ["Alternative power option", "A plug pack can be requested in place of the transformer; please email us separately when placing your order."],
   ]])
 );
 
@@ -505,10 +536,14 @@ const createArrowheadKit = (kit: ArrowheadKitDefinition): Product => {
           ? "Full-text LCD operation: The vertical full-English display provides clearer prompts and everyday system information."
           : "Touchscreen interaction: The touchscreen interface provides visual everyday control and system-status access.",
       "Pet-tolerant motion coverage: Optex FLX-S-ST detection is designed to identify movement while accommodating pets weighing up to 18 kg.",
-      "Flexible site scale: Support for up to 32 areas, 32 keypads and 2,000 users provides capacity for larger or multi-area installations.",
+      "Flexible site scale: Manage up to 32 areas and 2,000 users, including up to 1,900 wireless users when compatible wireless equipment is fitted. The system supports a combined total of up to 32 alarm/access keypads and readers.",
       "Optional app and monitoring path: Elite Cloud smartphone control or monitored reporting can be added through the appropriate plug-on communication module.",
       "Wireless growth option: A compatible Infinity Wireless Link can extend the system to wireless detectors, remotes, panic buttons and sirens.",
-      "Automation-ready outputs: Four onboard outputs can expand to 32, with a clean relay available for functions such as compatible garage-door or gate control.",
+      "Automation-ready outputs: Four onboard outputs can expand to 32 using optional EC-O4 modules. Output 4 provides a voltage-free relay for compatible gate or garage-door control.",
+      "Access-control expansion: With the appropriate optional access-control hardware, the EC system can manage up to 32 doors; door equipment is not included in the kit.",
+      "Wireless relay expansion: Supports up to 32 optional Infinity Output wireless relay modules through a compatible Infinity Wireless Link.",
+      "Protected accessory supply: A fused 13.8V DC accessory output provides up to 1A for compatible devices, within the system power budget.",
+      "Supervised siren outputs: Outputs 1 and 2 provide monitored 12V connections for the internal and external sirens.",
       "Resilient local alerting: Battery-backed operation and separately positioned indoor and outdoor sounders support local warning during an alarm event.",
     ],
     specifications: {
@@ -543,6 +578,7 @@ export function isAlarmProduct(product: Product) {
 export function alarmKitComponentDisplayName(kitId: string, component: Product) {
   if (kitId.startsWith("paradox-mg5050-") && component.id === "paradox-mg5050-control-panel") return `1 × Wireless Enabled Panel — ${component.name} in cabinet with fuse and transformer`;
   if (component.id.endsWith("control-panel")) return `1 × ${component.name} in cabinet with fuse and transformer`;
+  if (component.id === "paradox-tm50-touch-keypad") return `1 × ${component.name} — White`;
   if (component.id.endsWith("keypad")) return `1 × ${component.name}`;
   if (component.id.endsWith("pir-detector")) return `2 × ${component.name}`;
   if (component.id === "alarm-flush-mount-internal-siren") return `1 × ${component.name}`;

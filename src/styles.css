@@ -168,11 +168,17 @@ button {
 .main-nav a.active {
   color: var(--blue);
 }
+.customer-link,
 .cart-link {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--navy);
+  font-size: 16px;
   font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  flex-shrink: 0;
   position: relative;
 }
 .cart-link__icon {
@@ -502,7 +508,7 @@ button {
 }
 .category-card:hover {
   border-color: #76ace2;
-  box-shadow: 0 10px 24px #12396012;
+  box-shadow: 0 0px 0px #12396012;
   transform: translateY(-2px);
 }
 .category-card > span {
@@ -1553,9 +1559,6 @@ textarea:focus {
     background: transparent;
     font-size: 22px;
   }
-  .cart-link > span:nth-child(2) {
-    display: none;
-  }
   .category-nav {
     display: none;
   }
@@ -1764,17 +1767,8 @@ textarea:focus {
   font-weight: 600;
   white-space: nowrap;
 }
-.customer-link {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--navy);
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
 .customer-link__icon {
-  display: none;
+  display: block;
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
@@ -1788,12 +1782,15 @@ textarea:focus {
   color: var(--blue);
 }
 @media (max-width: 1080px) {
-  .staff-link span,
-  .customer-link > span {
+  .staff-link span {
     display: none;
   }
-  .customer-link__icon {
-    display: block;
+}
+/* Account and cart switch to icon-only at the same navigation breakpoint. */
+@media (max-width: 1200px) {
+  .customer-link > .header-action__label,
+  .cart-link > .header-action__label {
+    display: none;
   }
 }
 .product-photo {

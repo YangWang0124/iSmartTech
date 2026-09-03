@@ -38,7 +38,8 @@ func photo(_ path: String) -> NSImage {
     cache[path] = result
     return result
 }
-for kit in kits {
+let selectedIds = Set(CommandLine.arguments.dropFirst(3))
+for kit in kits where selectedIds.isEmpty || selectedIds.contains(kit.id) {
     let canvas = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 1200, pixelsHigh: 1200,
         bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
         colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
@@ -66,6 +67,7 @@ for kit in kits {
     context.flushGraphics()
     NSGraphicsContext.restoreGraphicsState()
     let data = canvas.representation(using: .jpeg, properties: [.compressionFactor: 0.92])!
-    try data.write(to: output.appendingPathComponent(kit.id + ".jpg"), options: .atomic)
+    let version = kit.panel.hasSuffix("-board-hires.png") ? "-boards-v4" : (kit.panel.hasSuffix("-board-only.png") ? "-boards-v3" : "")
+    try data.write(to: output.appendingPathComponent(kit.id + version + ".jpg"), options: .atomic)
     print("\(kit.id): 1200 × 1200, \(data.count) bytes")
 }

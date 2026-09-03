@@ -1,0 +1,102 @@
+/* Brand artwork above names; shared by desktop and mobile menus. */
+.brand-menu .brand-menu__panel {
+  width: min(490px, calc(100vw - 32px)) !important;
+  gap: 24px;
+}
+
+.brand-menu__panel section > strong {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.brand-menu__items {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.brand-menu__items .brand-menu__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 12px 6px;
+  border-radius: 6px;
+  isolation: isolate;
+  color: #52666a;
+  text-align: center;
+  text-decoration: none;
+}
+
+.brand-menu__items .brand-menu__link:hover,
+.brand-menu__items .brand-menu__link:focus-visible {
+  background: #f4f5f6;
+  color: #f15a24;
+}
+
+.brand-menu__items .brand-menu__link:focus-visible {
+  outline: 2px solid #f15a24;
+  outline-offset: 2px;
+}
+
+.brand-menu__logo {
+  position: relative;
+  display: block;
+  width: min(100%, 168px);
+  height: 48px;
+  flex: 0 0 48px;
+  overflow: hidden;
+  background: transparent;
+  /* White image pixels blend into the link's own hover/focus background. */
+  mix-blend-mode: multiply;
+}
+
+.brand-menu__logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The original square PNG has transparent margins around a thin wordmark. */
+.brand-menu__logo--paradox img,
+.brand-menu__logo--arrowhead img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: auto;
+  max-height: none;
+  transform: translate(-50%, -50%);
+}
+
+/* Remove only presentation whitespace; retain the complete logo artwork. */
+.brand-menu__logo--arrowhead img {
+  width: 118%;
+  max-width: none;
+}
+
+.brand-menu__items .brand-menu__label {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.35px;
+}
+
+@media (max-width: 1200px) {
+  .mobile-brand-menu .brand-menu__items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 4px 4px 12px;
+  }
+
+  .mobile-brand-menu .brand-menu__logo {
+    width: min(100%, 148px);
+  }
+
+  .mobile-brand-menu .brand-menu__label {
+    font-size: 10px;
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
 import { useProducts } from "../context/ProductContext";
@@ -94,10 +94,10 @@ export function ProductsPage() {
         <span>›</span>
         <Link to="/products">Products</Link>
         {crumbs.map((item) => (
-          <span className="breadcrumb__pair" key={item.id}>
+          <Fragment key={item.id}>
             <span>›</span>
             <Link to={`/category/${item.links}`}>{categoryDisplayTitle(item)}</Link>
-          </span>
+          </Fragment>
         ))}
       </div>
       <div className="page-title">

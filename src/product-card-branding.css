@@ -1,0 +1,66 @@
+/* Share tag styling between cards and detail galleries; logos stay on cards. */
+.product-card__visual {
+  isolation: isolate;
+}
+
+.product-card__visual > .badge,
+.product-detail__gallery > .badge {
+  color: #fff;
+  left: auto;
+  right: 12px;
+  max-width: calc(100% - 24px);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+/* Match SP4000: its board occupies five-sixths of a square image.
+   Keep the full-resolution crops and kit/detail imagery unchanged. */
+.product-card.product-card--compact-board .product-photo {
+  width: auto;
+  height: calc(100% - 20px);
+  aspect-ratio: 1;
+  max-width: calc(100% - 20px);
+  top: 10px;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%) scale(0.833333);
+}
+
+/* Overlay the logo without reducing the product photograph area. */
+.product-card__brand {
+  position: absolute;
+  z-index: 1;
+  left: 18px;
+  bottom: 10px;
+  width: min(104px, calc(100% - 36px));
+  height: 26px;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+
+.product-card__brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* These supplied assets include generous blank margins around the artwork. */
+.product-card__brand--paradox img,
+.product-card__brand--arrowhead img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: auto;
+  max-height: none;
+  transform: translate(-50%, -50%);
+}
+
+.product-card__brand--arrowhead img {
+  width: 118%;
+  max-width: none;
+}
