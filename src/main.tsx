@@ -7,6 +7,8 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
 import "./styles.css";
 import "./palette.css";
+import "./brand-menu.css";
+import "./category-nav-tabs.css";
 import "./installation.css";
 import "./product-zoom.css";
 import "./account.css";

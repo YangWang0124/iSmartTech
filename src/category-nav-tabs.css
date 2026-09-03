@@ -1,0 +1,68 @@
+/* Top-level tabs only; keep the white dropdown's own link styles intact. */
+@media (min-width: 1201px) {
+  .catalogue-mega-nav .category-nav__inner > .mega-menu {
+    align-self: stretch;
+  }
+
+  /* Preserve the chosen dropdown shadow; mask only its join with the tab. */
+  .catalogue-mega-nav .mega-menu__panel {
+    border: 0;
+    box-shadow: 0 0px 10px 0px #28354733;
+  }
+
+  .catalogue-mega-nav .category-nav__inner > a,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu > a {
+    height: 100%;
+    padding-inline: 10px;
+    border-radius: 4px 4px 0 0;
+    background: transparent;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  /* Standalone links have no dropdown, so round all four corners. */
+  .catalogue-mega-nav .category-nav__inner > a.category-nav__all,
+  .catalogue-mega-nav .category-nav__inner > a[href="/contact"] {
+    border-radius: 4px;
+  }
+
+  .catalogue-mega-nav .category-nav__inner > a:hover,
+  .catalogue-mega-nav .category-nav__inner > a:focus-visible,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:hover > a,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:focus-within > a {
+    background: #fff;
+    color: #283547;
+  }
+
+  /* Paint the open tab above the panel shadow, without altering the shadow. */
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:hover > a,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:focus-within > a {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* A tiny white overlap prevents a seam at fractional browser zoom levels. */
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:hover > a::after,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu:focus-within > a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: #fff;
+    pointer-events: none;
+  }
+
+  .catalogue-mega-nav .category-nav__inner > a:focus-visible,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu > a:focus-visible {
+    outline: 2px solid #283547;
+    outline-offset: -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalogue-mega-nav .category-nav__inner > a,
+  .catalogue-mega-nav .category-nav__inner > .mega-menu > a {
+    transition: none;
+  }
+}

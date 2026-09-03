@@ -7,6 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { catalogueCategories } from "../lib/catalogue";
 import { useAuth } from "../context/AuthContext";
 import { catalogueBrandGroups } from "../lib/brands";
+import { BrandMenuLink } from "./BrandMenuLink";
 
 export function Header() {
   const { itemCount } = useCart();
@@ -98,17 +99,16 @@ export function Header() {
                   {group.title}
                   <span>＋</span>
                 </summary>
-                {group.brands.map((brand) => (
-                  <Link
-                    key={brand.label}
-                    to={`/category/${group.category}?brand=${encodeURIComponent(
-                      brand.value
-                    )}`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {brand.label}
-                  </Link>
-                ))}
+                <div className="brand-menu__items">
+                  {group.brands.map((brand) => (
+                    <BrandMenuLink
+                      key={brand.label}
+                      brand={brand}
+                      category={group.category}
+                      onClick={() => setMenuOpen(false)}
+                    />
+                  ))}
+                </div>
               </details>
             ))}
           </details>
@@ -180,7 +180,7 @@ export function Header() {
             <circle cx="12" cy="7" r="4.4" />
             <path d="M3.4 21v-1.2a8.6 8.6 0 0 1 8.6-8.6h0a8.6 8.6 0 0 1 8.6 8.6V21" />
           </svg>
-          <span>{user ? "My account" : "Sign in"}</span>
+          <span className="header-action__label">{user ? "My account" : "Sign in"}</span>
         </Link>
         <Link
           className="cart-link"
@@ -188,7 +188,7 @@ export function Header() {
           aria-label={`Cart with ${itemCount} items`}
         >
           <span className="cart-link__icon" aria-hidden="true" />
-          <span>{t("cart")}</span>
+          <span className="header-action__label">{t("cart")}</span>
           {itemCount > 0 && <b>{itemCount}</b>}
         </Link>
         <button
