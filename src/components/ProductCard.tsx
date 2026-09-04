@@ -14,6 +14,8 @@ export function ProductCard({ product }: { product: Product }) {
   const displayed = localizeProduct(product, language);
   const brandLogo = getProductBrandLogo(product.brand);
   const compactBoard = product.id === "paradox-mg5050-control-panel" || product.id === "paradox-sp5500-control-panel";
+  const formattedPrice = money(product.price);
+  const priceParts = formattedPrice.match(/^(.*?)([.,]\d{1,2})$/);
   return (
     <article className={`product-card${compactBoard ? " product-card--compact-board" : ""}`}>
       <Link className="product-card__visual" to={`/products/${product.id}`}>
@@ -53,15 +55,19 @@ export function ProductCard({ product }: { product: Product }) {
         </p>
         <div className="product-card__buy">
           <div>
-            <strong>
-              {product.priceOnRequest
-                ? "Price on request"
-                : money(product.price)}
-            </strong>
-            {product.oldPrice && <del>{money(product.oldPrice)}</del>}
             <small>
               {product.priceOnRequest ? "Contact us for a quote" : "inc GST"}
             </small>
+            <span className="product-card__price-line">
+              <strong className={product.priceOnRequest ? "price-on-request" : undefined}>
+                {product.priceOnRequest
+                  ? "Price on request"
+                  : priceParts
+                    ? <>{priceParts[1]}<span className="product-card__price-fraction">{priceParts[2]}</span></>
+                    : formattedPrice}
+              </strong>
+              {product.oldPrice && <del>{money(product.oldPrice)}</del>}
+            </span>
           </div>
           {product.priceOnRequest ? (
             <Link
@@ -69,7 +75,7 @@ export function ProductCard({ product }: { product: Product }) {
               to="/contact"
               aria-label={`Request a quote for ${product.name}`}
             >
-              →
+              {language === "zh" ? "询价" : "Request"}
             </Link>
           ) : (
             <button
@@ -77,7 +83,8 @@ export function ProductCard({ product }: { product: Product }) {
               onClick={() => addItem(product.id)}
               aria-label={`Add ${product.name} to cart`}
             >
-              ＋
+              <span className="product-card__cart-icon" aria-hidden="true" />
+              <span>{language === "zh" ? "加入购物车" : "Add to cart"}</span>
             </button>
           )}
         </div>

@@ -714,15 +714,43 @@ button {
   align-items: center;
 }
 .product-card__buy strong {
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 700;
   font-family: "Open Sans", Arial, sans-serif;
-  color: #fd5e02;
+  color: #253746;
+  line-height: 1;
+}
+.product-card__price-line {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 7px;
+  min-height: 25px;
+}
+.product-card__price-fraction {
+  display: inline-block;
+  margin-left: 1px;
+  font-size: 0.6em;
+  line-height: 1;
+  vertical-align: 0.45em;
+}
+.detail-price__fraction {
+  display: inline-block;
+  margin-left: 1px;
+  font-size: 0.6em;
+  line-height: 1;
+  vertical-align: 0.45em;
+}
+.product-card__buy strong.price-on-request {
+  font-size: 16px;
+}
+.product-purchase .detail-price > strong.price-on-request {
+  font-size: 20px;
 }
 .product-card__buy del {
   font-size: 11px;
   color: #8795a6;
-  margin-left: 7px;
+  margin-left: 0;
 }
 .product-card__buy small {
   display: block;
