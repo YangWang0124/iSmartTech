@@ -9,7 +9,7 @@ import { useProducts } from "../context/ProductContext";
 import type { Product } from "../types";
 import { Seo } from "../components/Seo";
 import { categoryPathForProduct } from "../lib/catalogue";
-import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, createAlarmDetailContent, paradoxKitSupplementalItems } from "../data/alarmProducts";
+import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, arrowheadKitSupplementalItems, createAlarmDetailContent, paradoxKitSupplementalItems } from "../data/alarmProducts";
 
 type DetailedTiandyContent = {
   descriptionTitle: string;
@@ -806,6 +806,7 @@ const alarmKitProducts = (alarmKitComponentIds[product.id] ?? [])
   .map((id) => products.find((item) => item.id === id))
   .filter((item): item is Product => Boolean(item));
 const paradoxSupplementalItems = paradoxKitSupplementalItems[product.id] ?? [];
+const arrowheadSupplementalItems = arrowheadKitSupplementalItems[product.id] ?? [];
 const arrowheadIncludedItems = arrowheadKitIncludedItems[product.id] ?? [];
 const usesVerifiedAlarmCopy = Boolean(alarmLayoutContent);
 const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm-kit"
@@ -948,8 +949,8 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
           <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (usesVerifiedAlarmCopy || product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}>{description}</li>)}</ul><p>Cable must be ordered separately.</p></section>}
-          {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}{paradoxSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
-          {arrowheadIncludedItems.length > 0 && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadIncludedItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
+          {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}{paradoxSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}{arrowheadSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
+          {alarmKitProducts.length === 0 && arrowheadIncludedItems.length > 0 && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadIncludedItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
           {usesArrowheadKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{arrowheadKitContents(arrowheadKeypad!).map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
           {!usesHikvisionKitLayout && !usesParadoxKitLayout && !usesArrowheadKitLayout && !usesDahuaBadges && product.featureImages?.length ? <div className="feature-badges" aria-label={zh ? "产品特点" : "Product features"}>{product.featureImages.map((src, index) => <img key={src} src={src} alt={product.features[index] || `Feature ${index + 1}`} loading="lazy" decoding="async" />)}</div> : null}
           {usesDetailedProductLayout && <section className="key-features"><h2>{zh ? "主要特点" : "Key Features"}</h2><ul>{detailedLayoutContent!.features.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>}

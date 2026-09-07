@@ -22,6 +22,10 @@ type ComponentSource = {
   image: string;
   pdf: string;
   pdfLabel?: string;
+  documents?: Array<{ label: string; url: string }>;
+  sourceUrl?: string;
+  icon?: string;
+  colors?: string[];
   short: string;
   description: string;
   features: Array<[string, string]>;
@@ -291,22 +295,383 @@ const componentSources: ComponentSource[] = [
     ],
     specs: { "Product type": "Polycarbonate teardrop external siren", Strobe: "Integrated blue strobe", Current: "200 mA", Voltage: "12V DC nominal", "Operating range": "6–15V DC", "Sound pressure": "114 ±5 dB at 30 cm", Dimensions: "205 × 114 × 60 mm", Colour: "White with blue strobe", Warranty: "2 years" },
   },
+  {
+    id: "arrowhead-ec-plas-control-panel",
+    name: "Arrowhead EC Security and Control Panel in Plastic Cabinet",
+    category: "Wired Alarm Control Panels",
+    categoryIds: [5, 33, 35, 83],
+    sku: "EC-PLAS",
+    image: "/assets/alarm/arrowhead/components/ec-plas.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-PLAS.pdf",
+    pdfLabel: "EC-PLAS Product Sheet",
+    documents: [
+      { label: "EC-PLAS Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-PLAS.pdf" },
+      { label: "EliteControl System Brochure", url: "https://www.aap.co.nz/site/aap/EliteControl%20Brochure%202024.pdf" },
+      { label: "EC-PCB and EC-i Operating Guide", url: "https://www.aap.co.nz/site/aap/EC-PCB%20%26%20EC-i%20Operating%20Guide.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/ECKit/EC-PLAS.html",
+    icon: "ALM",
+    badge: "Control Panel",
+    short: "Modular alarm, access and automation control in a powered enclosure",
+    description: "The Arrowhead EC-PLAS combines the EC security and control panel with its plastic enclosure and a 16V AC, 1.4A power supply. Designed as a modular foundation for residential and small-to-medium commercial systems, the EC platform brings alarm, access-control and automation functions into one expandable controller. Eight onboard inputs provide the starting capacity; up to thirty EC-Z8 expanders can extend the system to 248 inputs, while EC-O4 modules provide a path to 32 outputs. The system also supports 32 partitions, 32 connected keypads, 2,000 users and a 10,000-event history. Optional modules add EliteCloud connectivity, Infinity long-range wireless, RS232, PSTN communication and supported home-automation integration. A resistor and screw pack is supplied for installation; a keypad is not included with this panel package.",
+    features: [
+      ["Integrated control platform", "Combines intrusion alarm, access-control and automation capabilities in one modular EC system."],
+      ["Modular input expansion", "Starts with eight onboard inputs and supports up to thirty EC-Z8 modules, each adding eight configurable inputs, for a system total of 248."],
+      ["Flexible output control", "Supports up to 32 system outputs; as many as eight EC-O4 modules can each add four configurable relay outputs."],
+      ["Areas, keypads and access", "Provides up to 32 partitions, 32 keypads and 32 access levels. Optional two-door EC-A2 REX modules add integrated access-control hardware."],
+      ["User and event management", "Provides 2,000 user positions and a 10,000-event history. Positions 101 to 2,000 can be assigned to radio users when compatible Infinity equipment is fitted."],
+      ["Configurable warning outputs", "Outputs 1 and 2 can be configured as monitored siren drivers, while compatible Infinity wireless outputs can be mapped within the system's 32-output capacity."],
+      ["Optional connected control", "An EC-IoT module can add EliteCloud app access, monitoring and compatible home-automation integration."],
+      ["Expandable communications", "Optional Infinity wireless, RS232 and PSTN modules allow the system to be configured around the site."],
+      ["Powered enclosure", "Includes the EC plastic cabinet, a 16V AC 1.4A supply, resistors and installation screws."],
+    ],
+    specs: { Model: "EC-PLAS", "Product type": "EC security and control panel in powered plastic enclosure", "Onboard inputs": "8", "Maximum inputs": "248", "Input expansion": "Up to 30 EC-Z8 modules; 8 configurable inputs per module", "Maximum outputs": "32", "Output expansion": "Up to 8 EC-O4 modules; 4 configurable relay outputs per module", "Siren outputs": "Outputs 1 and 2 can be configured as monitored siren drivers", Partitions: "Up to 32", Keypads: "Up to 32", Users: "Up to 2,000", "Radio-user positions": "Users 101-2,000 when compatible Infinity equipment is fitted", "Access levels": "Up to 32", "Access-control module": "EC-A2 REX; 2-door access-control module", "Time schedules": "Up to 32", "Event history": "Up to 10,000 events", Enclosure: "EC-PLAS CAB plastic cabinet", Supply: "16V AC, 1.4A", "Included hardware": "2K2, 4K7 and 8K2 resistors plus screw pack", Connectivity: "Optional EC-IoT, Infinity wireless, RS232 and PSTN modules", Keypad: "Not included", Warranty: "5 years" },
+  },
+  {
+    id: "arrowhead-ec-lcd-keypad",
+    name: "Arrowhead EC-LCD Full-English Slimline Keypad",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "EC-LCD",
+    image: "/assets/alarm/arrowhead/components/ec-lcd.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-LCD%20%26%20EC-LCD%20PROX.pdf",
+    pdfLabel: "EC-LCD Product Sheet",
+    documents: [
+      { label: "EC-LCD Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-LCD%20%26%20EC-LCD%20PROX.pdf" },
+      { label: "EC-LCD User Manual", url: "https://www.aap.co.nz/site/aap/EC-LCD%20Manual.pdf" },
+    ],
+    sourceUrl: "https://www.alarmwarehouse.co.nz/products/keypads/arrowhead/arrowhead-lcd-full-english-keypad-for-ec-alarm-panels/",
+    icon: "KEY",
+    colors: ["White"],
+    badge: "LCD Keypad",
+    short: "Clear full-English alarm control in a slim, low-power keypad",
+    description: "The Arrowhead EC-LCD is a slimline keypad for compatible EC control panels. Its full-English display presents system information in readable text, while dedicated quick-arm, Stay-arm and control keys make frequently used actions easier to reach. The adjustable white backlight supports use in different lighting conditions, and direct EC programming allows authorised setup work to be completed from the keypad. Low-power electronics and UV-stabilised plastics support practical everyday installation. Alarm Warehouse lists its dimensions as 137 × 88 × 24mm and provides a five-year warranty. This standard EC-LCD does not include a proximity reader; that feature belongs to the separate EC-LCD PROX model.",
+    features: [
+      ["Full-English display", "Shows alarm information and prompts as readable text rather than relying only on zone indicators."],
+      ["Quick everyday control", "Dedicated Arm, Stay and assignable control functions provide direct access to common operations."],
+      ["Adjustable illumination", "A white backlight can be adjusted to suit the installed environment."],
+      ["Panel programming", "Supports direct programming of compatible EC control systems from the keypad."],
+      ["Efficient construction", "Uses low-power electronics and UV-stabilised plastics in a slim wall-mounted format."],
+      ["Model distinction", "The standard EC-LCD has no proximity reader; AAP offers EC-LCD PROX separately."],
+      ["Listed size and warranty", "Alarm Warehouse lists the keypad at 137 × 88 × 24mm with a five-year warranty."],
+    ],
+    specs: { Model: "EC-LCD", "Product type": "Slimline full-English LCD alarm keypad", Compatibility: "Arrowhead EC control panels", Backlight: "Adjustable white", Controls: "Quick Arm, Stay Arm and assignable control button", Programming: "Direct EC panel programming supported", Proximity: "Not included on EC-LCD; available on EC-LCD PROX", Construction: "UV-stabilised plastic", Dimensions: "137 × 88 × 24 mm", "Previous model name": "ESX-KP1", Warranty: "5 years" },
+  },
+  {
+    id: "arrowhead-ec-kp-w-keypad",
+    name: "Arrowhead EC-KP W White Slimline Touch Keypad",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "EC-KP W",
+    colors: ["White"],
+    image: "/assets/alarm/arrowhead/components/ec-kp-w.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-KP%20W%20%26%20EC-KP%20B.pdf",
+    pdfLabel: "EC-KP W and EC-KP B Product Sheet",
+    documents: [
+      { label: "EC-KP W and EC-KP B Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-KP%20W%20%26%20EC-KP%20B.pdf" },
+      { label: "EC-KP User Manual", url: "https://www.aap.co.nz/site/aap/EC-KP%20Manual.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Keypads/EC-KP+W.html",
+    icon: "KEY",
+    badge: "Touch Keypad",
+    short: "Low-profile white touch control for compatible Arrowhead alarm panels",
+    description: "The Arrowhead EC-KP W provides a compact touch interface for compatible EC and legacy Arrowhead alarm systems. Its narrow white housing is proportioned to align neatly with many light-switch plates, helping the keypad sit naturally within residential or commercial interiors. Adjustable display brightness, selectable sleep behaviour and an adjustable key tone allow everyday presentation to be tailored to the location. Surface mounting keeps installation straightforward, while traditional address programming supports established Arrowhead configuration workflows. Powered from a compatible alarm panel at 12V DC, the keypad can be hardwired up to 300m from the controller using the cable arrangement specified by AAP. It can be fixed directly or fitted to a standard vertical flush box, with a recommended mounting height of 1.2-1.5m and automatic calibration when attached to its backplate.",
+    features: [
+      ["Slim touch interface", "A low-profile capacitive keypad provides clean everyday system control."],
+      ["Flexible display behaviour", "Multiple display and sleep settings allow the interface to suit its installed location."],
+      ["Adjustable feedback", "Brightness and keypad tone can be configured for the user and environment."],
+      ["Neat wall fit", "The 74mm-wide format aligns with many common light-switch plates."],
+      ["Straightforward installation", "Designed for simple surface mounting and traditional address programming."],
+      ["Broad Arrowhead compatibility", "Supports EC, ESX V2, ESL, ESL-2 and Runner systems."],
+      ["Documented cable reach", "AAP permits a hardwired run of up to 300m from a compatible control panel when the specified wiring requirements are followed."],
+      ["Flexible mounting", "Can be fixed directly or installed over a standard vertical flush box at a recommended height of 1.2-1.5m."],
+      ["Automatic setup", "Self-calibrates when the keypad is attached to its backplate."],
+    ],
+    specs: { Model: "EC-KP W", "Product type": "Slimline touch-interface alarm keypad", Colour: "White", Compatibility: "EC, ESX V2, ESL, ESL-2 and Runner", Power: "12V DC from compatible alarm panel", "Maximum cable distance": "Up to 300m, subject to AAP wiring requirements", Installation: "Direct fix or standard vertical flush box", "Recommended mounting height": "1.2-1.5m", Calibration: "Self-calibrating when attached to backplate", Programming: "Traditional address programming", Adjustments: "Display brightness, sleep options and beep tone", Dimensions: "118 × 74 × 12 mm", Manufacture: "Designed and manufactured in New Zealand", Warranty: "5 years" },
+  },
+  {
+    id: "arrowhead-ec-kp-b-keypad",
+    name: "Arrowhead EC-KP B Black Slimline Touch Keypad",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "EC-KP B",
+    colors: ["Black"],
+    image: "/assets/alarm/arrowhead/components/ec-kp-b.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-KP%20W%20%26%20EC-KP%20B.pdf",
+    pdfLabel: "EC-KP W and EC-KP B Product Sheet",
+    documents: [
+      { label: "EC-KP W and EC-KP B Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-KP%20W%20%26%20EC-KP%20B.pdf" },
+      { label: "EC-KP User Manual", url: "https://www.aap.co.nz/site/aap/EC-KP%20Manual.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Keypads/EC-KP+B.html",
+    icon: "KEY",
+    badge: "Touch Keypad",
+    short: "Low-profile black touch control for compatible Arrowhead alarm panels",
+    description: "The black Arrowhead EC-KP B combines the same compact touch interface and system compatibility as the white EC-KP W with a darker finish for interiors where black controls are preferred. Its slim dimensions align with many light-switch plates, and the keypad can be surface-mounted without a bulky wall profile. Adjustable brightness, selectable display and sleep modes, and configurable key tones allow the user experience to be tuned for the room. Traditional address programming supports established Arrowhead installation practices. Powered from a compatible alarm panel at 12V DC, the keypad can be hardwired up to 300m from the controller using the cable arrangement specified by AAP. It can be fixed directly or fitted to a standard vertical flush box, with a recommended mounting height of 1.2-1.5m and automatic calibration when attached to its backplate.",
+    features: [
+      ["Black slimline finish", "A compact dark touch interface suited to interiors using black electrical accessories."],
+      ["Flexible display behaviour", "Multiple display and sleep settings allow the interface to suit its installed location."],
+      ["Adjustable feedback", "Brightness and keypad tone can be configured for the user and environment."],
+      ["Neat wall fit", "The 74mm-wide format aligns with many common light-switch plates."],
+      ["Straightforward installation", "Designed for simple surface mounting and traditional address programming."],
+      ["Broad Arrowhead compatibility", "Supports EC, ESX V2, ESL, ESL-2 and Runner systems."],
+      ["Documented cable reach", "AAP permits a hardwired run of up to 300m from a compatible control panel when the specified wiring requirements are followed."],
+      ["Flexible mounting", "Can be fixed directly or installed over a standard vertical flush box at a recommended height of 1.2-1.5m."],
+      ["Automatic setup", "Self-calibrates when the keypad is attached to its backplate."],
+    ],
+    specs: { Model: "EC-KP B", "Product type": "Slimline touch-interface alarm keypad", Colour: "Black", Compatibility: "EC, ESX V2, ESL, ESL-2 and Runner", Power: "12V DC from compatible alarm panel", "Maximum cable distance": "Up to 300m, subject to AAP wiring requirements", Installation: "Direct fix or standard vertical flush box", "Recommended mounting height": "1.2-1.5m", Calibration: "Self-calibrating when attached to backplate", Programming: "Traditional address programming", Adjustments: "Display brightness, sleep options and beep tone", Dimensions: "118 × 74 × 12 mm", Manufacture: "Designed and manufactured in New Zealand", Warranty: "5 years" },
+  },
+  {
+    id: "arrowhead-ec-touch-w-keypad",
+    name: "Arrowhead EC-TOUCH W 5-inch White Touchscreen Keypad",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "EC-TOUCH W",
+    colors: ["White"],
+    image: "/assets/alarm/arrowhead/components/ec-touch-w.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-TOUCH.pdf",
+    pdfLabel: "EC-TOUCH Product Sheet",
+    documents: [
+      { label: "EC-TOUCH Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-TOUCH.pdf" },
+      { label: "Touch Keypad Installation Guide", url: "https://www.aap.co.nz/site/aap/Touch%20KP%20Installation%20Guide.pdf" },
+      { label: "Touch Keypad Update Guide", url: "https://www.aap.co.nz/site/aap/files/Touch/Touch%20KP%20Update.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Keypads/EC-TOUCH+W.html",
+    icon: "KEY",
+    badge: "Touchscreen",
+    short: "Five-inch visual alarm control in a slim white touchscreen",
+    description: "The Arrowhead EC-TOUCH W gives compatible alarm systems a clear five-inch touchscreen interface in a slim white surround. It is designed for EC and EC-i panels while also supporting several earlier Arrowhead platforms, allowing a more visual control style to be used across new installations and suitable upgrades. AAP also supports the keypad with dedicated installation, image-conversion and firmware-update resources. ESX compatibility requires the panel and keypad firmware versions specified by AAP. The 800 × 480 resistive display works with a finger, glove or stylus, while the supplied AAP Micro SD card supports compatible custom images and field updates. AAP specifies a 10-15V DC supply, 250mA normal current and 500mA maximum current, so keypad quantity and cable distance must be considered during system power design.",
+    features: [
+      ["Five-inch touch control", "Provides a larger visual interface for everyday alarm operation and status checking."],
+      ["Slim white surround", "A white low-profile enclosure suits a wide range of residential and commercial interiors."],
+      ["Multi-platform support", "Compatible with EC-i, EC, ESL, Elite S and Elite S Lite systems."],
+      ["Qualified ESX support", "Works with ESX when the required AAP panel and keypad firmware revisions are installed."],
+      ["Supported maintenance", "AAP provides installation, image-conversion and keypad-update documentation."],
+      ["Clear resistive display", "The 800 × 480 interface can be operated by finger, glove or stylus."],
+      ["Local media support", "A supplied 1GB AAP Micro SD card supports compatible custom images and field updates in FAT32 format."],
+      ["Documented power requirement", "Operates from 10-15V DC and draws 250mA normally, with a stated 500mA maximum."],
+      ["Planned cable distance", "AAP specifies up to 30m on 0.2mm² cable or 80m on 0.5mm² cable."],
+      ["Power-aware expansion", "AAP advises a maximum of two touch keypads directly on the listed legacy systems; larger quantities require an additional or higher-capacity supply."],
+    ],
+    specs: { Model: "EC-TOUCH W", "Product type": "5-inch touchscreen alarm keypad", Colour: "White", Display: "5-inch, 800 × 480 resistive touchscreen", Compatibility: "EC-i, EC, ESL, Elite S and Elite S Lite", "ESX requirement": "ESX firmware 10.0.307 or later and touchscreen keypad firmware 3.00.190111", Power: "10-15V DC from a battery-backed supply", Current: "250mA normal; 500mA maximum", "Maximum cable distance": "30m with 0.2mm² cable; 80m with 0.5mm² cable", Storage: "Supplied 1GB AAP Micro SD card, FAT32", "Recommended mounting height": "1,500mm", Dimensions: "144 × 104 × 13 mm", Warranty: "5 years" },
+  },
+  {
+    id: "arrowhead-ec-touch-b-keypad",
+    name: "Arrowhead EC-TOUCH B 5-inch Black Touchscreen Keypad",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "EC-TOUCH B",
+    colors: ["Black"],
+    image: "/assets/alarm/arrowhead/components/ec-touch-b.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-TOUCH.pdf",
+    pdfLabel: "EC-TOUCH Product Sheet",
+    documents: [
+      { label: "EC-TOUCH Product Sheet", url: "https://www.aap.co.nz/site/aap/EC-TOUCH.pdf" },
+      { label: "Touch Keypad Installation Guide", url: "https://www.aap.co.nz/site/aap/Touch%20KP%20Installation%20Guide.pdf" },
+      { label: "Touch Keypad Update Guide", url: "https://www.aap.co.nz/site/aap/files/Touch/Touch%20KP%20Update.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Keypads/EC-TOUCH+B.html",
+    icon: "KEY",
+    badge: "Touchscreen",
+    short: "Five-inch visual alarm control in a slim black touchscreen",
+    description: "The Arrowhead EC-TOUCH B offers the same five-inch touchscreen format as the white version in a black surround. It provides a visual interface for compatible EC, EC-i and selected legacy Arrowhead systems, making it suitable where a dark keypad better complements the interior finish. Its shallow housing keeps the wall profile restrained, and AAP provides dedicated product and installation documents for system planning. ESX installations must meet AAP's stated firmware requirements. The 800 × 480 resistive display works with a finger, glove or stylus, while the supplied AAP Micro SD card supports compatible custom images and field updates. AAP specifies a 10-15V DC supply, 250mA normal current and 500mA maximum current, so keypad quantity and cable distance must be considered during system power design.",
+    features: [
+      ["Five-inch touch control", "Provides a larger visual interface for everyday alarm operation and status checking."],
+      ["Black surround", "A dark low-profile finish coordinates with black switches and contemporary interiors."],
+      ["Multi-platform support", "Compatible with EC-i, EC, ESL, Elite S and Elite S Lite systems."],
+      ["Qualified ESX support", "Works with ESX when the required AAP panel and keypad firmware revisions are installed."],
+      ["Supported installation", "AAP provides dedicated product and installation documentation."],
+      ["Clear resistive display", "The 800 × 480 interface can be operated by finger, glove or stylus."],
+      ["Local media support", "A supplied 1GB AAP Micro SD card supports compatible custom images and field updates in FAT32 format."],
+      ["Documented power requirement", "Operates from 10-15V DC and draws 250mA normally, with a stated 500mA maximum."],
+      ["Planned cable distance", "AAP specifies up to 30m on 0.2mm² cable or 80m on 0.5mm² cable."],
+      ["Power-aware expansion", "AAP advises a maximum of two touch keypads directly on the listed legacy systems; larger quantities require an additional or higher-capacity supply."],
+    ],
+    specs: { Model: "EC-TOUCH B", "Product type": "5-inch touchscreen alarm keypad", Colour: "Black", Display: "5-inch, 800 × 480 resistive touchscreen", Compatibility: "EC-i, EC, ESL, Elite S and Elite S Lite", "ESX requirement": "ESX firmware 10.0.307 or later and touchscreen keypad firmware 3.00.190111", Power: "10-15V DC from a battery-backed supply", Current: "250mA normal; 500mA maximum", "Maximum cable distance": "30m with 0.2mm² cable; 80m with 0.5mm² cable", Storage: "Supplied 1GB AAP Micro SD card, FAT32", "Recommended mounting height": "1,500mm", Dimensions: "144 × 104 × 13 mm", Warranty: "5 years" },
+  },
+  {
+    id: "powerpac-dm12-7-5-battery",
+    name: "PowerPac DM12-7.5 12V 7.5Ah SLA Battery",
+    brand: "PowerPac",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "DM12-7.5",
+    image: "/assets/alarm/arrowhead/components/dm12-7-5.png",
+    pdf: "https://www.aap.co.nz/site/aap/DM12-7.5.pdf",
+    pdfLabel: "DM12-7.5 Product Sheet",
+    documents: [
+      { label: "DM12-7.5 Product Sheet", url: "https://www.aap.co.nz/site/aap/DM12-7.5.pdf" },
+      { label: "DM12-7.5 Technical Specification", url: "https://www.aap.co.nz/site/aap/DM12-7.5%20Specification%20Sheet.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/Batteries/12V+SLA/DM12-7.5.html",
+    icon: "BAT",
+    badge: "Backup Battery",
+    short: "Compact sealed 12V standby power for compatible alarm systems",
+    description: "The PowerPac DM12-7.5 is the sealed lead-acid backup battery specified by AAP for its current EC alarm kits. Its 12V, 7.5Ah rating provides standby power for compatible alarm equipment when mains power is interrupted. The compact, spill- and leak-resistant case is sized for common alarm enclosures, while low self-discharge supports fixed standby service. AAP's technical sheet specifies a five-year design float life at 20°C, which is a service-life rating rather than the product warranty; the supplied warranty remains one year return to base. Documented cycle and standby charging values help the installer match the battery to a suitable charging circuit.",
+    features: [
+      ["Alarm standby power", "Provides backup energy for compatible control panels during a mains-power interruption."],
+      ["12V 7.5Ah rating", "Matches the DM12-7.5 model specified in AAP's current EC alarm kits."],
+      ["Sealed construction", "SLA design is suited to enclosed, maintenance-conscious standby installations."],
+      ["Compact enclosure fit", "A 151 × 65 × 95mm case fits common alarm cabinet arrangements."],
+      ["Documented performance", "AAP provides both a product brochure and a detailed technical specification sheet."],
+      ["Standby design", "Rated for a five-year floating design life at 20°C, with approximately 3% capacity loss per month in storage at that temperature."],
+      ["Charging guidance", "AAP specifies 13.6-13.8V for standby use and 14.7-14.9V for cycle use, with a maximum charging current of 1.7A."],
+      ["High-current capability", "The technical sheet lists 22mΩ internal resistance and a 105A maximum discharge for five seconds at 25°C."],
+    ],
+    specs: { Model: "DM12-7.5", Brand: "PowerPac", "Product type": "Sealed lead-acid standby battery", Voltage: "12V", Capacity: "7.5Ah at the 20-hour rate", "Design float life": "5 years at 20°C", "Standby charging": "13.6-13.8V", "Cycle charging": "14.7-14.9V; 1.7A maximum current", "Internal resistance": "22mΩ when fully charged at 25°C", "Maximum discharge": "105A for 5 seconds at 25°C", "Operating temperature": "Discharge -15°C to +35°C; charge 0°C to +35°C", "Recommended operating temperature": "15°C to 25°C", "Self-discharge": "Approximately 3% capacity per month at 20°C", Terminals: "T1/T2", Dimensions: "151 × 65 × 95 mm; 100mm total height", Weight: "Approximately 2.14kg", Warranty: "1-year return-to-base warranty" },
+  },
+  {
+    id: "alarm-7ah-backup-battery",
+    name: "12V 7.0Ah Sealed Lead-Acid Alarm Backup Battery",
+    brand: "Alarm Warehouse",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "7AH-4.8",
+    image: "/assets/alarm/arrowhead/components/alarm-7ah-backup-battery.jpg",
+    pdf: "",
+    sourceUrl: "https://www.alarmwarehouse.co.nz/products/batteries-and-power-supplies/sealed-lead-acid-12vdc-batteries/7-0-ah-battery-with-4-8mm-terminals/",
+    icon: "BAT",
+    badge: "Backup Battery",
+    short: "Rechargeable 12V standby battery with 7.0Ah capacity",
+    description: "This rechargeable 12V sealed lead-acid battery provides 7.0Ah of backup capacity for compatible alarm equipment. Alarm Warehouse lists 4.8mm terminals, a compact 150 × 65 × 65mm case and a weight of 2.51kg. It is the backup-battery capacity specified in the Arrowhead kits shown in this catalogue and carries a one-year product warranty.",
+    features: [
+      ["Alarm standby power", "Provides 7.0Ah of rechargeable backup capacity for compatible 12V alarm equipment."],
+      ["Sealed construction", "The sealed lead-acid design is suited to fixed standby use in a compatible enclosure."],
+      ["4.8mm terminals", "Uses the terminal size specified by Alarm Warehouse."],
+      ["Compact format", "Measures 150 × 65 × 65mm and weighs approximately 2.51kg."],
+      ["Product warranty", "Covered by a one-year warranty."],
+    ],
+    specs: { "Product type": "Sealed lead-acid rechargeable alarm battery", Voltage: "12V", Capacity: "7.0Ah", Terminals: "4.8mm", Dimensions: "150 × 65 × 65 mm", Weight: "2.51kg", Warranty: "1 year" },
+  },
+  {
+    id: "optex-opt-flx-s-st-pir-detector",
+    name: "Optex OPT-FLX-S-ST FlipX Indoor PIR Detector",
+    brand: "Optex",
+    category: "Wired Alarm Sensors",
+    categoryIds: [5, 33, 38, 83],
+    sku: "OPT-FLX-S-ST",
+    image: "/assets/alarm/arrowhead/components/opt-flx-s-st.png",
+    pdf: "https://www.aap.co.nz/site/aap/OPT-FLX-S-ST.pdf",
+    pdfLabel: "OPT-FLX-S-ST Product Sheet",
+    documents: [
+      { label: "OPT-FLX-S-ST Product Sheet", url: "https://www.aap.co.nz/site/aap/OPT-FLX-S-ST.pdf" },
+      { label: "Optex FlipX Installation Manual", url: "https://www.aap.co.nz/site/aap/optex-flipx-standard-st-dt-manual-en.pdf" },
+    ],
+    sourceUrl: "https://www.aap.co.nz/shop/pirs-detectors/PIRs/OPT-FLX-S-ST.html",
+    icon: "PIR",
+    badge: "PIR Detector",
+    short: "Pet-friendly indoor PIR detection with selectable wide or narrow coverage",
+    description: "The Optex OPT-FLX-S-ST is a hardwired indoor passive infrared detector with a reversible FlipX lens. An installer can configure the lens for broad room coverage or a focused long-range corridor pattern, allowing one detector body to suit different protected spaces. Digital temperature compensation supports consistent detection as room conditions change, while switchable indication, alarm and tamper relays, and a low current draw make it practical for compatible alarm panels. AAP lists an optional OPT-FLX-CW-G2 bracket separately when angled wall, corner or ceiling positioning is required.",
+    features: [
+      ["Selectable detection pattern", "The reversible FlipX lens changes between 12m wide-area and 18m narrow-area coverage."],
+      ["Pet-friendly configuration", "Designed for indoor applications where appropriate pet-tolerant detector setup is required."],
+      ["Digital compensation", "SMDA digital temperature compensation helps preserve detection performance as conditions change."],
+      ["Low panel load", "Draws 8mA normally and up to 11mA at 12V DC."],
+      ["Alarm and tamper supervision", "Provides normally closed alarm and cover-tamper relay outputs."],
+      ["Flexible mounting", "Supports wall or corner mounting, with wall, corner and ceiling adjustment available using the optional bracket."],
+      ["Digital Quad Zone Logic", "AAP identifies this model as using Optex Digital Quad Zone Logic for stable indoor detection."],
+      ["Clear alarm indication", "A switchable green LED provides visible warm-up and alarm indication."],
+      ["Product warranty", "Covered by a two-year product warranty."],
+    ],
+    specs: { Model: "OPT-FLX-S-ST", "Detection method": "Passive infrared with Digital Quad Zone Logic", "Wide coverage": "12m at 85°, 76 zones", "Narrow coverage": "18m at 5°, 12 zones", "Mounting height": "2.0-3.0m; 2.4m recommended", "Alarm period": "2.0 ± 0.5 seconds", "Warm-up period": "Approximately 60 seconds", Indicator: "Switchable green LED for warm-up and alarm", "Power input": "9.5-16V DC", "Current draw": "8mA normal; 11mA maximum at 12V DC", Outputs: "Normally closed alarm and tamper relays, 24V DC 0.1A maximum", Temperature: "-20°C to +50°C", Humidity: "95% maximum", "Temperature compensation": "Digital SMDA", Dimensions: "129.2 × 61.5 × 50.9 mm", Weight: "Approximately 90g", Mounting: "Indoor wall or corner; ceiling with optional bracket", Warranty: "2 years" },
+  },
+  {
+    id: "arrowhead-ec-siren",
+    name: "Arrowhead EC-SIREN White External Siren and Strobe",
+    category: "Wired Alarm Sirens",
+    categoryIds: [5, 33, 39, 83],
+    sku: "EC-SIREN",
+    colors: ["White"],
+    image: "/assets/alarm/arrowhead/components/ec-siren.png",
+    pdf: "https://www.aap.co.nz/site/aap/EC-SIREN%20%26%20EC-SIREN%20B.pdf",
+    pdfLabel: "EC-SIREN Product Sheet",
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Sirens+-+External/EC-SIREN.html",
+    icon: "SIR",
+    badge: "External Siren",
+    short: "Combined outdoor audible and visual warning for compatible alarm systems",
+    description: "The Arrowhead EC-SIREN combines an external audible alarm with a high-brightness LED strobe in a slim white enclosure. Its 114dB output provides a strong local warning, while front and rear tamper switches help the connected alarm system supervise interference with the sounder. The UV-stabilised housing is only 39mm deep and includes an optional status LED for compatible installations. It is designed for the EC range and can be used as the outdoor warning device supplied with Arrowhead EC kits. The 10-15V DC operating range and 250mA maximum current support warning-circuit planning. A charcoal EC-SIREN B is available separately where a darker enclosure is preferred.",
+    features: [
+      ["Audible and visual warning", "Combines an external siren with an integrated strobe in one enclosure."],
+      ["EC system compatibility", "Designed for use with Arrowhead EC alarm systems and compatible alarm outputs."],
+      ["White exterior finish", "The standard kit component uses a white enclosure."],
+      ["Low-voltage operation", "Operates across a 10-15V DC supply range."],
+      ["High audible output", "Produces a rated sound-pressure level of 114 ±5dB at 30cm."],
+      ["Tamper supervision", "Includes front and rear tamper switches for connection to a compatible alarm system."],
+      ["Visible alarm indication", "Uses a high-brightness blue LED strobe and provides an optional status LED."],
+      ["Durable slim housing", "The UV-stabilised enclosure measures 250 × 150 × 39mm."],
+      ["Alternative finish", "AAP also offers the charcoal EC-SIREN B as a separate model."],
+    ],
+    specs: { Model: "EC-SIREN", "Product type": "External alarm siren with LED strobe", Colour: "White", Strobe: "Blue high-brightness LED", Voltage: "12V DC nominal", "Operating range": "10-15V DC", "Maximum current": "250mA", "Sound output": "114 ±5dB at 30cm", Tamper: "Front and rear tamper switches", "Status indication": "Optional status LED", Housing: "UV-stabilised", Dimensions: "250 × 150 × 39 mm", Compatibility: "Arrowhead EC range and suitable compatible alarm outputs", Warranty: "2 years" },
+  },
+  {
+    id: "arrowhead-ps209-r-internal-siren",
+    name: "Arrowhead Kit Flush-Mount Internal Siren",
+    category: "Wired Alarm Sirens",
+    categoryIds: [5, 33, 39, 83],
+    sku: "INTERNAL-FLUSH",
+    image: "/assets/alarm/arrowhead/components/ps209-r.png",
+    pdf: "",
+    sourceUrl: "https://www.alarmwarehouse.co.nz/products/sirens-sounders-strobes/internal-sirens/internal-siren-flush-mount/",
+    icon: "SIR",
+    badge: "Internal Siren",
+    short: "Compact flush-mounted indoor siren for compatible alarm panels",
+    description: "This flush-mount internal siren provides an audible indoor warning while keeping the visible installation compact. The catalogue follows the siren specification published by Alarm Warehouse for the component supplied with its alarm kits: 12V DC nominal operation, a 6-15V DC operating range, 120mA current draw and a rated output of 105 ±3dB at 30cm. Its white body measures 59 × 76mm and works with compatible alarm panels. Alarm Warehouse provides a two-year product warranty.",
+    features: [
+      ["Flush-mounted finish", "Provides a compact, low-profile indoor installation."],
+      ["Broad panel compatibility", "Alarm Warehouse lists the siren for use with alarm panels."],
+      ["Audible warning", "Rated at 105 ±3dB measured at 30cm."],
+      ["12V operation", "Uses a nominal 12V DC supply with a 6-15V DC operating range."],
+      ["Current draw", "Alarm Warehouse lists a 120mA current requirement."],
+      ["Compact dimensions", "The white siren body measures 59 × 76mm."],
+      ["Product warranty", "Covered by a two-year warranty."],
+    ],
+    specs: { "Product type": "Flush-mount internal alarm siren", Voltage: "12V DC nominal", "Operating range": "6-15V DC", Current: "120mA", "Sound output": "105 ±3dB at 30cm", Dimensions: "59 × 76 mm", Colour: "White", Compatibility: "Compatible alarm panels", Warranty: "2 years" },
+  },
+  {
+    id: "arrowhead-4c2-100-cu-alarm-cable",
+    name: "Arrowhead 4C2-100-CU 4-Core Alarm Cable - 100m",
+    category: "Alarm Accessories",
+    categoryIds: [5, 33, 40, 83],
+    sku: "4C2-100-CU",
+    image: "/assets/alarm/arrowhead/components/4c2-100-cu.png",
+    pdf: "https://www.aap.co.nz/site/aap/4C2-100-CU.pdf",
+    pdfLabel: "4C2-100-CU Product Sheet",
+    sourceUrl: "https://www.aap.co.nz/shop/Alarm+Systems/Cable/4C2-100-CU.html",
+    icon: "CAB",
+    badge: "Alarm Cable",
+    short: "Four-core tinned-copper security cable in a centre-pull 100m box",
+    description: "The Arrowhead 4C2-100-CU is a 100-metre roll of four-core, 0.2mm² tinned-copper security cable supplied in a centre-pull box. It is the cable model named by AAP in the cabled versions of its EC alarm kits. The four conductors support common low-voltage alarm wiring tasks when the cable type, run length and electrical requirements have been confirmed for the installation. Centre-pull packaging helps the installer feed cable progressively while keeping the remaining roll contained.",
+    features: [
+      ["Four-core construction", "Provides four conductors for suitable low-voltage security and alarm connections."],
+      ["Tinned-copper conductors", "Uses four 0.2mm², seven-strand tinned-copper conductors as specified by AAP."],
+      ["100-metre supply", "A full 100m roll supports planned wired alarm installations."],
+      ["Centre-pull box", "Cable feeds from the box while the unused roll remains contained."],
+      ["Colour-coded insulation", "The four PVC-insulated conductors are red, yellow, black and blue for consistent identification."],
+      ["Installer-friendly jacket", "A white 3.6mm PVC outer jacket incorporates a nylon ripcord for controlled stripping."],
+      ["Documented cable rating", "AAP specifies a 75°C temperature rating and 300V voltage rating."],
+      ["EC kit component", "This is the cable model identified in AAP's cabled EC alarm kits."],
+    ],
+    specs: { Model: "4C2-100-CU", "Product type": "Security and alarm cable", Cores: "4", "Conductor composition": "0.2mm² tinned copper, 7 strands per core", Insulation: "PVC; red, yellow, black and blue", "Insulation diameter": "1.1 ±0.05mm", Jacket: "White PVC with nylon ripcord", "Outer diameter": "3.6mm", "Temperature rating": "75°C", "Voltage rating": "300V", Twisted: "Yes", Length: "100m", Packaging: "Centre-pull box" },
+  },
+
 ];
 
 const components: Product[] = componentSources.map((item) => ({
   ...base,
   id: item.id,
   name: item.name,
-  brand: item.brand ?? "Paradox",
+  brand: item.brand ?? (item.id.startsWith("arrowhead-") ? "Arrowhead" : "Paradox"),
   category: item.category,
   categoryIds: item.categoryIds,
   tagIds: [],
   sku: item.sku,
   badge: item.badge,
-  icon: item.category.includes("Sensors") ? "PIR" : item.category.includes("Sirens") ? "SIR" : item.sku.includes("K10") || item.sku === "TM50" ? "KEY" : item.sku === "RT1272" ? "BAT" : "ALM",
+  icon: item.icon ?? (item.category.includes("Sensors") ? "PIR" : item.category.includes("Sirens") ? "SIR" : item.sku.includes("K10") || item.sku === "TM50" ? "KEY" : item.sku === "RT1272" ? "BAT" : "ALM"),
   image: item.image,
+  colors: item.colors,
+  sourceUrl: item.sourceUrl,
   datasheetUrl: item.pdfLabel ? undefined : item.pdf,
-  specSheetLinks: item.pdfLabel ? [{ label: item.pdfLabel, url: item.pdf }] : undefined,
+  specSheetLinks: item.documents ?? (item.pdfLabel ? [{ label: item.pdfLabel, url: item.pdf }] : undefined),
   shortDescription: item.short,
   description: item.description,
   features: item.features.map(([title, detail]) => `${title}: ${detail}`),
@@ -466,52 +831,82 @@ type ArrowheadKitDefinition = {
   keypad: string;
   keypadColour: "White" | "Black";
   includesCable: boolean;
+  legacyPanel?: boolean;
 };
 
 const arrowheadKitDefinitions: ArrowheadKitDefinition[] = [
-  { id: "arrowhead-ec-led-alarm-kit", name: "Arrowhead EC Alarm Kit with LED Keypad, 2 Detectors, Sirens and Cable", sku: "EC-KIT KP W", image: "/assets/alarm/arrowhead/ec-kit-led-with-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-led-with-cable.pdf", keypad: "white slimline LED keypad", keypadColour: "White", includesCable: true },
+  { id: "arrowhead-ec-led-alarm-kit", name: "Arrowhead EC Alarm Kit with Slimline Touch Keypad, 2 Detectors, Sirens and Cable", sku: "EC-KIT KP W", image: "/assets/alarm/arrowhead/ec-kit-led-with-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-led-with-cable.pdf", keypad: "white EC-KP W slimline touch keypad", keypadColour: "White", includesCable: true },
   { id: "arrowhead-ec-lcd-alarm-kit", name: "Arrowhead EC Alarm Kit with LCD Keypad, 2 Detectors, Sirens and Cable", sku: "EC-KIT LCD", image: "/assets/alarm/arrowhead/ec-kit-lcd-with-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-lcd-with-cable.pdf", keypad: "full-English vertical LCD keypad", keypadColour: "White", includesCable: true },
-  { id: "arrowhead-ec-led-alarm-kit-no-cable", name: "Arrowhead EC Alarm Kit with LED Keypad, 2 Detectors and Sirens", sku: "EC-KIT KP W NC", image: "/assets/alarm/arrowhead/ec-kit-led-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-led-no-cable.pdf", keypad: "white slimline LED keypad", keypadColour: "White", includesCable: false },
+  { id: "arrowhead-ec-led-alarm-kit-no-cable", name: "Arrowhead EC Alarm Kit with Slimline Touch Keypad, 2 Detectors and Sirens", sku: "EC-KIT KP W NC", image: "/assets/alarm/arrowhead/ec-kit-led-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-led-no-cable.pdf", keypad: "white EC-KP W slimline touch keypad", keypadColour: "White", includesCable: false },
   { id: "arrowhead-ec-lcd-alarm-kit-no-cable", name: "Arrowhead EC Alarm Kit with LCD Keypad, 2 Detectors and Sirens", sku: "EC-KIT LCD NC", image: "/assets/alarm/arrowhead/ec-kit-lcd-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-lcd-no-cable.pdf", keypad: "full-English vertical LCD keypad", keypadColour: "White", includesCable: false },
-  { id: "arrowhead-ec-black-touchscreen-alarm-kit", name: "Arrowhead EC Alarm Kit with Black Touchscreen Keypad, 2 Detectors and Sirens", sku: "EC-KIT TOUCH B NC", image: "/assets/alarm/arrowhead/ec-kit-touch-black-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-touch-black-no-cable.pdf", keypad: "black touchscreen keypad", keypadColour: "Black", includesCable: false },
+  { id: "arrowhead-ec-black-touchscreen-alarm-kit", name: "Arrowhead EC Alarm Kit with Black Touchscreen Keypad, 2 Detectors and Sirens", sku: "EC-KIT TOUCH B NC", image: "/assets/alarm/arrowhead/ec-kit-touch-black-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-touch-black-no-cable.pdf", keypad: "black touchscreen keypad", keypadColour: "Black", includesCable: false, legacyPanel: true },
   { id: "arrowhead-ec-white-touchscreen-alarm-kit", name: "Arrowhead EC Alarm Kit with White Touchscreen Keypad, 2 Detectors and Sirens", sku: "EC-KIT TOUCH W NC", image: "/assets/alarm/arrowhead/ec-kit-touch-white-no-cable.png", pdf: "/assets/alarm/arrowhead/ec-kit-touch-white-no-cable.pdf", keypad: "white touchscreen keypad", keypadColour: "White", includesCable: false },
 ];
 
+const arrowheadKeypadComponentId = (kit: ArrowheadKitDefinition) =>
+  kit.keypad.includes("LCD")
+    ? "arrowhead-ec-lcd-keypad"
+    : kit.keypad.includes("touchscreen")
+      ? kit.keypadColour === "Black" ? "arrowhead-ec-touch-b-keypad" : "arrowhead-ec-touch-w-keypad"
+      : kit.keypadColour === "Black" ? "arrowhead-ec-kp-b-keypad" : "arrowhead-ec-kp-w-keypad";
+
+Object.assign(alarmKitComponentIds, Object.fromEntries(
+  arrowheadKitDefinitions.map((kit) => [kit.id, [
+    ...(kit.legacyPanel ? [] : ["arrowhead-ec-plas-control-panel"]),
+    arrowheadKeypadComponentId(kit),
+    "optex-opt-flx-s-st-pir-detector",
+    "alarm-7ah-backup-battery",
+    "arrowhead-ec-siren",
+    "arrowhead-ps209-r-internal-siren",
+    ...(kit.includesCable ? ["arrowhead-4c2-100-cu-alarm-cable"] : []),
+  ]])
+));
+
 export const arrowheadKitIncludedItems: Record<string, Array<[string, string]>> = Object.fromEntries(
   arrowheadKitDefinitions.map((kit) => [kit.id, [
-    ["Alarm panel", "1 × Arrowhead EC hardwired 8-zone alarm panel in a plastic cabinet with transformer and fuse assembly"],
-    ["Keypad", `1 x ${kit.keypad}`],
-    ["Backup battery", "1 x 7.0 Ah backup battery"],
-    ["Motion detection", "2 x Optex FLX-S-ST pet-tolerant PIR detectors, suitable for pets up to 18 kg"],
-    ["External warning", "1 × Arrowhead EC external siren"],
-    ["Internal warning", "1 x flush-mount internal siren"],
-    ...(kit.includesCable ? [["Alarm cable", "1 x 100 metre box of 0.2 alarm cable"] as [string, string]] : []),
-    ["Warranty", "5-year warranty"],
-    ...(kit.keypad.includes("LED")
-      ? [["Alternative keypad colour", "A white LED keypad is supplied as standard. To request a black LED keypad instead, please email us separately when placing your order."] as [string, string]]
+    ["Alarm panel", kit.legacyPanel
+      ? "1 × Arrowhead hardwired 16-zone alarm panel in a plastic cabinet with analogue dialler and transformer"
+      : "1 × Arrowhead EC security and control panel in its powered plastic enclosure"],
+    ["Keypad", `1 × ${kit.keypad}`],
+    ["Backup battery", "1 × 12V 7.0Ah sealed lead-acid backup battery"],
+    ["Motion detection", "2 × Optex OPT-FLX-S-ST indoor PIR detectors with pet-friendly detection up to 18kg"],
+    ["External warning", "1 × Arrowhead EC-SIREN external siren and strobe"],
+    ["Internal warning", "1 × flush-mount internal siren"],
+    ...(kit.includesCable ? [["Alarm cable", "1 × 100m box of Arrowhead 4C2-100-CU four-core alarm cable"] as [string, string]] : []),
+  ]])
+);
+
+export const arrowheadKitSupplementalItems: Record<string, Array<[string, string]>> = Object.fromEntries(
+  arrowheadKitDefinitions.map((kit) => [kit.id, [
+    ["Warranty", "5-year warranty for the complete kit"],
+    ...(kit.sku.includes("KP")
+      ? [["Alternative keypad colour", "A white keypad is supplied as standard. A black EC-KP B can be requested instead; please email us when placing your order."] as [string, string]]
       : []),
-    ["Alternative power option", "A plug pack can be requested in place of the transformer; please email us separately when placing your order."],
+    ["Alternative power option", "A plug pack can be requested in place of the transformer; please email us when placing your order."],
   ]])
 );
 
 const createArrowheadKit = (kit: ArrowheadKitDefinition): Product => {
-  const usesLed = kit.keypad.includes("LED");
+  const usesLed = kit.sku.includes("KP");
+  const usesLegacyPanel = kit.legacyPanel === true;
   const usesLcd = kit.keypad.includes("LCD");
   const interfaceHeading = usesLed
-    ? "clear LED control"
+    ? "slimline touch control"
     : usesLcd
       ? "full-text LCD control"
       : `intuitive ${kit.keypadColour.toLowerCase()} touchscreen control`;
   const kitHeading = `Expandable alarm protection with ${interfaceHeading}${kit.includesCable ? " and installation cable" : ""}`;
   const keypadOverview = usesLed
-    ? "A slimline LED keypad provides direct status indication and straightforward everyday arming controls."
+    ? "A slimline touch keypad provides direct status indication and straightforward everyday arming controls."
     : usesLcd
       ? "A vertical full-English LCD keypad presents clear prompts and system information for everyday operation."
       : `The ${kit.keypadColour.toLowerCase()} touchscreen provides a visual interface for arming, disarming and checking system status.`;
   const cableOverview = kit.includesCable
-    ? "This version also supplies a 100 metre box of 0.2 alarm cable for the planned wired installation."
+    ? "This version also supplies a 100 metre box of four-core 0.2mm² tinned-copper alarm cable for the planned wired installation."
     : "Site cabling can be selected separately to suit the final detector locations and installation route.";
-  const kitOverview = `Designed for homes, retail spaces and other small commercial premises that may need room to grow, this Arrowhead EC system starts with eight onboard hardwired zones and can expand to 248 zones using compatible EC-Z8 input modules. ${keypadOverview} Optex FLX-S-ST PIR detection supports pet-tolerant monitoring for animals weighing up to 18 kg. Elite Cloud app access or monitored reporting can be added through the appropriate plug-on module, while an Infinity Wireless Link can extend the system to compatible wireless detectors, remotes, panic buttons and sirens. Four onboard outputs support local alarm and automation functions, with expansion available when more outputs are required. Battery-backed operation and indoor and outdoor sounders provide dependable local warning. ${cableOverview}`;
+  const kitOverview = usesLegacyPanel
+    ? `This black-touchscreen package follows the Alarm Warehouse listing and uses an Arrowhead hardwired 16-zone alarm panel rather than the newer EC-PLAS package used by the other kits. The panel provides eight onboard zones, with a further eight available as ATZ zones or wireless zones when a compatible wireless receiver is added. A built-in analogue dialler supports telephone reporting, while the black touchscreen provides everyday arming and status control. Two Optex OPT-FLX-S-ST pet-friendly PIR detectors, a 7.0Ah backup battery and internal and external sounders complete the local alarm package. ${cableOverview}`
+    : `Designed for homes, retail spaces and other small commercial premises that may need room to grow, this Arrowhead EC system starts with eight onboard hardwired zones and can expand to 248 zones using compatible EC-Z8 input modules. ${keypadOverview} Optex OPT-FLX-S-ST PIR detection provides pet-friendly indoor motion monitoring with selectable wide or narrow coverage. Elite Cloud app access or monitored reporting can be added through the appropriate plug-on module, while an Infinity Wireless Link can extend the system to compatible wireless detectors, remotes, panic buttons and sirens. Four onboard outputs support local alarm and automation functions, with expansion available when more outputs are required. Battery-backed operation and indoor and outdoor sounders provide dependable local warning. ${cableOverview}`;
   return {
     ...base,
     id: kit.id,
@@ -528,14 +923,21 @@ const createArrowheadKit = (kit: ArrowheadKitDefinition): Product => {
     colors: [kit.keypadColour],
     shortDescription: kitHeading,
     description: kitOverview,
-    features: [
+    features: usesLegacyPanel ? [
+      "Sixteen-zone panel: Eight onboard zones can be supplemented by eight ATZ zones, or by wireless zones when a compatible wireless receiver is added.",
+      "Built-in analogue dialler: The panel includes an analogue telephone dialler for compatible reporting arrangements.",
+      "Black touchscreen control: The supplied black touchscreen provides visual everyday arming and system-status access.",
+      "Pet-friendly detection: Two Optex OPT-FLX-S-ST PIR detectors are listed for pets up to 18kg when correctly configured and installed.",
+      "Backup and local warning: A 7.0Ah backup battery, external siren and flush-mount internal siren are included.",
+      "Alternative mains connection: A plug pack can be requested instead of the supplied transformer.",
+    ] : [
       "Large expansion headroom: Eight onboard hardwired zones can grow to 248 zones with compatible EC-Z8 input expanders.",
       usesLed
-        ? "Clear LED operation: The slimline LED interface provides straightforward everyday arming and system-status indication."
+        ? "Slimline touch operation: The EC-KP W touch interface provides straightforward everyday arming and system-status indication."
         : usesLcd
           ? "Full-text LCD operation: The vertical full-English display provides clearer prompts and everyday system information."
           : "Touchscreen interaction: The touchscreen interface provides visual everyday control and system-status access.",
-      "Pet-tolerant motion coverage: Optex FLX-S-ST detection is designed to identify movement while accommodating pets weighing up to 18 kg.",
+      "Flexible motion coverage: Two Optex OPT-FLX-S-ST detectors provide selectable wide or narrow indoor PIR coverage with a pet-friendly detection design.",
       "Flexible site scale: Manage up to 32 areas and 2,000 users, including up to 1,900 wireless users when compatible wireless equipment is fitted. The system supports a combined total of up to 32 alarm/access keypads and readers.",
       "Optional app and monitoring path: Elite Cloud smartphone control or monitored reporting can be added through the appropriate plug-on communication module.",
       "Wireless growth option: A compatible Infinity Wireless Link can extend the system to wireless detectors, remotes, panic buttons and sirens.",
@@ -546,7 +948,19 @@ const createArrowheadKit = (kit: ArrowheadKitDefinition): Product => {
       "Supervised siren outputs: Outputs 1 and 2 provide monitored 12V connections for the internal and external sirens.",
       "Resilient local alerting: Battery-backed operation and separately positioned indoor and outdoor sounders support local warning during an alarm event.",
     ],
-    specifications: {
+    specifications: usesLegacyPanel ? {
+      "Control panel": "Arrowhead hardwired 16-zone alarm panel in plastic cabinet with transformer",
+      "Onboard zones": "8",
+      "Additional zones": "8 ATZ zones, or wireless zones with a compatible wireless receiver",
+      "Maximum zones": "16",
+      Dialler: "Built-in analogue dialler",
+      Keypad: kit.keypad,
+      Detection: "2 × Optex OPT-FLX-S-ST indoor PIR detectors; pet-friendly listing up to 18kg",
+      "Backup battery": "12V 7.0Ah sealed lead-acid battery",
+      Sirens: "1 × external siren and 1 × flush-mount internal siren",
+      Cable: "Not listed as included",
+      Warranty: "5 years for the complete kit",
+    } : {
       "Control panel": "Arrowhead EC hardwired alarm panel in plastic cabinet with transformer and fuse assembly",
       "Onboard zones": "8",
       "Maximum zones": "248 with compatible EC-Z8 input expanders",
@@ -558,11 +972,11 @@ const createArrowheadKit = (kit: ArrowheadKitDefinition): Product => {
       Communications: "Optional plug-on module required for monitoring or Elite Cloud app access",
       "Wireless expansion": "Optional Infinity Wireless Link supports compatible wireless devices",
       Keypad: kit.keypad,
-      Detection: "2 x Optex FLX-S-ST pet-tolerant PIR detectors, up to 18 kg",
-      "Backup battery": "7.0 Ah",
-      Sirens: "1 x Arrowhead EC external siren and 1 x flush-mount internal siren",
-      Cable: kit.includesCable ? "100 metre box of 0.2 alarm cable included" : "Not listed as included",
-      Warranty: "5 years",
+      Detection: "2 × Optex OPT-FLX-S-ST indoor PIR detectors with selectable wide or narrow coverage",
+      "Backup battery": "12V 7.0Ah sealed lead-acid battery",
+      Sirens: "1 × Arrowhead EC external siren and 1 × flush-mount internal siren",
+      Cable: kit.includesCable ? "100m box of 4C2-100-CU four-core 0.2mm² tinned-copper alarm cable" : "Not listed as included",
+      Warranty: "5 years for the complete kit",
     },
   };
 };
@@ -577,11 +991,13 @@ export function isAlarmProduct(product: Product) {
 
 export function alarmKitComponentDisplayName(kitId: string, component: Product) {
   if (kitId.startsWith("paradox-mg5050-") && component.id === "paradox-mg5050-control-panel") return `1 × Wireless Enabled Panel — ${component.name} in cabinet with fuse and transformer`;
+  if (component.id === "arrowhead-ec-plas-control-panel") return `1 × ${component.name}`;
   if (component.id.endsWith("control-panel")) return `1 × ${component.name} in cabinet with fuse and transformer`;
   if (component.id === "paradox-tm50-touch-keypad") return `1 × ${component.name} — White`;
   if (component.id.endsWith("keypad")) return `1 × ${component.name}`;
   if (component.id.endsWith("pir-detector")) return `2 × ${component.name}`;
   if (component.id === "alarm-flush-mount-internal-siren") return `1 × ${component.name}`;
+  if (kitId.startsWith("arrowhead-") && ["alarm-7ah-backup-battery", "powerpac-dm12-7-5-battery", "arrowhead-ec-siren", "arrowhead-ps209-r-internal-siren", "arrowhead-4c2-100-cu-alarm-cable"].includes(component.id)) return `1 × ${component.name}`;
   return component.name;
 }
 
