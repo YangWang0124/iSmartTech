@@ -105,8 +105,9 @@ export function RouteSeo() {
   const { pathname } = useLocation();
   if (pathname.startsWith("/products/") || pathname.startsWith("/category/")) return null;
   const privateRoute = ["/cart", "/signin", "/signup", "/account"].includes(pathname);
+  const knownRoute = privateRoute || Boolean(routeSeo[pathname]);
   const details = privateRoute
     ? { title: "Customer account | iSmartTech", description: "Secure iSmartTech customer account area." }
-    : routeSeo[pathname] ?? routeSeo["/"];
-  return <Seo {...details} canonicalPath={pathname} noIndex={privateRoute} />;
+    : routeSeo[pathname] ?? { title: "Page not found | iSmartTech NZ", description: "The requested iSmartTech page could not be found." };
+  return <Seo {...details} canonicalPath={pathname} noIndex={privateRoute || !knownRoute} />;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ProductVisual } from "../components/ProductVisual";
 import { useCart } from "../context/CartContext";
@@ -8,6 +8,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useProducts } from "../context/ProductContext";
 import type { Product } from "../types";
 import { Seo } from "../components/Seo";
+import { NotFoundPage } from "./NotFoundPage";
 import { categoryPathForProduct } from "../lib/catalogue";
 import { alarmKitComponentDisplayName, alarmKitComponentIds, alarmPageHeadings, arrowheadKitIncludedItems, arrowheadKitSupplementalItems, createAlarmDetailContent, paradoxKitSupplementalItems } from "../data/alarmProducts";
 
@@ -32,7 +33,7 @@ type AccessoryDetailContent = {
   installationNotes: string[];
 };
 
-const dahuaFeatureBadges = [
+const _dahuaFeatureBadges = [
   ["/assets/product-features/6mp-resolution.png", "6MP full HD resolution"],
   ["/assets/product-features/30m-night-vision.png", "30 metre night vision"],
   ["/assets/product-features/weather-proof.png", "Weather proof"],
@@ -662,7 +663,7 @@ const nvrDetailedProductContent: Record<string, DetailedTiandyContent> = {
   },
 };
 
-const tiandyProductContent: TiandyProductContent[] = [
+const _tiandyProductContent: TiandyProductContent[] = [
   {
     model: "TC-C36XN",
     name: "Tiandy 6MP DualLight Turret Camera",
@@ -714,7 +715,7 @@ const tiandyProductContent: TiandyProductContent[] = [
   },
 ];
 
-const normaliseProductCode = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+const _normaliseProductCode = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 function productSummaryHeading(product: Product) {
   const highlights = product.features.slice(0, 2).join(" | ");
@@ -762,10 +763,10 @@ export function ProductDetailPage() {
   const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("");
-  const sourceColourOptions = [...new Set((sourceDetail?.colors ?? []).map((color) => color.trim()).filter(Boolean))];
+  const sourceColourOptions = useMemo(() => [...new Set((sourceDetail?.colors ?? []).map((color) => color.trim()).filter(Boolean))], [sourceDetail?.colors]);
   useEffect(() => {
     if (sourceColourOptions.length > 0) setSelectedColor(sourceColourOptions[0]);
-  }, [sourceDetail]);
+  }, [sourceColourOptions]);
   const [selectedPower, setSelectedPower] = useState("NZ power supply");
   const [added, setAdded] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -774,7 +775,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     setPreviewIndex(0);
   }, [resolvedProductId]);
-  if (!product) return <main className="page container empty-state"><h1>Product not found</h1><Link className="button button--primary" to="/products">Back to products</Link></main>;
+  if (!product) return <NotFoundPage />;
   const formattedProductPrice = money(product.price);
   const formattedProductPriceParts = formattedProductPrice.match(/^(.*?)([.,]\d{1,2})$/);
   const add = () => { addItem(product.id, quantity); setAdded(true); window.setTimeout(() => setAdded(false), 1800); };

@@ -9,9 +9,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --config vite.worker.config.ts && node scripts/copy-hosting-metadata.mjs",
     "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "generate:seo": "node scripts/generate-seo.mjs",
-    "prebuild": "npm run generate:seo"
+    "prebuild": "npm run generate:seo && npm run lint && npm run check:catalogue && npm run check:alarm",
+    "check:catalogue": "node scripts/check-category-routes.mjs",
+    "check:alarm": "node scripts/check-alarm-feature-coverage.mjs",
+    "check:public-routes": "node scripts/check-public-routes.mjs",
+    "check": "npm run build",
+    "postbuild": "npm run check:public-routes"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

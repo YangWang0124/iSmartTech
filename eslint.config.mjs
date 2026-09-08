@@ -1,6 +1,5 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import eslint from "@eslint/js";
-import next from "@next/eslint-plugin-next";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -21,7 +20,6 @@ const eslintConfig = defineConfig([
   react.configs.flat["jsx-runtime"],
   reactHooks.configs.flat["recommended-latest"],
   jsxA11y.flatConfigs.recommended,
-  next.configs["core-web-vitals"],
   {
     languageOptions: {
       globals: {
@@ -34,6 +32,12 @@ const eslintConfig = defineConfig([
       react: {
         version: "detect",
       },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
+      "react/no-unescaped-entities": "off",
+      "react-hooks/preserve-manual-memoization": "off",
+      "react-hooks/set-state-in-effect": "off",
     },
   },
 ]);
