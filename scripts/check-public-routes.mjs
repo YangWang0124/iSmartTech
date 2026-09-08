@@ -16,7 +16,7 @@ const contentTypes = new Map([
 const assets = {
   async fetch(request) {
     const url = new URL(request.url);
-    if (url.pathname === "/index.html") return new Response(indexHtml, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    if (url.pathname === "/index.html") return new Response(null, { status: 307, headers: { Location: "/" } });
     if (!extname(url.pathname)) {
       const routeFile = url.pathname === "/"
         ? join(clientDirectory, "index.html")

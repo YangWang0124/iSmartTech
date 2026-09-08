@@ -12,7 +12,7 @@ const { default: worker } = await import(new URL("../dist/server/index.js", impo
 const assets = {
   async fetch(request) {
     const url = new URL(request.url);
-    if (url.pathname === "/index.html") {
+    if (url.pathname === "/") {
       return new Response(indexHtml, { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
     return new Response("Not found", { status: 404 });

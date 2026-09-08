@@ -69,7 +69,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/")) return handleApi(request, env, url);
     if (request.method === "GET" && !url.pathname.includes(".")) {
-      const indexResponse = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+      const indexResponse = await env.ASSETS.fetch(new Request(new URL("/", url), request));
       return pageExists(url.pathname)
         ? injectSeo(indexResponse, url)
         : injectNotFoundSeo(indexResponse, url);
