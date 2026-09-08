@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && vite build --config vite.worker.config.ts && node scripts/copy-hosting-metadata.mjs",
+    "build": "tsc -b && vite build && vite build --config vite.worker.config.ts && node scripts/generate-route-html.mjs && node scripts/copy-hosting-metadata.mjs",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "generate:seo": "node scripts/generate-seo.mjs",
