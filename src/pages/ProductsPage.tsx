@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/ProductGrid";
 import { useProducts } from "../context/ProductContext";
@@ -11,6 +11,7 @@ import {
 import { isCuratedProduct } from "../data/curatedProducts";
 import { isAlarmProduct } from "../data/alarmProducts";
 import { Seo } from "../components/Seo";
+import { NotFoundPage } from "./NotFoundPage";
 
 export function ProductsPage() {
   const { products, brands } = useProducts();
@@ -43,13 +44,14 @@ export function ProductsPage() {
   }, []);
   const update = (key: string, value: string) => {
     const next = new URLSearchParams(params);
-    value ? next.set(key, value) : next.delete(key);
+    if (value) next.set(key, value);
+    else next.delete(key);
     setParams(next);
   };
   const categoryIds = categoryEntry
     ? descendantIds(categoryEntry.category)
     : [];
-  const filtered = useMemo(() => {
+  const filtered = (() => {
     const term = query.trim().toLowerCase();
     const result = products.filter(
       (product) =>
@@ -76,12 +78,13 @@ export function ProductsPage() {
         ? b.rating - a.rating
         : 0
     );
-  }, [products, query, brand, sort, categorySlug, params.toString(), showFullCatalogue]);
+  })();
   const crumbs = categoryEntry
     ? [...categoryEntry.ancestors, categoryEntry.category]
     : [];
   const isCamera = crumbs.some((item) => item.id === 9);
   const categoryTitle = categoryEntry ? categoryDisplayTitle(categoryEntry.category) : undefined;
+  if (categorySlug && !categoryEntry) return <NotFoundPage />;
   return (
     <main className="page container catalogue-page">
       {categorySlug && <Seo

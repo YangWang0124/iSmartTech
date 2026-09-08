@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
 import { money } from "../lib/products";
@@ -30,7 +30,7 @@ export function AdminProductsPage() {
   const [loadError, setLoadError] = useState("");
   const editing = Boolean(draft.id);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (localPreview) {
       setSession({ authenticated: true, authorized: true, email: "preview@ismarttech.local" });
       setItems(products);
@@ -50,8 +50,8 @@ export function AdminProductsPage() {
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Unable to open the product manager.");
     }
-  };
-  useEffect(() => { void load(); }, []);
+  }, [localPreview, products]);
+  useEffect(() => { void load(); }, [load]);
 
   const set = (key: keyof Draft, value: string | number | boolean) => setDraft(current => ({ ...current, [key]: value }));
   const imagePreview = useMemo(() => image ? URL.createObjectURL(image) : draft.image, [image, draft.image]);
@@ -93,7 +93,7 @@ export function AdminProductsPage() {
         <h3 className="admin-form__section">Product preview</h3><label className="image-upload"><span>{imagePreview ? <img src={imagePreview} alt="Preview" /> : "Upload main product image"}</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={event => setImage(event.target.files?.[0] || null)} /><small>Main image: PNG, JPG or WebP, maximum 8 MB.</small></label><div className="admin-fields"><label className="wide">Additional gallery images <small>One image URL per line</small><textarea rows={3} value={draft.galleryImagesText} onChange={e => set("galleryImagesText", e.target.value)} /></label></div>
         <h3 className="admin-form__section">Description</h3><div className="admin-fields"><label className="wide">Description title<textarea required rows={2} value={draft.shortDescription} onChange={e => set("shortDescription", e.target.value)} /></label><label className="wide">Description<textarea required rows={4} value={draft.description} onChange={e => set("description", e.target.value)} /></label></div>
         <h3 className="admin-form__section">Features and options</h3><div className="admin-fields"><label className="wide">Feature labels <small>One per line</small><textarea rows={5} value={draft.featuresText} onChange={e => set("featuresText", e.target.value)} /></label><label className="wide">Feature badge images <small>One image URL per line, matching the labels</small><textarea rows={4} value={draft.featureImagesText} onChange={e => set("featureImagesText", e.target.value)} /></label><label className="wide">Colour choices <small>One colour per line</small><textarea rows={3} value={draft.colorsText} onChange={e => set("colorsText", e.target.value)} /></label><label className="wide">Specifications <small>Use “Name: Value”, one per line</small><textarea rows={6} value={draft.specificationsText} onChange={e => set("specificationsText", e.target.value)} /></label><label>Stock quantity<input required min="0" type="number" value={draft.stock} onChange={e => set("stock", Number(e.target.value))} /></label></div>
-        <label className="publish-toggle"><input type="checkbox" checked={Boolean(draft.published)} onChange={e => set("published", e.target.checked)} /><span><strong>Publish product</strong><small>Published products appear immediately in the storefront.</small></span></label>
+        <label className="publish-toggle" aria-label="Publish product"><input type="checkbox" checked={Boolean(draft.published)} onChange={e => set("published", e.target.checked)} /><span><strong>Publish product</strong><small>Published products appear immediately in the storefront.</small></span></label>
         {notice && <p className="admin-notice">{notice}</p>}<button className="button button--primary" disabled={busy}>{busy ? "Saving…" : editing ? "Save changes" : "Create product"}</button>
       </form>
     </div>
