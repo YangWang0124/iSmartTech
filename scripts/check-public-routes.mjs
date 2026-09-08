@@ -58,6 +58,7 @@ for (const path of ["/not-a-real-page", "/category/not-a-real-category", "/produ
   const html = await response.text();
   assert.match(html, /Page not found \| iSmartTech NZ/);
   assert.match(html, /name="robots" content="noindex, nofollow"/);
+  assert.doesNotMatch(html, /name="robots" content="index, follow"/);
   const hostedResponse = await assets.fetch(new Request(new URL(path, siteOrigin)));
   assert.equal(hostedResponse.status, 404, path + ": generated host route must return 404");
   assert.match(await hostedResponse.text(), /Page not found \| iSmartTech NZ/);

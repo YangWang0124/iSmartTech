@@ -341,8 +341,11 @@ async function injectNotFoundSeo(response, url) {
   html = html
     .replace(/<title>[^<]*<\/title>/, "<title>Page not found | iSmartTech NZ</title>")
     .replace(/<meta name="description"[^>]*>/, '<meta name="description" content="The requested iSmartTech page could not be found." />')
-    .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />`)
-    .replace("</head>", '<meta name="robots" content="noindex, nofollow" /></head>');
+    .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />`);
+  const robots = '<meta name="robots" content="noindex, nofollow" />';
+  html = /<meta name="robots"[^>]*>/.test(html)
+    ? html.replace(/<meta name="robots"[^>]*>/, robots)
+    : html.replace("</head>", robots + "</head>");
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
   headers.set("Pragma", "no-cache");
