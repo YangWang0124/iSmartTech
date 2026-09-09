@@ -13,9 +13,44 @@ export function Header() {
   const { itemCount } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const lastScrollYRef = useRef(0);
+  const scrollFrameRef = useRef<number | null>(null);
   const { user } = useAuth();
+
+  useEffect(() => {
+    lastScrollYRef.current = Math.max(window.scrollY, 0);
+
+    const updateHeader = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const movement = currentScrollY - lastScrollYRef.current;
+
+      if (currentScrollY < 80 || menuOpen) {
+        setHeaderHidden(false);
+      } else if (Math.abs(movement) >= 6) {
+        setHeaderHidden(movement > 0);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+      scrollFrameRef.current = null;
+    };
+
+    const handleScroll = () => {
+      if (scrollFrameRef.current === null) {
+        scrollFrameRef.current = window.requestAnimationFrame(updateHeader);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -39,13 +74,14 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header>
+    <>
       <div className="top-strip">
         <div className="container">
           {t("owned")} <span>{t("advice")}</span>
         </div>
       </div>
-      <div className="main-header container">
+      <header className={`site-header ${headerHidden ? "site-header--hidden" : ""}`}>
+        <div className="main-header container">
         <Link className="brand" to="/" aria-label="iSmartTech home">
           <img
             className="brand__logo"
@@ -194,7 +230,10 @@ export function Header() {
         <button
           ref={menuButtonRef}
           className="menu-button"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            setHeaderHidden(false);
+            setMenuOpen(!menuOpen);
+          }}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
         >
@@ -204,7 +243,8 @@ export function Header() {
       <div className="mobile-search container">
         <SearchBar compact />
       </div>
-      <CategoryNav />
-    </header>
+        <CategoryNav />
+      </header>
+    </>
   );
 }
