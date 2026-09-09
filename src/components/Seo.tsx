@@ -99,6 +99,13 @@ const routeSeo: Record<string, { title: string; description: string }> = {
     title: "Professional Installation Services Auckland | iSmartTech",
     description: "Arrange professional Auckland installation for security cameras, networking, smart-home and related electrical technology solutions.",
   },
+  "/privacy": { title: "Privacy Notice | iSmartTech NZ", description: "Read how iSmartTech handles personal information for enquiries, customer accounts and orders." },
+  "/terms-and-conditions": { title: "Terms of Sale | iSmartTech NZ", description: "Read the terms applying to iSmartTech products, quotations, delivery, payment and services." },
+  "/shipping-returns": { title: "Shipping, Returns & Refunds | iSmartTech NZ", description: "Read iSmartTech shipping, return authorisation, restocking and refund information." },
+  "/warranty": { title: "Product Warranty Process | iSmartTech NZ", description: "Learn how iSmartTech product warranty assessments and manufacturer warranty claims work." },
+  "/installation-terms": { title: "Installation Terms | iSmartTech NZ", description: "Read how Smart Tech House installation work is assessed, quoted and delivered." },
+  "/payment-information": { title: "Payment Information | iSmartTech NZ", description: "View payment methods, currency, GST and invoicing information for iSmartTech orders." },
+  "/faq": { title: "Frequently Asked Questions | iSmartTech NZ", description: "Find answers about iSmartTech products, ordering, delivery, returns, warranty and installation." },
 };
 
 export function RouteSeo() {

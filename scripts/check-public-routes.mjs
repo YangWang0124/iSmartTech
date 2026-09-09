@@ -38,9 +38,14 @@ const assets = {
     }
   },
 };
+const testEnv = {
+  ASSETS: assets,
+  SITE_URL: siteOrigin,
+  GOOGLE_SITE_VERIFICATION: "search-console-test-token",
+};
 
 async function request(path) {
-  return worker.fetch(new Request(new URL(path, siteOrigin)), { ASSETS: assets }, {});
+  return worker.fetch(new Request(new URL(path, siteOrigin)), testEnv, {});
 }
 
 for (const path of ["/", "/about", "/products", "/category/category_alarm", "/products/arrowhead-ec-lcd-keypad"]) {
@@ -50,6 +55,18 @@ for (const path of ["/", "/about", "/products", "/category/category_alarm", "/pr
   const hostedResponse = await assets.fetch(new Request(new URL(path, siteOrigin)));
   assert.equal(hostedResponse.status, 200, path + ": generated host route must return 200");
   assert.equal(hostedResponse.headers.get("location"), null, path + ": generated host route must not redirect");
+}
+
+const redirects = new Map([
+  ["/products/dahua-nvr4104", "/products/curated-dahua-nvr4104"],
+  ["/terms", "/terms-and-conditions"],
+  ["/return_policies", "/shipping-returns"],
+  ["/help-center", "/faq"],
+]);
+for (const [from, to] of redirects) {
+  const redirectResponse = await request(from + "?source=old-link");
+  assert.equal(redirectResponse.status, 308, from + ": must permanently redirect");
+  assert.equal(redirectResponse.headers.get("location"), siteOrigin + to + "?source=old-link");
 }
 
 for (const path of ["/not-a-real-page", "/category/not-a-real-category", "/products/not-a-real-product"]) {
@@ -70,9 +87,20 @@ assert.ok(productHtml.includes(`<link rel="canonical" href="${siteOrigin}/produc
 assert.match(productHtml, /<meta property="og:type" content="product"/);
 assert.match(productHtml, /"@type":"Product"/);
 assert.match(productHtml, /"sku":"EC-LCD"/);
+assert.match(productHtml, /name="google-site-verification" content="search-console-test-token"/);
+for (const [, json] of productHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
+
+const categoryResponse = await request("/category/wired_smart-security-kits");
+const categoryHtml = await categoryResponse.text();
+assert.match(categoryHtml, /"@type":"CollectionPage"/);
+assert.match(categoryHtml, /"@type":"BreadcrumbList"/);
+for (const [, json] of categoryHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
 
 const sitemapPaths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, location]) => new URL(location).pathname);
 assert(sitemapPaths.length > 0, "Sitemap must contain public URLs");
+assert.equal(new Set(sitemapPaths).size, sitemapPaths.length, "Sitemap must not contain duplicate URLs");
+assert.ok(sitemapPaths.every((path) => !["/cart", "/signin", "/signup", "/account"].includes(path)), "Sitemap must exclude private routes");
+assert.ok(!sitemapPaths.includes("/products/dahua-nvr4104"), "Sitemap must exclude redirected product aliases");
 for (const path of sitemapPaths) {
   const response = await request(path);
   assert.equal(response.status, 200, "Sitemap URL " + path + ": expected 200, received " + response.status);
@@ -82,6 +110,10 @@ for (const path of sitemapPaths) {
   assert.match(html, /<meta name="description" content="[^"]+"/, "Sitemap URL " + path + ": missing description");
   assert.ok(html.includes("<link rel=\"canonical\" href=\"" + siteOrigin + path + "\""), "Sitemap URL " + path + ": incorrect canonical");
   assert.doesNotMatch(html, /name="robots" content="noindex/, "Sitemap URL " + path + ": public route must be indexable");
+  assert.match(html, /name="google-site-verification" content="search-console-test-token"/, "Sitemap URL " + path + ": verification meta missing");
+  for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
+  if (path.startsWith("/products/")) assert.match(html, /"@type":"Product"/, "Sitemap product " + path + ": Product structured data missing");
+  if (path.startsWith("/category/")) assert.match(html, /"@type":"CollectionPage"/, "Sitemap category " + path + ": CollectionPage structured data missing");
   const hostedResponse = await assets.fetch(new Request(new URL(path, siteOrigin)));
   assert.equal(hostedResponse.status, 200, "Generated sitemap route " + path + ": expected 200");
   const hostedHtml = await hostedResponse.text();

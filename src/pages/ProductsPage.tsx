@@ -84,13 +84,27 @@ export function ProductsPage() {
     : [];
   const isCamera = crumbs.some((item) => item.id === 9);
   const categoryTitle = categoryEntry ? categoryDisplayTitle(categoryEntry.category) : undefined;
+  const categoryCanonicalPath = categorySlug ? `/category/${categorySlug}` : undefined;
+  const categoryCanonicalUrl = categoryCanonicalPath ? new URL(categoryCanonicalPath, window.location.origin).toString() : undefined;
+  const categoryJsonLd = categoryCanonicalUrl && categoryTitle ? {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "CollectionPage", "@id": `${categoryCanonicalUrl}#collection`, name: categoryTitle, url: categoryCanonicalUrl },
+      { "@type": "BreadcrumbList", itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", window.location.origin).toString() },
+        { "@type": "ListItem", position: 2, name: "Products", item: new URL("/products", window.location.origin).toString() },
+        { "@type": "ListItem", position: 3, name: categoryTitle, item: categoryCanonicalUrl },
+      ] },
+    ],
+  } : undefined;
   if (categorySlug && !categoryEntry) return <NotFoundPage />;
   return (
     <main className="page container catalogue-page">
       {categorySlug && <Seo
         title={`${categoryTitle || "Products"} | iSmartTech NZ`}
         description={`Browse ${categoryTitle || "security and smart-home products"} from iSmartTech for New Zealand homes and businesses.`}
-        canonicalPath={`/category/${categorySlug}`}
+        canonicalPath={categoryCanonicalPath}
+        jsonLd={categoryJsonLd}
       />}
       <div className="breadcrumb">
         <Link to="/">Home</Link>

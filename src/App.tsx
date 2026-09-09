@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation, useNavigationType } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigationType } from "react-router-dom";
 import { useLayoutEffect } from "react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -15,6 +15,7 @@ import { AccountPage } from "./pages/AccountPage";
 import { CustomCctvKitPage } from "./pages/CustomCctvKitPage";
 import { RouteSeo } from "./components/Seo";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { CommercialInfoPage } from "./pages/CommercialInfoPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -38,5 +39,5 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  return <ProductProvider><ScrollToTop /><RouteSeo /><Header /><Routes><Route path="/" element={<HomePage />} /><Route path="/products" element={<ProductsPage />} /><Route path="/custom-cctv-kit" element={<CustomCctvKitPage />} /><Route path="/category/:categorySlug" element={<ProductsPage />} /><Route path="/products/:id" element={<ProductDetailPage />} /><Route path="/cart" element={<CartPage />} /><Route path="/about" element={<AboutPage />} /><Route path="/contact" element={<ContactPage />} /><Route path="/installation-services" element={<InstallationServicesPage />} /><Route path="/signin" element={<CustomerAuthPage mode="signin" />} /><Route path="/signup" element={<CustomerAuthPage mode="signup" />} /><Route path="/account" element={<AccountPage />} /><Route path="*" element={<NotFoundPage />} /></Routes><Footer /></ProductProvider>;
+  return <ProductProvider><ScrollToTop /><RouteSeo /><Header /><Routes><Route path="/" element={<HomePage />} /><Route path="/products" element={<ProductsPage />} /><Route path="/custom-cctv-kit" element={<CustomCctvKitPage />} /><Route path="/category/:categorySlug" element={<ProductsPage />} /><Route path="/products/:id" element={<ProductDetailPage />} /><Route path="/cart" element={<CartPage />} /><Route path="/about" element={<AboutPage />} /><Route path="/contact" element={<ContactPage />} /><Route path="/installation-services" element={<InstallationServicesPage />} /><Route path="/privacy" element={<CommercialInfoPage page="privacy" />} /><Route path="/terms-and-conditions" element={<CommercialInfoPage page="terms" />} /><Route path="/terms" element={<Navigate replace to="/terms-and-conditions" />} /><Route path="/return_policies" element={<Navigate replace to="/shipping-returns" />} /><Route path="/help-center" element={<Navigate replace to="/faq" />} /><Route path="/shipping-returns" element={<CommercialInfoPage page="shipping-returns" />} /><Route path="/warranty" element={<CommercialInfoPage page="warranty" />} /><Route path="/installation-terms" element={<CommercialInfoPage page="installation-terms" />} /><Route path="/payment-information" element={<CommercialInfoPage page="payment-information" />} /><Route path="/faq" element={<CommercialInfoPage page="faq" />} /><Route path="/signin" element={<CustomerAuthPage mode="signin" />} /><Route path="/signup" element={<CustomerAuthPage mode="signup" />} /><Route path="/account" element={<AccountPage />} /><Route path="*" element={<NotFoundPage />} /></Routes><Footer /></ProductProvider>;
 }

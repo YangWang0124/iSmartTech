@@ -17,6 +17,8 @@ const metaSchema = `CREATE TABLE IF NOT EXISTS catalogue_state (key TEXT PRIMARY
 const retiredSampleIds = ["hikvision-colorvu", "uniview-4ch-kit", "ajax-starter-kit", "ubiquiti-g5-bullet", "tp-link-vigi-nvr", "ezviz-doorbell", "seagate-skyhawk-4tb", "dahua-16ch-nvr", "hikvision-intercom-kit", "reolink-solar-camera", "ruijie-poe-switch", "ajax-motioncam", "tp-link-outdoor-ap", "western-digital-8tb", "uniview-thermal-sensor"];
 const seoProducts = [...seedProducts.filter((product) => !alarmProducts.some((alarm) => alarm.id === product.id)), ...createCuratedProducts([]), ...alarmProducts];
 const productAliases = new Map([["dahua-nvr4104", "curated-dahua-nvr4104"]]);
+const permanentRedirects = new Map([["/products/dahua-nvr4104", "/products/curated-dahua-nvr4104"], ["/terms", "/terms-and-conditions"], ["/return_policies", "/shipping-returns"], ["/help-center", "/faq"]]);
+const defaultSiteOrigin = "https://ismarttech-demo.yangwang02885215668.chatgpt.site";
 const routeMetadata = {
   "/": ["iSmartTech NZ | Security, Smart Home & Installation", "Shop security, networking and smart-home technology with practical advice and professional installation services across Auckland."],
   "/products": ["Security & Smart Home Products | iSmartTech NZ", "Browse iSmartTech cameras, NVRs, alarms, networking equipment and smart-home products for New Zealand homes and businesses."],
@@ -24,6 +26,13 @@ const routeMetadata = {
   "/about": ["About iSmartTech | Auckland Technology Specialists", "Learn about iSmartTech’s New Zealand team and its practical approach to security, networking, smart-home and installation solutions."],
   "/contact": ["Contact iSmartTech | Auckland Security Advice", "Contact iSmartTech for friendly advice about security cameras, networking, smart-home products and Auckland installation services."],
   "/installation-services": ["Professional Installation Services Auckland | iSmartTech", "Arrange professional Auckland installation for security cameras, networking, smart-home and related electrical technology solutions."],
+  "/privacy": ["Privacy Notice | iSmartTech NZ", "Read how iSmartTech handles personal information for enquiries, customer accounts and orders."],
+  "/terms-and-conditions": ["Terms of Sale | iSmartTech NZ", "Read the terms applying to iSmartTech products, quotations, delivery, payment and services."],
+  "/shipping-returns": ["Shipping, Returns & Refunds | iSmartTech NZ", "Read iSmartTech shipping, return authorisation, restocking and refund information."],
+  "/warranty": ["Product Warranty Process | iSmartTech NZ", "Learn how iSmartTech product warranty assessments and manufacturer warranty claims work."],
+  "/installation-terms": ["Installation Terms | iSmartTech NZ", "Read how Smart Tech House installation work is assessed, quoted and delivered."],
+  "/payment-information": ["Payment Information | iSmartTech NZ", "View payment methods, currency, GST and invoicing information for iSmartTech orders."],
+  "/faq": ["Frequently Asked Questions | iSmartTech NZ", "Find answers about iSmartTech products, ordering, delivery, returns, warranty and installation."],
   "/cart": ["Shopping cart | iSmartTech", "Review products in your iSmartTech shopping cart.", true],
   "/signin": ["Customer sign in | iSmartTech", "Sign in to your iSmartTech customer account.", true],
   "/signup": ["Create customer account | iSmartTech", "Create an iSmartTech customer account.", true],
@@ -68,11 +77,19 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/api/")) return handleApi(request, env, url);
+    if ((request.method === "GET" || request.method === "HEAD") && !url.pathname.includes(".")) {
+      const redirectPath = permanentRedirects.get(normalizedPath(url.pathname));
+      if (redirectPath) {
+        const destination = new URL(redirectPath, siteOrigin(url, env));
+        destination.search = url.search;
+        return Response.redirect(destination, 308);
+      }
+    }
     if (request.method === "GET" && !url.pathname.includes(".")) {
       const indexResponse = await env.ASSETS.fetch(new Request(new URL("/", url), request));
       return pageExists(url.pathname)
-        ? injectSeo(indexResponse, url)
-        : injectNotFoundSeo(indexResponse, url);
+        ? injectSeo(indexResponse, url, env)
+        : injectNotFoundSeo(indexResponse, url, env);
     }
     return env.ASSETS.fetch(request);
   },
@@ -174,7 +191,8 @@ async function saveProduct(request, env, existingId) {
     if (image.size > 8 * 1024 * 1024) return json({ error: "Image must be smaller than 8 MB." }, 400);
     if (!/^image\/(png|jpeg|webp)$/.test(image.type)) return json({ error: "Use a PNG, JPG or WebP image." }, 400);
     const extension = image.type === "image/jpeg" ? "jpg" : image.type.split("/")[1];
-    const nextKey = `${crypto.randomUUID()}.${extension}`;
+    const imageName = `${product.id}-${product.sku}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 100) || "product";
+    const nextKey = `${imageName}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
     await env.PRODUCT_IMAGES.put(nextKey, image.stream(), { httpMetadata: { contentType: image.type } });
     if (imageKey) await env.PRODUCT_IMAGES.delete(imageKey);
     imageKey = nextKey;
@@ -209,15 +227,52 @@ async function serveImage(env, key) {
 }
 
 function json(value, status = 200) { return Response.json(value, { status, headers: { "Cache-Control": "no-store" } }); }
-async function injectSeo(response, url) {
+
+function siteOrigin(url, env) {
+  try {
+    const configured = new URL(String(env?.SITE_URL || defaultSiteOrigin));
+    if (configured.protocol === "https:" || configured.protocol === "http:") return configured.origin;
+  } catch {}
+  return url.origin;
+}
+
+function sharedSeo(html, url, env) {
+  const origin = siteOrigin(url, env);
+  let next = html.replaceAll(defaultSiteOrigin, origin);
+  const verification = String(env?.GOOGLE_SITE_VERIFICATION || "").trim();
+  if (verification && !/name="google-site-verification"/.test(next)) {
+    const safe = verification.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    next = next.replace("</head>", `<meta name="google-site-verification" content="${safe}" /></head>`);
+  }
+  return next;
+}
+
+async function injectSeo(response, url, env) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return response;
 
   const path = normalizedPath(url.pathname);
   const categoryMatch = path.match(/^\/category\/([^/]+)$/);
   const category = categoryMatch ? categoryMetadata.get(decodeURIComponent(categoryMatch[1])) : undefined;
-  const page = routeMetadata[path] || category;
-  if (page) return injectPageSeo(response, url, page);
+  if (category) {
+    const origin = siteOrigin(url, env);
+    const canonical = `${origin}${path}`;
+    const [title, description] = category;
+    const categoryJsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "CollectionPage", "@id": `${canonical}#collection`, name: title.replace(/ \| iSmartTech NZ$/, ""), description, url: canonical, isPartOf: { "@id": `${origin}/#website` } },
+        { "@type": "BreadcrumbList", itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+          { "@type": "ListItem", position: 2, name: "Products", item: `${origin}/products` },
+          { "@type": "ListItem", position: 3, name: title.replace(/ \| iSmartTech NZ$/, ""), item: canonical },
+        ] },
+      ],
+    };
+    return injectPageSeo(response, url, category, env, categoryJsonLd);
+  }
+  const page = routeMetadata[path];
+  if (page) return injectPageSeo(response, url, page, env);
 
   const match = url.pathname.match(/^\/products\/([^/]+)\/?$/);
   const requestedId = match ? decodeURIComponent(match[1]) : "";
@@ -225,7 +280,8 @@ async function injectSeo(response, url) {
   const product = seoProducts.find((item) => item.id === resolvedId);
   if (!product) return preventHtmlCaching(response);
 
-  const canonical = `${url.origin}/products/${product.id}`;
+  const origin = siteOrigin(url, env);
+  const canonical = `${origin}/products/${product.id}`;
   const preferredTitle = `${product.name} | iSmartTech NZ`;
   const title = preferredTitle.length <= 65
     ? preferredTitle
@@ -234,7 +290,7 @@ async function injectSeo(response, url) {
   const description = sourceDescription.length > 158
     ? `${sourceDescription.slice(0, 155).replace(/\s+\S*$/, "")}…`
     : sourceDescription;
-  const image = product.image ? new URL(product.image, url.origin).toString() : `${url.origin}/og.jpg`;
+  const image = product.image ? new URL(product.image, origin).toString() : `${origin}/og.jpg`;
   const includeOffer = !product.priceOnRequest
     && !product.requiresLiveCatalogue
     && Number(product.price) > 0
@@ -267,8 +323,8 @@ async function injectSeo(response, url) {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: `${url.origin}/` },
-          { "@type": "ListItem", position: 2, name: "Products", item: `${url.origin}/products` },
+          { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+          { "@type": "ListItem", position: 2, name: "Products", item: `${origin}/products` },
           { "@type": "ListItem", position: 3, name: product.name, item: canonical },
         ],
       },
@@ -279,7 +335,7 @@ async function injectSeo(response, url) {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-  let html = await response.text();
+  let html = sharedSeo(await response.text(), url, env);
   html = html
     .replace(/<title>[^<]*<\/title>/, `<title>${attr(title)}</title>`)
     .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${attr(description)}" />`)
@@ -300,15 +356,15 @@ async function injectSeo(response, url) {
   return new Response(html, { status: response.status, statusText: response.statusText, headers });
 }
 
-async function injectPageSeo(response, url, [title, description, noIndex = false]) {
+async function injectPageSeo(response, url, [title, description, noIndex = false], env, jsonLd) {
   const canonicalPath = normalizedPath(url.pathname);
-  const canonical = `${url.origin}${canonicalPath}`;
+  const canonical = `${siteOrigin(url, env)}${canonicalPath}`;
   const attr = (value) => String(value)
     .replaceAll("&", "&amp;")
     .replaceAll(String.fromCharCode(34), "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-  let html = await response.text();
+  let html = sharedSeo(await response.text(), url, env);
   html = html
     .replace(/<title>[^<]*<\/title>/, `<title>${attr(title)}</title>`)
     .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${attr(description)}" />`)
@@ -319,7 +375,7 @@ async function injectPageSeo(response, url, [title, description, noIndex = false
     .replace(/<meta property="og:type"[^>]*>/, '<meta property="og:type" content="website" />')
     .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${attr(title)}" />`)
     .replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${attr(description)}" />`)
-    .replace("</head>", `<meta name="robots" content="${noIndex ? "noindex, nofollow" : "index, follow"}" /></head>`);
+    .replace("</head>", `${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replaceAll("<", String.raw`\u003c`)}</script>` : ""}<meta name="robots" content="${noIndex ? "noindex, nofollow" : "index, follow"}" /></head>`);
   const headers = new Headers(response.headers);
   headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
   headers.set("Pragma", "no-cache");
@@ -333,11 +389,11 @@ function preventHtmlCaching(response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-async function injectNotFoundSeo(response, url) {
+async function injectNotFoundSeo(response, url, env) {
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return new Response(response.body, { status: 404, headers: response.headers });
-  const canonical = `${url.origin}${normalizedPath(url.pathname)}`;
-  let html = await response.text();
+  const canonical = `${siteOrigin(url, env)}${normalizedPath(url.pathname)}`;
+  let html = sharedSeo(await response.text(), url, env);
   html = html
     .replace(/<title>[^<]*<\/title>/, "<title>Page not found | iSmartTech NZ</title>")
     .replace(/<meta name="description"[^>]*>/, '<meta name="description" content="The requested iSmartTech page could not be found." />')

@@ -2377,3 +2377,131 @@ textarea:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 2px #1672df20;
 }
+
+/* Customer information pages */
+.policy-layout {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 64px;
+  padding-top: 64px;
+  padding-bottom: 90px;
+}
+.policy-layout > nav {
+  align-self: start;
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 4px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+}
+.policy-layout > nav h2 {
+  margin: 0 0 10px;
+  font: 800 16px Manrope;
+  color: var(--navy);
+}
+.policy-layout > nav a {
+  padding: 9px 10px;
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+.policy-layout > nav a:hover {
+  background: #edf5fb;
+  color: var(--navy);
+}
+.policy-content {
+  max-width: 850px;
+}
+.policy-content > section,
+.faq-list > section {
+  padding: 0 0 28px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+.policy-content h2 {
+  margin: 0 0 12px;
+  color: var(--navy);
+  font: 800 24px Manrope;
+}
+.policy-content p,
+.policy-content li {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.policy-content ul,
+.policy-content ol {
+  padding-left: 22px;
+}
+.policy-content a {
+  color: var(--blue);
+   text-decoration: underline;
+   text-underline-offset: 3px;
+}
+.policy-table-wrap {
+   overflow-x: auto;
+   margin: 18px 0;
+}
+.policy-table {
+  width: 100%;
+  border-collapse: collapse;
+   min-width: 620px;
+}
+.policy-table th,
+.policy-table td {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.policy-table th {
+  background: var(--navy);
+  color: #fff;
+  font: 800 13px Manrope;
+}
+.policy-table td:last-child {
+  width: 34%;
+  color: var(--ink);
+  font-weight: 700;
+}
+.policy-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 22px;
+  border-radius: 8px;
+  background: #edf5fb;
+  color: var(--muted);
+  font-size: 14px;
+}
+.policy-contact strong { color: var(--navy); }
+.faq-list details {
+  border-top: 1px solid var(--line);
+}
+.faq-list summary {
+  cursor: pointer;
+   padding: 17px 30px 17px 0;
+   color: var(--ink);
+  font: 700 15px Manrope;
+}
+.faq-list details p {
+  margin-top: -4px;
+  padding: 0 0 16px;
+}
+@media (max-width: 800px) {
+  .policy-layout { grid-template-columns: 1fr; gap: 30px; padding-top: 36px; }
+  .policy-layout > nav { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .policy-layout > nav h2 { grid-column: 1 / -1; }
+  .policy-page .inner-hero h1 { font-size: 40px; }
+}
+@media (max-width: 520px) {
+  .policy-layout > nav { grid-template-columns: 1fr; }
+  .policy-page .inner-hero h1 { font-size: 34px; }
+}

@@ -11,9 +11,10 @@
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "generate:seo": "node scripts/generate-seo.mjs",
-    "prebuild": "npm run generate:seo && npm run lint && npm run check:catalogue && npm run check:alarm",
+    "prebuild": "npm run generate:seo && npm run lint && npm run check:catalogue && npm run check:alarm && npm run check:seo-assets",
     "check:catalogue": "node scripts/check-category-routes.mjs",
     "check:alarm": "node scripts/check-alarm-feature-coverage.mjs",
+    "check:seo-assets": "node scripts/check-seo-assets.mjs",
     "check:public-routes": "node scripts/check-public-routes.mjs",
     "check": "npm run build",
     "postbuild": "npm run check:public-routes"

@@ -4,5 +4,6 @@ Disallow: /account
 Disallow: /signin
 Disallow: /signup
 Disallow: /cart
+Disallow: /staff
 
 Sitemap: https://ismarttech-demo.yangwang02885215668.chatgpt.site/sitemap.xml
