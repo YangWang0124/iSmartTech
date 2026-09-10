@@ -14,6 +14,7 @@ export function Header() {
   const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const lastScrollYRef = useRef(0);
@@ -22,10 +23,13 @@ export function Header() {
 
   useEffect(() => {
     lastScrollYRef.current = Math.max(window.scrollY, 0);
+    setHeaderScrolled(lastScrollYRef.current > 8);
 
     const updateHeader = () => {
       const currentScrollY = Math.max(window.scrollY, 0);
       const movement = currentScrollY - lastScrollYRef.current;
+
+      setHeaderScrolled(currentScrollY > 8);
 
       if (currentScrollY < 80 || menuOpen) {
         setHeaderHidden(false);
@@ -80,7 +84,11 @@ export function Header() {
           {t("owned")} <span>{t("advice")}</span>
         </div>
       </div>
-      <header className={`site-header ${headerHidden ? "site-header--hidden" : ""}`}>
+      <header
+        className={`site-header ${headerHidden ? "site-header--hidden" : ""} ${
+          headerScrolled ? "site-header--scrolled" : ""
+        }`}
+      >
         <div className="main-header container">
         <Link className="brand" to="/" aria-label="iSmartTech home">
           <img

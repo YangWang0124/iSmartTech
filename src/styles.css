@@ -81,7 +81,9 @@ button {
   z-index: 40;
   background: #fff;
   transform: translateY(0);
-  transition: transform 220ms ease-out;
+  transition:
+    transform 220ms ease-out,
+    box-shadow 260ms ease;
   will-change: transform;
 }
 .site-header--hidden {
@@ -91,6 +93,9 @@ button {
 
 @media (max-width: 1200px) {
   .site-header {
+    box-shadow: 0 5px 14px rgba(37, 55, 70, 0);
+  }
+  .site-header--scrolled {
     box-shadow: 0 5px 14px rgba(37, 55, 70, 0.12);
   }
 }
