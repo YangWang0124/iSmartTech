@@ -3,7 +3,7 @@ export const catalogueBrandGroups = [
     title: "CCTV",
     category: "category_cctv",
     brands: [
-      { label: "HIKVISION (HILOOK)", value: "Hikvision", logo: "/assets/brands/hikvision.png" },
+      { label: "HIKVISION/HILOOK", value: "Hikvision", logo: "/assets/brands/hikvision-hilook.png" },
       { label: "DAHUA", value: "Dahua", logo: "/assets/brands/dahua.svg" },
       { label: "TIANDY", value: "Tiandy", logo: "/assets/brands/tiandy-menu.webp" },
     ],

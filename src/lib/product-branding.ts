@@ -7,6 +7,7 @@ const brandLogos = new Map<string, string>(
 );
 
 brandLogos.set("hilook", "/assets/brands/hilook.svg");
+brandLogos.set("hikvision", "/assets/brands/hikvision.png");
 brandLogos.set("ritar", "/assets/brands/ritar.webp");
 brandLogos.set("uniview", "/assets/brands/uniview.png");
 brandLogos.set("uniarch", "/assets/brands/uniarch.png");
