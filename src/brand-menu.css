@@ -60,6 +60,15 @@
   object-fit: contain;
 }
 
+/* Optical sizing: bold, compact marks need less width than the finer stacked lockup. */
+.brand-menu__logo--dahua {
+  width: min(100%, 150px);
+}
+
+.brand-menu__logo--tiandy {
+  width: min(100%, 136px);
+}
+
 /* The original square PNG has transparent margins around a thin wordmark. */
 .brand-menu__logo--paradox img,
 .brand-menu__logo--arrowhead img {
