@@ -2469,6 +2469,11 @@ textarea:focus {
 .advice-banner {
   background: linear-gradient(135deg, #283547 0%, #3e4c5e 100%);
 }
+
+/* Keep inner-page banners blue, with a smoother same-hue transition. */
+.inner-hero {
+  background: linear-gradient(120deg, #285b85 0%, #3f6f95 100%);
+}
 .advice-banner:after {
   border-color: #ffffff2b;
 }
