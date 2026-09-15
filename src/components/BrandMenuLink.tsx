@@ -4,15 +4,14 @@ import type { CatalogueBrand } from "../lib/brands";
 
 type Props = {
   brand: CatalogueBrand;
-  category: string;
   onClick: MouseEventHandler<HTMLAnchorElement>;
 };
 
-export function BrandMenuLink({ brand, category, onClick }: Props) {
+export function BrandMenuLink({ brand, onClick }: Props) {
   return (
     <Link
       className="brand-menu__link"
-      to={`/category/${category}?brand=${encodeURIComponent(brand.value)}`}
+      to={`/brand/${brand.slug}`}
       onClick={onClick}
     >
       <span className={`brand-menu__logo brand-menu__logo--${brand.value.toLowerCase()}`} aria-hidden="true">

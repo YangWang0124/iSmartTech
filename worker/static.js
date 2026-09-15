@@ -2,6 +2,7 @@ import seedProducts from "../src/data/products.json";
 import { createCuratedProducts } from "../src/data/curatedProducts.ts";
 import { alarmProducts } from "../src/data/alarmProducts.ts";
 import categoryData from "../src/Catalogue/categories-full.json";
+import { catalogueBrands } from "../src/lib/brands.ts";
 import { fetchCatalogue, fetchCatalogueProduct } from "./catalogue-source.js";
 
 const schema = `CREATE TABLE IF NOT EXISTS products (
@@ -49,6 +50,10 @@ const categoryTitles = {
 };
 const categorySlugs = new Set();
 const categoryMetadata = new Map();
+const brandMetadata = new Map(catalogueBrands.map((brand) => [
+  brand.slug,
+  [`${brand.label} | iSmartTech NZ`, `Browse selected ${brand.label} products or switch to the complete API catalogue from iSmartTech.`],
+]));
 const collectCategorySlugs = (categories) => categories.forEach((category) => {
   categorySlugs.add(category.links);
   const title = categoryTitles[category.links] || category.title;
@@ -66,6 +71,8 @@ function pageExists(pathname) {
   if (publicPagePaths.has(path)) return true;
   const categoryMatch = path.match(/^\/category\/([^/]+)$/);
   if (categoryMatch) return categorySlugs.has(decodeURIComponent(categoryMatch[1]));
+  const brandMatch = path.match(/^\/brand\/([^/]+)$/);
+  if (brandMatch) return brandMetadata.has(decodeURIComponent(brandMatch[1]));
   const productMatch = path.match(/^\/products\/([^/]+)$/);
   if (!productMatch) return false;
   const requestedId = decodeURIComponent(productMatch[1]);
@@ -270,6 +277,26 @@ async function injectSeo(response, url, env) {
       ],
     };
     return injectPageSeo(response, url, category, env, categoryJsonLd);
+  }
+  const brandMatch = path.match(/^\/brand\/([^/]+)$/);
+  const brand = brandMatch ? brandMetadata.get(decodeURIComponent(brandMatch[1])) : undefined;
+  if (brand) {
+    const origin = siteOrigin(url, env);
+    const canonical = `${origin}${path}`;
+    const [title, description] = brand;
+    const brandName = title.replace(/ \| iSmartTech NZ$/, "");
+    const brandJsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "CollectionPage", "@id": `${canonical}#collection`, name: brandName, description, url: canonical, isPartOf: { "@id": `${origin}/#website` } },
+        { "@type": "BreadcrumbList", itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+          { "@type": "ListItem", position: 2, name: "Products", item: `${origin}/products` },
+          { "@type": "ListItem", position: 3, name: brandName, item: canonical },
+        ] },
+      ],
+    };
+    return injectPageSeo(response, url, brand, env, brandJsonLd);
   }
   const page = routeMetadata[path];
   if (page) return injectPageSeo(response, url, page, env);

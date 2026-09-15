@@ -48,7 +48,7 @@ async function request(path) {
   return worker.fetch(new Request(new URL(path, siteOrigin)), testEnv, {});
 }
 
-for (const path of ["/", "/about", "/products", "/category/category_alarm", "/products/arrowhead-ec-lcd-keypad"]) {
+for (const path of ["/", "/about", "/products", "/category/category_alarm", "/brand/hikvision-hilook", "/products/arrowhead-ec-lcd-keypad"]) {
   const response = await request(path);
   assert.equal(response.status, 200, path + ": expected 200, received " + response.status);
   assert.equal(response.headers.get("location"), null, path + ": must not redirect");
@@ -96,6 +96,13 @@ assert.match(categoryHtml, /"@type":"CollectionPage"/);
 assert.match(categoryHtml, /"@type":"BreadcrumbList"/);
 for (const [, json] of categoryHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
 
+const brandResponse = await request("/brand/hikvision-hilook");
+const brandHtml = await brandResponse.text();
+assert.match(brandHtml, /<title>HIKVISION\/HILOOK \| iSmartTech NZ<\/title>/);
+assert.match(brandHtml, /"@type":"CollectionPage"/);
+assert.match(brandHtml, /"@type":"BreadcrumbList"/);
+for (const [, json] of brandHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
+
 const sitemapPaths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, location]) => new URL(location).pathname);
 assert(sitemapPaths.length > 0, "Sitemap must contain public URLs");
 assert.equal(new Set(sitemapPaths).size, sitemapPaths.length, "Sitemap must not contain duplicate URLs");
@@ -114,6 +121,7 @@ for (const path of sitemapPaths) {
   for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(json);
   if (path.startsWith("/products/")) assert.match(html, /"@type":"Product"/, "Sitemap product " + path + ": Product structured data missing");
   if (path.startsWith("/category/")) assert.match(html, /"@type":"CollectionPage"/, "Sitemap category " + path + ": CollectionPage structured data missing");
+  if (path.startsWith("/brand/")) assert.match(html, /"@type":"CollectionPage"/, "Sitemap brand " + path + ": CollectionPage structured data missing");
   const hostedResponse = await assets.fetch(new Request(new URL(path, siteOrigin)));
   assert.equal(hostedResponse.status, 200, "Generated sitemap route " + path + ": expected 200");
   const hostedHtml = await hostedResponse.text();

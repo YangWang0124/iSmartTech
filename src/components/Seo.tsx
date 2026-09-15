@@ -110,7 +110,7 @@ const routeSeo: Record<string, { title: string; description: string }> = {
 
 export function RouteSeo() {
   const { pathname } = useLocation();
-  if (pathname.startsWith("/products/") || pathname.startsWith("/category/")) return null;
+  if (pathname.startsWith("/products/") || pathname.startsWith("/category/") || pathname.startsWith("/brand/")) return null;
   const privateRoute = ["/cart", "/signin", "/signup", "/account"].includes(pathname);
   const knownRoute = privateRoute || Boolean(routeSeo[pathname]);
   const details = privateRoute

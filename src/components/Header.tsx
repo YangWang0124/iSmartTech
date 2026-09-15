@@ -148,7 +148,6 @@ export function Header() {
                     <BrandMenuLink
                       key={brand.label}
                       brand={brand}
-                      category={group.category}
                       onClick={() => setMenuOpen(false)}
                     />
                   ))}

@@ -12,20 +12,27 @@ import { isCuratedProduct } from "../data/curatedProducts";
 import { isAlarmProduct } from "../data/alarmProducts";
 import { Seo } from "../components/Seo";
 import { NotFoundPage } from "./NotFoundPage";
+import { brandPageBySlug } from "../lib/brands";
 
 export function ProductsPage() {
   const { products, brands } = useProducts();
-  const { categorySlug } = useParams();
+  const { categorySlug, brandSlug } = useParams();
   const categoryEntry = categorySlug
     ? categoryBySlug.get(categorySlug)
     : undefined;
+  const brandEntry = brandSlug ? brandPageBySlug.get(brandSlug) : undefined;
   const [params, setParams] = useSearchParams();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [listDisabled, setListDisabled] = useState(false);
   const [showFullCatalogue, setShowFullCatalogue] = useState(false);
   const query = params.get("q") ?? "";
-  const brand = params.get("brand") ?? "";
+  const brandParam = params.get("brand") ?? "";
+  const brandValues = brandEntry
+    ? [...brandEntry.filterValues]
+    : brandParam
+      ? [brandParam]
+      : [];
   const sort = params.get("sort") ?? "default";
   const selectedTags = technicalFilters
     .map((filter) => Number(params.get(filter.key)))
@@ -65,7 +72,10 @@ export function ProductsPage() {
             .includes(term)) &&
         (!categoryIds.length ||
           product.categoryIds?.some((id) => categoryIds.includes(id))) &&
-        (!brand || product.brand.toLowerCase() === brand.toLowerCase()) &&
+        (!brandValues.length ||
+          brandValues.some(
+            (brand) => product.brand.toLowerCase() === brand.toLowerCase(),
+          )) &&
         (!params.get("stock") || product.stock > 0) &&
         selectedTags.every((tag) => product.tagIds?.includes(tag))
     );
@@ -82,29 +92,38 @@ export function ProductsPage() {
   const crumbs = categoryEntry
     ? [...categoryEntry.ancestors, categoryEntry.category]
     : [];
-  const isCamera = crumbs.some((item) => item.id === 9);
+  const isCamera = crumbs.some((item) => item.id === 9) || brandEntry?.group === "CCTV";
   const categoryTitle = categoryEntry ? categoryDisplayTitle(categoryEntry.category) : undefined;
-  const categoryCanonicalPath = categorySlug ? `/category/${categorySlug}` : undefined;
-  const categoryCanonicalUrl = categoryCanonicalPath ? new URL(categoryCanonicalPath, window.location.origin).toString() : undefined;
-  const categoryJsonLd = categoryCanonicalUrl && categoryTitle ? {
+  const collectionTitle = brandEntry?.label ?? categoryTitle;
+  const collectionDescription = brandEntry
+    ? `Browse selected ${brandEntry.label} products or switch to the complete API catalogue from iSmartTech.`
+    : `Browse ${categoryTitle || "security and smart-home products"} from iSmartTech for New Zealand homes and businesses.`;
+  const collectionCanonicalPath = brandSlug
+    ? `/brand/${brandSlug}`
+    : categorySlug
+      ? `/category/${categorySlug}`
+      : undefined;
+  const collectionCanonicalUrl = collectionCanonicalPath ? new URL(collectionCanonicalPath, window.location.origin).toString() : undefined;
+  const collectionJsonLd = collectionCanonicalUrl && collectionTitle ? {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "CollectionPage", "@id": `${categoryCanonicalUrl}#collection`, name: categoryTitle, url: categoryCanonicalUrl },
+      { "@type": "CollectionPage", "@id": `${collectionCanonicalUrl}#collection`, name: collectionTitle, url: collectionCanonicalUrl },
       { "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", window.location.origin).toString() },
         { "@type": "ListItem", position: 2, name: "Products", item: new URL("/products", window.location.origin).toString() },
-        { "@type": "ListItem", position: 3, name: categoryTitle, item: categoryCanonicalUrl },
+        { "@type": "ListItem", position: 3, name: collectionTitle, item: collectionCanonicalUrl },
       ] },
     ],
   } : undefined;
   if (categorySlug && !categoryEntry) return <NotFoundPage />;
+  if (brandSlug && !brandEntry) return <NotFoundPage />;
   return (
     <main className="page container catalogue-page">
-      {categorySlug && <Seo
-        title={`${categoryTitle || "Products"} | iSmartTech NZ`}
-        description={`Browse ${categoryTitle || "security and smart-home products"} from iSmartTech for New Zealand homes and businesses.`}
-        canonicalPath={categoryCanonicalPath}
-        jsonLd={categoryJsonLd}
+      {(categorySlug || brandSlug) && <Seo
+        title={`${collectionTitle || "Products"} | iSmartTech NZ`}
+        description={collectionDescription}
+        canonicalPath={collectionCanonicalPath}
+        jsonLd={collectionJsonLd}
       />}
       <div className="breadcrumb">
         <Link to="/">Home</Link>
@@ -116,21 +135,23 @@ export function ProductsPage() {
             <Link to={`/category/${item.links}`}>{categoryDisplayTitle(item)}</Link>
           </Fragment>
         ))}
+        {brandEntry && <><span>›</span><span>{brandEntry.label}</span></>}
       </div>
       <div className="page-title">
         <div>
-          <span className="eyebrow">CATALOGUE</span>
-          <h1>{categoryTitle || "All products"}</h1>
+          <span className="eyebrow">{brandEntry ? "BRAND" : "CATALOGUE"}</span>
+          <h1>{collectionTitle || "All products"}</h1>
           <p>
-            Browse iSmartTech products using the complete catalogue structure
-            and technical filters.
+            {brandEntry
+              ? `Browse selected ${brandEntry.label} products, or switch to the complete API catalogue.`
+              : "Browse iSmartTech products using the complete catalogue structure and technical filters."}
           </p>
         </div>
         <div className="results-count">
           <strong>{filtered.length}</strong> products
         </div>
       </div>
-      {!categorySlug || categoryEntry?.category.id === 2 ? (
+      {!brandEntry && (!categorySlug || categoryEntry?.category.id === 2) ? (
         <Link className="custom-kit-button" to="/custom-cctv-kit">
           <span>Custom CCTV Kit</span>
           <small>Build a compatible system →</small>
@@ -214,13 +235,13 @@ export function ProductsPage() {
             />
             <small>Enter at least 2 characters</small>
           </label>
-          <fieldset>
+          {!brandEntry && <fieldset>
             <legend className="filter-legend-down">Brand</legend>
             <label>
               <input
                 type="radio"
                 name="brand"
-                checked={!brand}
+                checked={!brandParam}
                 onChange={() => update("brand", "")}
               />{" "}
               All brands
@@ -230,13 +251,13 @@ export function ProductsPage() {
                 <input
                   type="radio"
                   name="brand"
-                  checked={brand === item}
+                  checked={brandParam === item}
                   onChange={() => update("brand", item)}
                 />{" "}
                 {item}
               </label>
             ))}
-          </fieldset>
+          </fieldset>}
           <fieldset>
             <legend className="filter-legend-down">Availability</legend>
             <label>

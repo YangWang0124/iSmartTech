@@ -13,10 +13,12 @@ const server = await createServer({
 
 let products;
 let categorySlugs;
+let brandSlugs;
 try {
   const { createCuratedProducts } = await server.ssrLoadModule("/src/data/curatedProducts.ts");
   const { alarmProducts } = await server.ssrLoadModule("/src/data/alarmProducts.ts");
   const { flatCategories, descendantIds } = await server.ssrLoadModule("/src/lib/catalogue.ts");
+  const { catalogueBrands } = await server.ssrLoadModule("/src/lib/brands.ts");
   products = [...seedProducts, ...createCuratedProducts([]), ...alarmProducts]
     .filter((product, index, all) => product.published !== false && all.findIndex((item) => item.id === product.id) === index);
   categorySlugs = flatCategories
@@ -25,6 +27,7 @@ try {
       return products.some((product) => product.categoryIds?.some((id) => validIds.has(id)));
     })
     .map(({ category }) => category.links);
+  brandSlugs = catalogueBrands.map((brand) => brand.slug);
 } finally {
   await server.close();
 }
@@ -34,6 +37,7 @@ const staticPaths = ["/", "/products", "/custom-cctv-kit", "/about", "/contact",
 const paths = [
   ...staticPaths,
   ...categorySlugs.map((slug) => `/category/${slug}`),
+  ...brandSlugs.map((slug) => `/brand/${slug}`),
   ...products.map((product) => `/products/${product.id}`),
 ];
 const uniquePaths = [...new Set(paths)].filter((path) => !/[?#]/.test(path));

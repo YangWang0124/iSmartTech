@@ -65,7 +65,13 @@ try {
   assert.ok(mounts.length);
   assert.ok(mounts.every(product => product.categoryIds.includes(12) && !product.categoryIds.includes(71)));
 
-  for (const group of catalogueBrandGroups) assert.ok(categoryBySlug.has(group.category));
+  for (const group of catalogueBrandGroups) {
+    assert.ok(categoryBySlug.has(group.category));
+    for (const brand of group.brands) {
+      assert.ok(brand.slug);
+      assert.ok(brand.filterValues.length);
+    }
+  }
   const home = await readFile(new URL("../src/pages/HomePage.tsx", import.meta.url), "utf8");
   for (const [, slug] of home.matchAll(/slug: "([^"]+)"/g)) assert.ok(categoryBySlug.has(slug), slug);
   const footer = await readFile(new URL("../src/components/Footer.tsx", import.meta.url), "utf8");
@@ -76,7 +82,7 @@ try {
   assert.ok(detail.includes("to={productCategoryPath}"));
   assert.ok(!detail.includes("/products?category="));
   const listing = await readFile(new URL("../src/pages/ProductsPage.tsx", import.meta.url), "utf8");
-  assert.ok(listing.includes('categoryTitle || "All products"'));
+  assert.ok(listing.includes('collectionTitle || "All products"'));
   console.log("PASS: " + products.length + " product records; " + flatCategories.length
     + " category routes; all six alarm labels; duplicate-name routing; accessory membership; home, brand and footer links.");
 } finally {
