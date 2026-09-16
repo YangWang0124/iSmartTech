@@ -140,17 +140,69 @@ export function ProductsPage() {
       <div className="page-title">
         <div>
           <span className="eyebrow">{brandEntry ? "BRAND" : "CATALOGUE"}</span>
-          <h1>{collectionTitle || "All products"}</h1>
-          <p>
-            {brandEntry
-              ? `Browse selected ${brandEntry.label} products, or switch to the complete API catalogue.`
-              : "Browse iSmartTech products using the complete catalogue structure and technical filters."}
-          </p>
+          <h1
+            className={brandEntry ? "brand-page-heading" : undefined}
+            aria-label={brandEntry?.label}
+          >
+            {brandEntry ? (
+              <span
+                key={brandEntry.slug}
+                className={`brand-menu__logo brand-menu__logo--${brandEntry.value.toLowerCase()}`}
+                aria-hidden="true"
+              >
+                <img src={brandEntry.logo} alt="" decoding="async" />
+              </span>
+            ) : collectionTitle || "All products"}
+          </h1>
+          {!brandEntry && (
+            <p>Browse iSmartTech products using the complete catalogue structure and technical filters.</p>
+          )}
         </div>
         <div className="results-count">
           <strong>{filtered.length}</strong> products
         </div>
       </div>
+      {brandEntry?.slug === "hikvision-hilook" ? (
+        <figure className="brand-catalogue-banner">
+          <img
+            src="/assets/brand-banners/hikvision-hilook-cctv.png"
+            alt="HIKVISION and HiLook CCTV turret cameras with a PoE network video recorder"
+            decoding="async"
+          />
+        </figure>
+      ) : brandEntry?.slug === "dahua" ? (
+        <figure className="brand-catalogue-banner">
+          <img
+            src="/assets/brand-banners/dahua-cctv.png"
+            alt="Dahua Smart Dual Light turret cameras with a compact PoE network video recorder"
+            decoding="async"
+          />
+        </figure>
+      ) : brandEntry?.slug === "tiandy" ? (
+        <figure className="brand-catalogue-banner">
+          <img
+            src="/assets/brand-banners/tiandy-cctv.png"
+            alt="Tiandy fixed turret and Wi-Fi bullet cameras with a compact PSE network video recorder"
+            decoding="async"
+          />
+        </figure>
+      ) : brandEntry?.slug === "paradox" ? (
+        <figure className="brand-catalogue-banner">
+          <img
+            src="/assets/brand-banners/paradox-tm50.png"
+            alt="Paradox TM50 touchscreen keypad mounted in a contemporary home"
+            decoding="async"
+          />
+        </figure>
+      ) : brandEntry?.slug === "arrowhead" ? (
+        <figure className="brand-catalogue-banner">
+          <img
+            src="/assets/brand-banners/arrowhead-ec-touch-b-v2.png"
+            alt="Arrowhead EC-TOUCH B charcoal touchscreen keypad mounted beside a home entrance"
+            decoding="async"
+          />
+        </figure>
+      ) : null}
       {!brandEntry && (!categorySlug || categoryEntry?.category.id === 2) ? (
         <Link className="custom-kit-button" to="/custom-cctv-kit">
           <span>Custom CCTV Kit</span>
