@@ -68,11 +68,11 @@ dd {
   letter-spacing: -0.35px;
 }
 .home-product-section {
-  padding-top: 30px;
-  padding-bottom: 30px;
+  padding-top: 32px;
+  padding-bottom: 32px;
 }
 .section.home-category-section {
-  padding-top: 30px;
+  padding-top: 32px;
   padding-bottom: 40px;
 }
 .home-product-section + .advice-banner {
@@ -80,14 +80,14 @@ dd {
 }
 @media (max-width: 700px) {
   .home-product-section {
-    padding-top: 38px;
-    padding-bottom: 38px;
+    padding-top: 36px;
+    padding-bottom: 36px;
   }
 }
 @media (max-width: 700px) {
   .section.home-category-section {
-    padding-top: 38px;
-    padding-bottom: 48px;
+    padding-top: 36px;
+    padding-bottom: 44px;
   }
 }
 @media (max-width: 700px) {
@@ -368,8 +368,8 @@ textarea:focus {
   filter: brightness(0) invert(1);
 }
 @media (max-width: 700px) {
-  .brand__logo {
-    width: 180px;
+  .main-header .brand__logo {
+    width: 100%;
     height: 46px;
   }
   .brand__logo--footer {
@@ -1981,7 +1981,7 @@ textarea:focus {
   font-weight: 700;
 }
 .kit-builder {
-  padding-bottom: 80px;
+  padding-bottom: clamp(56px, 7vw, 80px);
 }
 .kit-builder__heading {
   max-width: 730px;
@@ -2249,6 +2249,9 @@ textarea:focus {
   margin: 5px 0;
 }
 @media (max-width: 700px) {
+  .kit-builder__heading {
+    margin-bottom: 24px;
+  }
   .kit-builder__heading h1 {
     font-size: 31px;
   }
@@ -2337,7 +2340,7 @@ textarea:focus {
 @media (max-width: 700px) {
   .catalogue-toolbar {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 16px 10px;
   }
   .catalogue-mode-toggle {
     margin-left: 0;

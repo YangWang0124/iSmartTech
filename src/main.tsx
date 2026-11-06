@@ -12,6 +12,5 @@ import "./category-nav-tabs.css";
 import "./installation.css";
 import "./product-zoom.css";
 import "./account.css";
-import "./spacing.css";
 
 createRoot(document.getElementById("root")!).render(<StrictMode><BrowserRouter><LanguageProvider><AuthProvider><CartProvider><App /></CartProvider></AuthProvider></LanguageProvider></BrowserRouter></StrictMode>);
