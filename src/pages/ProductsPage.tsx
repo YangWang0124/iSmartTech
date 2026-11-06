@@ -324,7 +324,9 @@ export function ProductsPage() {
           {isCamera &&
             technicalFilters.map((filter) => (
               <fieldset key={filter.key}>
-                <legend>{filter.label}</legend>
+                <legend className={brandEntry ? "filter-legend-down" : undefined}>
+                  {filter.label}
+                </legend>
                 {filter.options.map(([id, label]) => (
                   <label key={id}>
                     <input
