@@ -166,7 +166,15 @@
 }
 
 @media (max-width: 430px) {
+  body {
+    min-width: min(320px, 100%);
+  }
+
   .main-header {
     gap: 8px;
+  }
+
+  .simple-installation__heading h1 {
+    overflow-wrap: anywhere;
   }
 }
