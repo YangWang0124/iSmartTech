@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staff administration | iSmartTech</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=8">
+  <script type="module" src="/admin/admin.js?v=7"></script>
+</head>
+<body>
+<header><div class="header-inner"><a href="/admin"><img src="/admin/logo.png" alt="iSmartTech"></a><strong>Staff administration</strong><span id="identity"></span><button id="logout" hidden>Sign out</button></div></header>
+<main>
+  <section id="login" class="card login" hidden>
+    <h1>Staff sign in</h1>
+    <form id="login-form">
+      <label>Username<input name="user" autocomplete="username" required maxlength="100"></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required maxlength="256"></label>
+      <button class="primary">Sign in</button>
+    </form>
+    <p id="login-status" role="status"></p>
+  </section>
+  <section id="workspace" hidden>
+    <div class="intro"><h1>Staff workspace</h1><p>Manage products, stock, pricing and orders.</p></div>
+    <div class="layout">
+      <div class="workspace-navigation">
+        <button type="button" id="navigation-toggle" aria-expanded="false" aria-controls="navigation">
+          <span>Menu</span><span id="navigation-current"></span>
+        </button>
+        <nav id="navigation" aria-label="Staff operations"></nav>
+      </div>
+      <div>
+        <section class="card"><h2 id="operation"></h2><p id="description"></p><form id="operation-form"></form><p id="status" role="status"></p></section>
+        <section id="result" class="card result" aria-label="Results" hidden></section>
+      </div>
+    </div>
+  </section>
+</main>
+</body></html>

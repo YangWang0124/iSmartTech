@@ -1,0 +1,74 @@
+:root{font-size:14px;font-family:"Open Sans",Arial,sans-serif;color:#253746;background:#f5f5f3;--ink:#253746;--line:#e2e3e5;--orange:#ff5a1f;--muted:#52666a}
+*{box-sizing:border-box} [hidden]{display:none!important} body{margin:0} header{background:white;border-bottom:4px solid var(--orange)}
+.header-inner{max-width:1280px;margin:auto;padding:16px 24px;display:flex;align-items:center;gap:20px}
+header img{width:138px;display:block} #identity{margin-left:auto} main{max-width:1280px;margin:auto;padding:32px 24px 56px}
+h1,h2,p{margin-top:0} h1{font-size:27px;margin-bottom:8px} h2{font-size:18px} p{line-height:1.5;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px}
+nav{align-self:start;background:var(--ink);color:white;padding:14px;border-radius:8px}
+nav details{padding:6px} nav summary{cursor:pointer;font-weight:bold;padding:6px 0}
+nav button{display:block;width:100%;text-align:left;border:0;background:transparent;color:white;padding:8px;margin:2px 0}
+nav button:hover,nav button[aria-current]{background:#425461} nav button[aria-current]{box-shadow:inset 3px 0 var(--orange)}
+.card{background:white;border:1px solid var(--line);border-radius:8px;padding:24px}.login{max-width:450px;margin:48px auto}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.login form{grid-template-columns:1fr}
+label{display:grid;gap:7px;font-weight:600;font-size:13px}label:has(input[type=checkbox]){display:flex;align-items:center}
+input,select,textarea,button{font:inherit;border:1px solid #c7c9cc;border-radius:5px;padding:9px 11px;color:inherit;background:white}
+input,select,textarea{width:100%;min-width:0} input[type=checkbox]{width:auto} textarea{min-height:80px;resize:vertical}
+button{cursor:pointer} button:disabled{opacity:.6;cursor:wait}.primary{justify-self:start;background:var(--orange);color:#202b34;border-color:var(--orange);font-weight:bold}
+:focus-visible{outline:2px solid #12694c;outline-offset:3px} form button{grid-column:1/-1}
+#status,#login-status{margin:12px 0 0}.error{color:#9c2611} .result{margin-top:20px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{background:#f5f5f3} .result h3{margin:16px 0 8px}.result h3:first-child{margin-top:0}
+dl{display:grid;grid-template-columns:minmax(100px,180px) 1fr;gap:8px;margin:0 0 12px}dd{margin:0;overflow-wrap:anywhere}dt{font-weight:600}
+@media(max-width:700px){.layout{grid-template-columns:1fr}main{padding:20px 14px}.header-inner{flex-wrap:wrap;padding:12px 14px}form{grid-template-columns:1fr}.card{padding:17px}header img{width:110px}}
+
+.form-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px}
+.form-actions button,.inventory-actions button{min-height:38px;white-space:nowrap}
+#status:empty,#login-status:empty{display:none}
+.result table{table-layout:auto}
+.result th{white-space:nowrap}
+.result td{overflow-wrap:break-word;min-width:74px;vertical-align:top}
+.inventory-list{padding:0;margin:0;list-style:none}
+.inventory-list li{display:grid;grid-template-columns:minmax(180px,2fr) minmax(124px,1fr) auto;gap:14px;align-items:start;padding:16px 0;border-top:1px solid var(--line)}
+.inventory-list p{margin:5px 0 0;font-size:12px}
+.inventory-list strong{overflow-wrap:break-word}
+.inventory-actions{display:flex;align-items:center;justify-self:end;gap:8px;white-space:nowrap}
+.inventory-actions span{font-size:13px;color:var(--muted)}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));gap:12px}
+.price-grid section{padding:14px;border:1px solid var(--line);border-radius:6px;background:#fafaf9}
+.price-grid h4{margin:0 0 12px}
+.price-grid dl{grid-template-columns:minmax(0,1fr) auto;font-size:13px}
+.price-grid dd{font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:1080px){.inventory-list li{grid-template-columns:minmax(0,1fr) auto}.inventory-list li>div:first-child{grid-column:1/-1}}
+@media(max-width:400px){.inventory-list li{grid-template-columns:minmax(0,1fr)}.inventory-actions{justify-self:start}}
+.price-grid dd button{padding:3px 7px;font-size:12px}
+.price-grid dt{align-self:center}
+
+.workspace-navigation{min-width:0;align-self:start}
+#navigation-toggle{display:none}
+@media(max-width:700px){
+  .layout{gap:14px}
+  .workspace-navigation{display:grid;gap:8px}
+  #navigation-toggle{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--ink);color:white;border-color:var(--ink);font-weight:600}
+  #navigation-toggle::after{content:"";flex:none;width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);margin:0 3px 4px}
+  #navigation-toggle[aria-expanded="true"]::after{transform:rotate(225deg);margin-bottom:0}
+  #navigation-current{margin-left:auto;text-align:right;font-size:13px;font-weight:400}
+  #navigation-toggle[aria-expanded="false"] + nav{display:none}
+  .workspace-navigation nav{max-height:45vh;max-height:45dvh;overflow:auto}
+}
+
+.cost-summary{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+
+.inventory-product{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.inventory-product>div{min-width:0}
+.product-thumbnail{display:grid;place-items:center;position:relative;flex:0 0 40px;width:40px;height:40px;border-radius:4px;background:#f5f5f3;overflow:hidden}
+.product-thumbnail::before{content:"";position:absolute;width:11px;height:8px;border:1px solid #8a979e;border-radius:2px}
+.product-thumbnail img{position:relative;display:block;object-fit:contain;background:white}
+.product-title{padding:0;border:0;border-radius:2px;background:none;text-align:left;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.product-title:hover,.product-title:active{text-decoration:none}
+
+input[type=number]{appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pricing-result{margin-top:0}
+.pricing-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.pricing-header h2{margin:0;overflow-wrap:anywhere}
