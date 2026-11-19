@@ -1,6 +1,6 @@
 local retail backend
 
-Run these commands from the iSmartTech project root. The backend uses the .NET 8 SDK, ASP.NET Core, and Microsoft.Data.Sqlite. It has a separate database under `outputs/`, and the read-only HTTP server binds to the Mac's loopback address. The storefront deployment does not use this backend.
+Run these commands from the iSmartTech project root. The backend uses the .NET 8 SDK, ASP.NET Core, and Microsoft.Data.Sqlite. It has a separate database under `outputs/`, and the HTTP server binds to the Mac's loopback address. The local storefront reads its product records from this backend. See the shared catalogue section for hosting configuration.
 
 ```sh
 dotnet run --project backend -- init owner
@@ -46,7 +46,7 @@ Prices and refunds are in cents. Payment references and refunds are local record
 
 To back up a database with SQLite installed, run `sqlite3 outputs/retail.sqlite ".backup outputs/retail-backup.sqlite"`. Inspect the backup using `sqlite3 outputs/retail-backup.sqlite "PRAGMA integrity_check;"` and open it with the CLI's `--db` option to verify it can be used.
 
-This first workflow covers one location and full dispatch, with partial returns. Supplier purchase orders, trade price lists and discount approval, receiving serials, split fulfilment, accounting and courier integrations, GST invoices, and live payment processing are follow-on work. Configure verified product types and compatibility before quoting a real kit.
+This first workflow covers one location and full dispatch, with partial returns. Supplier purchase orders, automatic quantity pricing and discount approval, receiving serials, split fulfilment, accounting and courier integrations, GST invoices, and live payment processing are follow-on work. Configure verified product types and compatibility before quoting a real kit.
 
 ### Akubela and Akuvox workbook updates
 
@@ -79,8 +79,7 @@ before offering automatic quantity pricing. Tier values are staff-only.
 Start the backend with `dotnet run --project backend -- serve` and open
 `http://127.0.0.1:8787/admin`. Use the same staff account as for terminal
 commands. The first Owner is created through the terminal with `init owner`.
-Uploads use the local database, and workbook preview lets you review stock
-changes before applying the import.
+Product image uploads use the local database. Import commands remain available through the CLI; the web navigation contains Inventory, Orders, Shipping, Customers, Returns and refunds, and Access.
 
 For a public deployment, publish `backend/Retail.csproj` to an ASP.NET Core
 host with a persistent volume. Run the published app with an absolute
@@ -90,3 +89,99 @@ host with a persistent volume. Run the published app with an absolute
 the public web directory and back it up. Serve the UI and admin API together
 on the same HTTPS origin. The existing storefront's static/Worker host does
 not run this C# process.
+
+### Shared storefront catalogue
+
+The storefront now reads `/api/retail/products` from this backend. Both the staff
+interface and the storefront use the same SQLite records. Vite proxies that
+endpoint to `http://127.0.0.1:8787` by default. Set `RETAIL_BACKEND_URL` in the
+Vite environment to use another development backend.
+
+In Inventory, choose Edit to maintain the product name, brand, category,
+publication state, descriptions, features, specifications, media URLs,
+documents, variants, included items, homepage selection and Chinese translation.
+Costs and workbook price tiers remain in Pricing. Stock adjustments remain
+in Adjust stock. Extended nested content currently uses labelled JSON fields.
+
+The one-time catalogue migration imports public product content from
+`catalogue-seed.json` and preserves existing inventory stock, price tiers and
+active status. It adds storefront SKUs missing from inventory with zero stock
+and no invented price. Existing product URLs are retained through route IDs
+and aliases. After migration the database owns the content, and the seed does
+not overwrite later staff edits.
+
+The frontend refreshes the catalogue on window focus and every 30 seconds.
+Archived products are excluded. A missing workbook price displays Price on
+request. The original API and bundled records no longer override these values.
+The development frontend and built frontend both use this endpoint. After
+`npm run build`, the .NET server can serve the built storefront at its root.
+
+For the hosted Cloudflare storefront, configure the Worker environment variable
+`RETAIL_BACKEND_URL` to the deployed HTTPS C# host before publishing the new
+frontend. The Cloudflare runtime proxies catalogue requests to that host.
+The local Mac setup alone does not supply a public C# service.
+
+### Online-store administration workflows
+
+Orders links each new staff-created order to an eligible customer and snapshots
+that customer's name, email and company price tier. Product prices are resolved
+from the existing price-tier tables, then stock is reserved atomically. Disabling
+a customer or purchasing permission prevents new orders. Customer edits use a
+version check to reject stale forms; existing orders retain their customer snapshot.
+
+Payments record money already received outside this application. The reference
+must be unique, the amount must match the order total, and repeated submissions
+cannot record the same payment twice. This is not a payment gateway integration.
+
+Shipping supports delivery addresses, carriers and tracking numbers. Pickup is not offered. Payment is required before marking ready to ship or dispatching. Dispatch consumes reserved stock once. Completed
+fulfilments cannot be edited or dispatched again. Optimistic version checks
+prevent stale fulfilment forms from overwriting concurrent changes.
+
+Returns move through requested, approved/rejected, then received. Quantities
+cannot exceed fulfilled quantities or overlap pending requests. Receiving an
+inspected sellable return restores stock; damaged goods do not increase sellable
+stock. Refunds record an externally completed refund and its transaction reference,
+limited to the received return's value. Duplicate refund submissions cannot create
+multiple records. Previously recorded returns remain visible separately.
+
+The storefront now connects registration, customer sign-in, account details, assigned-tier prices, checkout, order/tracking history and return requests to these records. No card charge, bank transfer, courier booking or customer email is sent automatically.
+
+Owner has full access. Sales manages customers and orders; Finance records
+payments and refunds; Warehouse prepares shipments. Warehouse and Finance can
+inspect returns. Changes are recorded in the existing audit log. The new tables
+are additive; existing inventory, pricing, order and return records are retained.
+
+### Connected customer storefront
+
+Customer accounts use a separate HttpOnly, SameSite=Strict cookie scheme, salted
+PBKDF2 hashes (600,000 SHA-256 iterations), and per-IP sign-in/registration rate
+limits. Customer cookies cannot access staff APIs; staff cookies do not establish
+a customer session. Active status is checked on every authenticated customer
+request. Purchasing permission and the current company price tier are checked
+again when calculating checkout. Profiles cannot modify email, permissions or
+price tiers. Customer order history and return requests are scoped to the signed-in
+customer. Customer and catalogue responses use no-store caching.
+
+New customers can register. Existing customer records require a single-use,
+48-hour invitation issued from Customers > Sign-up invitation. Share that code
+with the correct customer yourself; it is not emailed automatically. Reissuing an
+invitation invalidates the previous code. Registration never claims an existing
+customer's assigned prices by email alone. Old browser-only demo accounts are not
+server accounts and must register once; their old hashes are not imported.
+
+The cart requests a server-calculated review, then places an idempotent order using
+a stable checkout reference. Unit prices, discounts and stock come from the current
+backend, not browser totals. Complete CCTV kits retain the existing 10% eligible
+camera/recorder discount; brand, channel and drive-bay limits are checked again.
+Installation is charged only when selected and is calculated from the existing
+storeys/roof-access rule. Orders snapshot prices and reserve stock atomically.
+Duplicate or retried submissions do not create additional orders or reservations.
+
+Orders of $2,000 or more receive the published free-delivery allowance. Other
+orders await a delivery charge entered by Sales, Finance or Owner through the
+order or Shipping detail screen. Payment cannot be recorded before this charge
+is confirmed. Customers see the resulting total in My Account. Payments/refunds
+remain manual records; there is no payment provider, automatic email or courier
+integration. Shipping, payment and refund updates appear in the customer's order
+history. Run `npm run check:customer` for isolated customer workflow regression
+tests; no working inventory or customer data is used.

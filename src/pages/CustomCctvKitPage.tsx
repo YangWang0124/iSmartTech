@@ -312,7 +312,7 @@ export function CustomCctvKitPage() {
           ).toFixed(2)
         ),
         installationCost: index === 0 ? installationCost : undefined,
-        installation: index === 0 ? { storeys, noRoofAccess } : undefined,
+        installation: index === 0 && installation ? { storeys, noRoofAccess } : undefined,
       }))
     );
     setAdded(true);

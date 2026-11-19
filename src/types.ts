@@ -7,6 +7,22 @@ export type ProductVariant = {
 };
 
 export type Product = {
+  managedByBackend?: boolean;
+  featured?: boolean;
+  featuredOrder?: number;
+  routeAliases?: string[];
+  detailContent?: {
+    overview?: string;
+    capabilities?: Array<[string, string]>;
+    recommendedApplications?: Array<[string, string]>;
+    why?: string;
+    idealUseCases?: Array<[string, string]>;
+    applications?: string[];
+    installationNotes?: string[];
+  };
+  includedItems?: Array<{ label: string; productId?: string }>;
+  translations?: { zh?: Partial<Pick<Product, "name" | "shortDescription" | "description" | "features" | "specifications">> };
+
   id: string;
   name: string;
   brand: string;

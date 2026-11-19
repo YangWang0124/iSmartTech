@@ -41,11 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
         <p className="stock">
           <i />{" "}
-          {product.priceOnRequest
-            ? language === "zh"
-              ? "库存请询问"
-              : "Stock on request"
-            : product.stock > 0
+          {product.stock > 0
             ? language === "zh"
               ? "有货"
               : "In stock"

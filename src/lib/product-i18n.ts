@@ -25,6 +25,9 @@ const specKeys: Record<string,string> = { Resolution:"分辨率", Lens:"镜头",
 const valueZh = (value:string) => value.replace("included","内置").replace("Up to","最长").replace("open space","空旷环境").replace("Black","黑色").replace("Microphone","麦克风").replace("touch","触控").replace("Wall / pole","墙面 / 杆式").replace("Fire / intrusion","火灾 / 入侵").replace("Four","四").replace("years","年").replace("year","年");
 
 export function localizeProduct(product: Product, language: "en" | "zh"): Product {
+  if (product.managedByBackend) {
+    return language === "zh" && product.translations?.zh ? { ...product, ...product.translations.zh } : product;
+  }
   if (language === "en" || !zh[product.id]) return product;
   const translated = zh[product.id];
   return { ...product, ...translated, specifications: Object.fromEntries(Object.entries(product.specifications).map(([key,value]) => [specKeys[key] ?? key, valueZh(value)])) };

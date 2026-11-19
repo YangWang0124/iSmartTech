@@ -738,24 +738,24 @@ function productOverview(product: Product) {
 
 export function ProductDetailPage() {
   const { id } = useParams();
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   const legacyProductAliases: Record<string, string> = {
     "dahua-nvr4104": "curated-dahua-nvr4104",
   };
   const resolvedProductId = id ? legacyProductAliases[id] ?? id : id;
-  const baseProduct = products.find((item) => item.id === resolvedProductId);
+  const baseProduct = products.find((item) => item.id === resolvedProductId || item.routeAliases?.includes(resolvedProductId || ""));
   const [sourceDetail, setSourceDetail] = useState<Partial<Product>>();
   useEffect(() => {
     let cancelled = false;
     setSourceDetail(undefined);
     const sourceId = id?.startsWith("source-") ? id : baseProduct?.sourceProductId;
-    if (!sourceId) return () => { cancelled = true; };
+    if (!sourceId || baseProduct?.managedByBackend) return () => { cancelled = true; };
     fetch(`/api/catalogue-source/${encodeURIComponent(sourceId)}`)
       .then(response => response.ok ? response.json() : Promise.reject(new Error("Product details unavailable")))
       .then(detail => { if (!cancelled) setSourceDetail(detail); })
       .catch(() => undefined);
     return () => { cancelled = true; };
-  }, [id, baseProduct?.sourceProductId]);
+  }, [id, baseProduct?.sourceProductId, baseProduct?.managedByBackend]);
   const { language } = useLanguage();
   const zh = language === "zh";
   const keepsVerifiedCuratedCopy = Boolean(baseProduct?.id.startsWith("curated-"));
@@ -763,7 +763,7 @@ export function ProductDetailPage() {
   const product = detailedBaseProduct ? localizeProduct(detailedBaseProduct, language) : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState("");
-  const sourceColourOptions = useMemo(() => [...new Set((sourceDetail?.colors ?? []).map((color) => color.trim()).filter(Boolean))], [sourceDetail?.colors]);
+  const sourceColourOptions = useMemo(() => [...new Set((baseProduct?.managedByBackend ? baseProduct.colors ?? [] : sourceDetail?.colors ?? []).map((color) => color.trim()).filter(Boolean))], [sourceDetail?.colors, baseProduct?.managedByBackend, baseProduct?.colors]);
   useEffect(() => {
     if (sourceColourOptions.length > 0) setSelectedColor(sourceColourOptions[0]);
   }, [sourceColourOptions]);
@@ -775,7 +775,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     setPreviewIndex(0);
   }, [resolvedProductId]);
-  if (!product) return <NotFoundPage />;
+  if (!product) return loading ? <main aria-busy="true">Loading product…</main> : <NotFoundPage />;
   const formattedProductPrice = money(product.price);
   const formattedProductPriceParts = formattedProductPrice.match(/^(.*?)([.,]\d{1,2})$/);
   const add = () => { addItem(product.id, quantity); setAdded(true); window.setTimeout(() => setAdded(false), 1800); };
@@ -797,33 +797,33 @@ export function ProductDetailPage() {
           : normalisedProductSku === "DS-2CD2387G2H-LISU-SL" || normalisedProductSku === "DS-2CD2387G2H-LISU/SL"
             ? "hikvision-2387"
             : product.id;
-  const usesDahuaBadges = normalisedProductSku === "DH-IPC-HDW3667EM-S-IL-ANZ";
-  const detailedDahuaLayoutContent = dahuaDetailedContent[dahuaDetailKey];
-  const accessoryLayoutContent = accessoryDetailedContent[dahuaDetailKey];
+  const usesDahuaBadges = !product.managedByBackend && normalisedProductSku === "DH-IPC-HDW3667EM-S-IL-ANZ";
+  const detailedDahuaLayoutContent = product.managedByBackend ? undefined : dahuaDetailedContent[dahuaDetailKey];
+  const accessoryLayoutContent = product.managedByBackend ? undefined : accessoryDetailedContent[dahuaDetailKey];
   const usesAccessoryDetailedLayout = Boolean(accessoryLayoutContent);
-const usesHikvisionKitLayout = product.id === "hikvision-ax-pro-security-kit";
-const alarmLayoutContent = createAlarmDetailContent(product);
-const alarmKitProducts = (alarmKitComponentIds[product.id] ?? [])
+const usesHikvisionKitLayout = !product.managedByBackend && product.id === "hikvision-ax-pro-security-kit";
+const alarmLayoutContent = product.managedByBackend ? undefined : createAlarmDetailContent(product);
+const alarmKitProducts = (product.managedByBackend ? [] : alarmKitComponentIds[product.id] ?? [])
   .map((id) => products.find((item) => item.id === id))
   .filter((item): item is Product => Boolean(item));
 const paradoxSupplementalItems = paradoxKitSupplementalItems[product.id] ?? [];
 const arrowheadSupplementalItems = arrowheadKitSupplementalItems[product.id] ?? [];
-const arrowheadIncludedItems = arrowheadKitIncludedItems[product.id] ?? [];
+const arrowheadIncludedItems = product.managedByBackend ? [] : arrowheadKitIncludedItems[product.id] ?? [];
 const usesVerifiedAlarmCopy = Boolean(alarmLayoutContent);
-const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm-kit"
+const paradoxModel = !product.managedByBackend && !alarmLayoutContent && product.id === "paradox-sp4000-alarm-kit"
   ? "SP4000"
-  : !alarmLayoutContent && product.id === "paradox-sp5500-alarm-kit"
+  : !product.managedByBackend && !alarmLayoutContent && product.id === "paradox-sp5500-alarm-kit"
     ? "SP5500"
     : undefined;
   const usesParadoxKitLayout = Boolean(paradoxModel);
-  const arrowheadKeypad = !alarmLayoutContent && product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : !alarmLayoutContent && product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
+  const arrowheadKeypad = !product.managedByBackend && !alarmLayoutContent && product.id === "arrowhead-ec-lcd-alarm-kit" ? "LCD" : !product.managedByBackend && !alarmLayoutContent && product.id === "arrowhead-ec-led-alarm-kit" ? "LED" : undefined;
   const usesArrowheadKitLayout = Boolean(arrowheadKeypad);
-  const usesTiandyC36Layout = product.id === "curated-tiandy-tc-c36xn";
-  const usesTiandyH333Layout = product.id === "curated-tiandy-tc-h333k";
-  const additionalTiandyLayoutContent = tiandyAdditionalDetailedContent[product.id] ?? tiandyAdditionalCameraContent[product.id] ?? pdfDetailedProductContent[product.id] ?? nvrDetailedProductContent[product.id];
+  const usesTiandyC36Layout = !product.managedByBackend && product.id === "curated-tiandy-tc-c36xn";
+  const usesTiandyH333Layout = !product.managedByBackend && product.id === "curated-tiandy-tc-h333k";
+  const additionalTiandyLayoutContent = product.managedByBackend ? undefined : tiandyAdditionalDetailedContent[product.id] ?? tiandyAdditionalCameraContent[product.id] ?? pdfDetailedProductContent[product.id] ?? nvrDetailedProductContent[product.id];
   const usesTiandyDetailedLayout = usesTiandyC36Layout || usesTiandyH333Layout || Boolean(additionalTiandyLayoutContent) || Boolean(detailedDahuaLayoutContent);
   const usesDetailedProductLayout = usesTiandyDetailedLayout || usesAccessoryDetailedLayout;
-  const usesStandardUpperProductStyling = usesDetailedProductLayout || Boolean(alarmLayoutContent) || usesHikvisionKitLayout;
+  const usesStandardUpperProductStyling = product.managedByBackend || usesDetailedProductLayout || Boolean(alarmLayoutContent) || usesHikvisionKitLayout;
   const usesTiandyShortToggle = usesTiandyC36Layout || usesTiandyH333Layout || Boolean(additionalTiandyLayoutContent) || Boolean(detailedDahuaLayoutContent) || usesAccessoryDetailedLayout;
   const tiandyLayoutContent = usesTiandyC36Layout ? tiandyC36Content : usesTiandyH333Layout ? tiandyH333Content : additionalTiandyLayoutContent ?? detailedDahuaLayoutContent;
   const detailedLayoutContent = tiandyLayoutContent ?? accessoryLayoutContent;
@@ -882,7 +882,7 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
     ...((product.galleryImages?.length ? product.galleryImages : usesDahuaBadges ? ["/assets/dahua-installed-preview.png"] : [])),
   ];
   const displayedImage = previewImages[previewIndex] ?? product.image;
-  const fullSummary = usesDahuaBadges ? dahuaDescription : usesDetailedProductLayout ? detailedLayoutContent!.description : tiandyDetail?.overview ?? (usesVerifiedAlarmCopy ? product.description : productOverview(product));
+  const fullSummary = product.managedByBackend ? product.description : usesDahuaBadges ? dahuaDescription : usesDetailedProductLayout ? detailedLayoutContent!.description : tiandyDetail?.overview ?? (usesVerifiedAlarmCopy ? product.description : productOverview(product));
   const seoDescriptionSource = fullSummary || product.description || product.shortDescription;
   const seoDescription = seoDescriptionSource.length > 158
     ? `${seoDescriptionSource.slice(0, 155).replace(/\s+\S*$/, "")}…`
@@ -945,9 +945,9 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
         <div className="product-detail__info product-purchase">
           <span className="eyebrow">{product.brand} · SKU {displaySku}</span>
           <h1>{displayName}</h1>
-          <div className={"detail-price" + (!usesStandardUpperProductStyling ? " detail-price--with-status" : "")}><strong className={product.priceOnRequest ? "price-on-request" : undefined}>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : formattedProductPriceParts ? <>{formattedProductPriceParts[1]}<span className="detail-price__fraction">{formattedProductPriceParts[2]}</span></> : formattedProductPrice}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small>{usesStandardUpperProductStyling && <section className="product-status product-status--price" aria-label={zh ? "产品库存" : "Product stock"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}</div>
-          {!usesStandardUpperProductStyling && <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.priceOnRequest ? "out-of-stock" : product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.priceOnRequest ? (zh ? "库存请询问" : "Stock on request") : product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}
-          <div className="product-summary"><h2>{usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (usesVerifiedAlarmCopy || product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
+          <div className={"detail-price" + (!usesStandardUpperProductStyling ? " detail-price--with-status" : "")}><strong className={product.priceOnRequest ? "price-on-request" : undefined}>{product.priceOnRequest ? (zh ? "询价" : "Price on request") : formattedProductPriceParts ? <>{formattedProductPriceParts[1]}<span className="detail-price__fraction">{formattedProductPriceParts[2]}</span></> : formattedProductPrice}</strong>{product.oldPrice && <del>{money(product.oldPrice)}</del>}<small>{product.priceOnRequest ? (zh ? "请联系我们获取报价" : "Contact us for a quote") : (zh ? "含商品及服务税" : "inc GST")}</small>{usesStandardUpperProductStyling && <section className="product-status product-status--price" aria-label={zh ? "产品库存" : "Product stock"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}</div>
+          {!usesStandardUpperProductStyling && <section className="product-status" aria-label={zh ? "产品库存和选项" : "Product stock and options"}><div><span>{zh ? "库存" : "Stock"}</span><strong className={product.stock > 0 ? "in-stock" : "out-of-stock"}>{product.stock > 0 ? (zh ? `现货 ${product.stock} 件` : `${product.stock} in stock`) : (zh ? "缺货" : "Out of stock")}</strong></div></section>}
+          <div className="product-summary"><h2>{product.managedByBackend ? product.shortDescription : usesDahuaBadges ? dahuaDescriptionTitle : usesDetailedProductLayout ? detailedLayoutContent!.descriptionTitle : tiandyDetail?.descriptionTitle ?? (usesVerifiedAlarmCopy || product.id.startsWith("curated-") ? product.shortDescription : productSummaryHeading(product))}</h2><p>{fullSummary}</p></div>
           {usesHikvisionKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{hikvisionKitContents.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
           {usesParadoxKitLayout && <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{paradoxKitContents(paradoxModel!).map(([title, description]) => <li key={title}>{description}</li>)}</ul><p>Cable must be ordered separately.</p></section>}
           {alarmKitProducts.length > 0 && <section className="key-features product-kit-contents alarm-kit-components"><h2>What's included</h2><ul>{alarmKitProducts.map((component) => <li key={component.id}><Link to={"/products/" + component.id}>{alarmKitComponentDisplayName(product.id, component)}</Link></li>)}{paradoxSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}{arrowheadSupplementalItems.map(([title, description]) => <li key={title}>{description}</li>)}</ul></section>}
@@ -974,6 +974,21 @@ const paradoxModel = !alarmLayoutContent && product.id === "paradox-sp4000-alarm
           </div>}
         </div>
       </section>
+      {product.managedByBackend && <>
+        {product.includedItems?.length ? <section className="key-features product-kit-contents"><h2>{zh ? "套装包含" : "What's included"}</h2><ul>{product.includedItems.map((item, index) => <li key={index}>{item.productId && products.some(component => component.id === item.productId) ? <Link to={"/products/" + item.productId}>{item.label}</Link> : item.label}</li>)}</ul></section> : null}
+        {product.detailContent?.overview && <section className="product-overview product-overview--tiandy"><h2>{zh ? "产品概览" : "Product Overview"}</h2><p>{product.detailContent.overview}</p></section>}
+        {[
+          ["Capabilities", product.detailContent?.capabilities],
+          ["Recommended Applications", product.detailContent?.recommendedApplications],
+          ["Ideal Use Cases", product.detailContent?.idealUseCases],
+        ].map(([heading, entries]) => Array.isArray(entries) && entries.length > 0 ? <section className="key-features" key={heading as string}><h2>{heading as string}</h2><ul>{(entries as Array<[string, string]>).map(([title, description], index) => <li key={index}><strong>{title}</strong> {description}</li>)}</ul></section> : null)}
+        {product.detailContent?.why && <section className="product-overview"><h2>{zh ? "产品优势" : "Product Benefits"}</h2><p>{product.detailContent.why}</p></section>}
+        {Object.keys(product.specifications).length > 0 && <section className="product-specifications"><h2>{zh ? "规格" : "Specifications"}</h2><dl>{Object.entries(product.specifications).map(([term, detail]) => <div key={term}><dt>{term}</dt><dd>{detail}</dd></div>)}</dl></section>}
+        {[
+          ["Typical Applications", product.detailContent?.applications],
+          ["Installation Notes", product.detailContent?.installationNotes],
+        ].map(([heading, entries]) => Array.isArray(entries) && entries.length > 0 ? <section className="key-features" key={heading as string}><h2>{heading as string}</h2><ul>{(entries as string[]).map((text, index) => <li key={index}>{text}</li>)}</ul></section> : null)}
+      </>}
       {usesTiandyDetailedLayout && (!usesTiandyShortToggle || detailLength === "full") && <>
         <section className="product-overview product-overview--tiandy"><div><span className="eyebrow">{zh ? "产品概览" : "Product Overview"}</span><h2>{resolvedPageHeadings.overview}</h2></div><p>{tiandyLayoutContent!.overview}</p></section>
         <section className="key-features key-features--tiandy"><h2>{zh ? "主要能力" : "Capabilities"}</h2><ul>{tiandyLayoutContent!.capabilities.map(([title, description]) => <li key={title}><strong>{title}:</strong> {description}</li>)}</ul></section>

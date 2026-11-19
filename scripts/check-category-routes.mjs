@@ -77,7 +77,13 @@ try {
   const footer = await readFile(new URL("../src/components/Footer.tsx", import.meta.url), "utf8");
   for (const [, slug] of footer.matchAll(/to="\/category\/([^"]+)"/g)) assert.ok(categoryBySlug.has(slug), slug);
   const provider = await readFile(new URL("../src/context/ProductContext.tsx", import.meta.url), "utf8");
-  assert.ok(provider.includes("].map(withCatalogueCategory)"));
+  assert.ok(provider.includes('fetch("/api/retail/products"'));
+  assert.ok(!provider.includes("seedProducts"));
+  const imported = JSON.parse(await readFile(new URL("../backend/catalogue-seed.json", import.meta.url), "utf8"));
+  for (const product of imported.products) {
+    assert.equal(product.category, withCatalogueCategory(product).category,
+      "Seed category must preserve the storefront category for " + product.sku);
+  }
   const detail = await readFile(new URL("../src/pages/ProductDetailPage.tsx", import.meta.url), "utf8");
   assert.ok(detail.includes("to={productCategoryPath}"));
   assert.ok(!detail.includes("/products?category="));

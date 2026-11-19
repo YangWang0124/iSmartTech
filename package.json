@@ -17,7 +17,8 @@
     "check:seo-assets": "node scripts/check-seo-assets.mjs",
     "check:public-routes": "node scripts/check-public-routes.mjs",
     "check": "npm run build",
-    "postbuild": "npm run check:public-routes"
+    "postbuild": "npm run check:public-routes",
+    "check:customer": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-customer-workflows.cjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

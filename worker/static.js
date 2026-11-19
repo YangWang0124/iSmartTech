@@ -83,6 +83,15 @@ function pageExists(pathname) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith("/api/retail/customer/") || url.pathname === "/api/retail/products" || /^\/api\/retail\/images\/[a-f0-9]{64}\.(png|jpg|webp)$/.test(url.pathname)) {
+      if (!env.RETAIL_BACKEND_URL) return json({ error: "Retail backend is not configured." }, 503);
+      const target = new URL(url.pathname, env.RETAIL_BACKEND_URL);
+      if (target.protocol !== "https:") return json({ error: "Retail backend requires HTTPS." }, 503);
+      const headers = new Headers(request.headers);
+      headers.delete("host");
+      return fetch(target, { method: request.method, headers,
+        body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body, redirect: "error" });
+    }
     if (url.pathname.startsWith("/api/")) return handleApi(request, env, url);
     if ((request.method === "GET" || request.method === "HEAD") && !url.pathname.includes(".")) {
       const redirectPath = permanentRedirects.get(normalizedPath(url.pathname));

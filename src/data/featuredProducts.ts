@@ -14,6 +14,9 @@ export const featuredProductIds = [
 ] as const;
 
 export function getFeaturedProducts(products: Product[]): Product[] {
+  if (products.some(product => product.managedByBackend))
+    return products.filter(product => product.featured)
+      .sort((left, right) => (left.featuredOrder ?? 0) - (right.featuredOrder ?? 0));
   const productsById = new Map(products.map((product) => [product.id, product]));
   return featuredProductIds.flatMap((id) => {
     const product = productsById.get(id);
