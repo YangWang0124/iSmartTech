@@ -1,4 +1,4 @@
-# IoT Tech Store Prototype
+# IoT Tech Store
 
 A responsive ecommerce display prototype for IoT Technologies. It is inspired by the clarity and catalogue depth of large New Zealand technology retailers without copying their design.
 
