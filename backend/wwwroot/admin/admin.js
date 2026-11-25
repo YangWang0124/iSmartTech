@@ -19,6 +19,15 @@ const pricingActions = {
 };
 let allowedCommands = new Set();
 let staffRolePermissions = {};
+let adminViewKey='';
+function rememberAdminPage(command, record) {
+  if(!adminViewKey || !allowedCommands.has(command))return;
+  const safe={};
+  for(const key of ['sku','enquiryId','filter','orderId','stockMode','name','page'])if(record?.[key]!==undefined)safe[key]=record[key];
+  if(Array.isArray(record?.filters))safe.filters=record.filters.slice(0,3);
+  try{sessionStorage.setItem(adminViewKey,JSON.stringify({command,record:Object.keys(safe).length?safe:null}));}catch{ /* Browsing still works when storage is unavailable. */ }
+}
+
 const groups = {
   Inventory: {
     inventory: ['Browse inventory', 'Search by SKU or product name and filter by brand or category.', [
@@ -33,7 +42,10 @@ const groups = {
   Shipping: { fulfilments: ['Manage shipping', '', [], 'View shipping'] },
   Customers: { customers: ['Customer accounts', '', [], 'View customers'] },
   'Returns and refunds': { 'return-requests': ['Manage returns and refunds', '', [], 'View returns'] },
+  Enquiries: { enquiries: ['Enquiry inbox', '', [], 'Refresh enquiries'] },
   Access: {
+    'staff-list': ['Manage staff accounts', '', [], 'Refresh staff'],
+    'mail-outbox': ['Local email outbox', 'Local test messages only. Real email delivery requires SMTP configuration.', [], 'Refresh emails'],
     staff: ['Create staff account', '', [field('Username'), field('Role', 'select', { choices: ['sales', 'warehouse', 'finance', 'owner'] }),
       field('New password', 'password')], 'Create account'],
     audit: ['View audit log', '', [], 'View latest entries']
@@ -67,6 +79,8 @@ function message(id, text, error = false) {
   const target = get(id);
   target.textContent = text;
   target.classList.toggle('error', error);
+  const feedback=id==='status'?get('staff-create-status'):null;
+  if(feedback){feedback.textContent=text;feedback.classList.toggle('error',error);target.textContent='';}
 }
 
 const money = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD' });
@@ -77,6 +91,26 @@ function valueText(key, value) {
   if (typeof value === 'object') return JSON.stringify(value);
   if (typeof value === 'boolean' || key === 'active') return value ? 'Yes' : 'No';
   return String(value);
+}
+
+function renderAudit(records,target) {
+  target.replaceChildren();
+  if(!records.length){target.append(node('p','No records found.'));return;}
+  const table=node('table');table.className='audit-table';
+  const columns=Object.keys(records[0]);const header=table.createTHead().insertRow();
+  columns.forEach(key=>header.append(node('th',label(key))));
+  const body=table.createTBody();
+  for(const entry of records){
+    const row=body.insertRow();
+    for(const key of columns){
+      const cell=row.insertCell();
+      if(key==='details'){
+        const details=node('details');details.className='audit-details';details.append(node('summary','View details'));
+        const content=node('pre',typeof entry[key]==='string'?entry[key]:JSON.stringify(entry[key]));details.append(content);cell.append(details);
+      }else cell.textContent=valueText(key,entry[key]);
+    }
+  }
+  target.append(table);
 }
 
 function showResult(value, target, editProduct) {
@@ -164,6 +198,8 @@ function productThumbnail(sku, mainImage) {
 }
 
 function renderInventory(records, target, onEdit, onPricing, page = 0, onStock) {
+  const filterInputs=get('operation-form').querySelectorAll('input,select');
+  rememberAdminPage('inventory',{page,filters:Array.from(filterInputs).slice(0,3).map(input=>input.value)});
   if (!records.length) {
     target.append(node('p', 'No products match your search.'));
     return;
@@ -319,6 +355,7 @@ navigationToggle.addEventListener('click', () => {
 });
 
 async function contentEditor(record, navButton, back) {
+  rememberAdminPage('product',record);
   const form = get('operation-form');
   form.classList.remove('inventory-toolbar');
   get('operation').hidden = false;
@@ -697,6 +734,7 @@ async function contentEditor(record, navButton, back) {
 }
 
 async function stockEditor(record, mode, navButton, back) {
+  rememberAdminPage('stock-set',{...record,stockMode:mode});
   const form = get('operation-form');
   const result = get('result');
   form.classList.remove('inventory-toolbar');
@@ -866,6 +904,7 @@ function inventorySuggestions(form, controls) {
 }
 
 async function commerceWorkspace(module, navButton, selectedOrder) {
+  rememberAdminPage(module,{orderId:selectedOrder});
   const form = get('operation-form');
   form.classList.remove('inventory-toolbar');
   form.closest('.card').hidden = false;
@@ -921,7 +960,14 @@ async function commerceWorkspace(module, navButton, selectedOrder) {
       if(options.min!==undefined)input.min=options.min;
       if(options.step!==undefined)input.step=options.step;
       if(options.readOnly)input.readOnly=true;
-      wrapper.append(input);section.append(wrapper);controls[key]=input;
+      if(options.currency) {
+        const amount=node('span');amount.className='commerce-currency';
+        const symbol=node('span','$');symbol.setAttribute('aria-hidden','true');
+        amount.append(symbol,input);wrapper.append(amount);
+        const formatAmount=()=>{if(input.value!==''&&Number.isFinite(Number(input.value)))input.value=Number(input.value).toFixed(2);};
+        input.addEventListener('blur',formatAmount);formatAmount();
+      } else wrapper.append(input);
+      section.append(wrapper);controls[key]=input;
     }
     const actions=node('div');actions.className='form-actions';
     const save=button(saveLabel,async()=>{
@@ -952,9 +998,9 @@ async function commerceWorkspace(module, navButton, selectedOrder) {
         });
       };
       if(allowedCommands.has('customer-save'))actions.append(button('Add customer',()=>edit({}),true));
-      screen.append(node('p','Manage purchasing eligibility and company price tiers. Existing customers need a sign-up invitation to create their storefront login.'));
+      screen.append(node('p','Manage customer details, purchasing eligibility and company price tiers.'));
       table(['Customer','Email','Company','Purchasing','Price tier','Action'],data.customers,c=>[c.name,c.email,c.company,
-        !c.active?'Suspended':c.can_purchase?'Allowed':'Blocked',c.price_tier,(()=>{const actions=node('div');actions.className='form-actions';actions.append(button('Edit',()=>edit(c)));if(allowedCommands.has('customer-invite'))actions.append(button('Sign-up invitation',async()=>{const result=await run('customer-invite',{customer_id:String(c.id)});message('status','Share this invitation securely with '+c.email+'. It expires in 48 hours: '+result.invitation);}));return actions;})()]);
+        !c.active?'Suspended':c.can_purchase?'Allowed':'Blocked',c.price_tier,(()=>{const actions=node('div');actions.className='form-actions';actions.append(button('Edit',()=>edit(c)));return actions;})()]);
       return;
     }
     const orderDetail = async id => {
@@ -963,12 +1009,15 @@ async function commerceWorkspace(module, navButton, selectedOrder) {
       screen.append(node('h3','Order #'+order.id),node('p',(order.customer?.customer_name||'Customer not linked')+' · '+statusText(order)+' · '+money.format(order.total_cents/100)));
       screen.append(node('p','Payment reference: '+(order.payment?.reference||order.payment_ref||'Not recorded')));
       table(['SKU','Quantity','Unit price','Line total'],order.lines,line=>[line.sku,line.quantity,money.format(line.unit_cents/100),money.format(line.quantity*line.unit_cents/100)]);
-      if(module==='orders' && allowedCommands.has('cancel') && order.status==='reserved')
-        screen.append(button('Cancel order and release stock',async()=>{await api('operations/cancel',{values:[String(id)]});await reload(id);}));
+      if(module==='orders' && allowedCommands.has('cancel') && order.status==='reserved') {
+        const cancelActions=node('div');cancelActions.className='order-cancel-actions';
+        cancelActions.append(button('Cancel order and release stock',async()=>{await api('operations/cancel',{values:[String(id)]});await reload(id);}));
+        screen.append(cancelActions);
+      }
       if(order.shipping_pending) {
         screen.append(node('p','Delivery charges must be confirmed before payment. The customer will see the confirmed total in their account.'));
         if(allowedCommands.has('order-shipping')&&order.status==='reserved')panel('Confirm delivery charge',[
-          ['shipping','Shipping charge (NZD)','number',{min:'0',step:'0.01'}]
+          ['shipping','Shipping charge (NZD)','number',{min:'0.01',step:'0.01',currency:true}]
         ],{},'Confirm shipping charge',async payload=>{await run('order-shipping',{order_id:String(id),shipping_cents:String(Math.round(Number(payload.shipping)*100))});await reload(id);});
       }
       if(order.shipping_cents!==null&&order.shipping_cents!==undefined)screen.append(node('p','Shipping charge: '+money.format(order.shipping_cents/100)));
@@ -1068,9 +1117,91 @@ async function commerceWorkspace(module, navButton, selectedOrder) {
   } catch(error){if(screen.isConnected)message('status',error.message,true);}
 }
 
+async function enquiryWorkspace(navButton, record) {
+  operation('enquiry-view',['Enquiry inbox','Contact and installation requests. Open an enquiry to view its full details.',[],'Refresh enquiries'],navButton);
+  const form=get('operation-form'),result=get('result');let filter=['new','in-progress','closed'].includes(record?.filter)?record.filter:'all';
+  const statusLabel=value=>({'new':'New','in-progress':'In progress',closed:'Closed'}[value]||value);
+  const current=()=>get('operation').textContent==='Enquiry inbox';
+  const received=value=>new Intl.DateTimeFormat('en-NZ',{dateStyle:'medium',timeStyle:'short',timeZone:'Pacific/Auckland'}).format(new Date(value.replace(' ','T')+'Z'))+' NZ time';
+  const open=async id=>{
+    try {
+      const enquiry=await api('operations/enquiry-details',{values:[String(id)]});if(!current())return;
+      rememberAdminPage('enquiries',{filter,enquiryId:id});
+      result.replaceChildren(node('h3',enquiry.reference),node('p',enquiry.first_name+' '+enquiry.last_name),node('p','Email: '+enquiry.email),node('p','Phone: '+(enquiry.phone||'—')),node('p','Interest: '+(enquiry.interest||'—')),node('p','Received: '+received(enquiry.created_at)));
+      if(enquiry.kind==='installation')result.append(node('p','Installation address: '+enquiry.address));
+      const message=node('p',enquiry.message);message.className='enquiry-message';result.append(message);
+      const editor=node('form');editor.className='enquiry-editor';const label=node('label','Status'),select=node('select');['new','in-progress','closed'].forEach(value=>select.append(new Option(statusLabel(value),value)));select.value=enquiry.status;label.append(select);
+      const notesLabel=node('label','Internal notes'),notes=node('textarea');notes.maxLength=10000;notes.rows=5;notes.value=enquiry.notes;notesLabel.append(notes);
+      const actions=node('div');actions.className='form-actions';const save=node('button','Save enquiry');save.className='primary';const back=node('button','Back to inbox');back.type='button';back.onclick=()=>void load();actions.append(save,back);editor.append(notesLabel,label,actions);
+      editor.onsubmit=async event=>{event.preventDefault();save.disabled=true;try{await api('operations/enquiry-update',{values:[String(id),select.value,notes.value,String(enquiry.version)]});await open(id);messageStatus('Enquiry updated.');}catch(error){messageStatus(error.message,true);}finally{save.disabled=false;}};
+      result.append(editor);result.hidden=false;
+    }catch(error){messageStatus(error.message,true);}
+  };
+  const messageStatus=(text,error=false)=>message('status',text,error);
+  const load=async()=>{
+    try {
+      const enquiries=await api('operations/enquiries',{values:[filter]});if(!current())return;
+      result.replaceChildren();result.hidden=false;rememberAdminPage('enquiries',{filter});
+      const list=node('ul');list.className='enquiry-list';
+      for(const enquiry of enquiries){
+        const row=node('li'),details=node('div'),title=node('button',(enquiry.first_name+' '+enquiry.last_name).trim());title.type='button';title.className='enquiry-title';title.onclick=()=>void open(enquiry.id);
+        details.append(title,node('p',enquiry.email),node('small',enquiry.reference));
+        const summary=node('div');summary.append(node('strong',enquiry.kind==='installation'?'Installation request':'Contact enquiry'),node('p',enquiry.interest||'General enquiry'),node('small',received(enquiry.created_at)));
+        const actions=node('div');actions.className='enquiry-actions';actions.append(node('span',statusLabel(enquiry.status)));const button=node('button','Open');button.type='button';button.onclick=()=>void open(enquiry.id);actions.append(button);
+        row.append(details,summary,actions);list.append(row);
+      }
+      result.append(list);if(!enquiries.length)result.append(node('p','No enquiries match this status.'));
+    }catch(error){messageStatus(error.message,true);}
+  };
+  const filterLabel=node('label','Status'),select=node('select');['all','new','in-progress','closed'].forEach(value=>select.append(new Option(value==='all'?'All enquiries':statusLabel(value),value)));select.onchange=()=>{filter=select.value;void load();};filterLabel.append(select);select.value=filter;form.prepend(filterLabel);
+  form.onsubmit=event=>{event.preventDefault();void load();};
+  if(record?.enquiryId)await open(record.enquiryId);else await load();
+}
+
+async function staffWorkspace(navButton) {
+  operation('staff-list-view',['Manage staff accounts','Only Owner accounts can manage staff. Role or status changes end existing sessions. Suspended users cannot sign in.',[],'Refresh staff'],navButton);
+  const form=get('operation-form'),result=get('result');
+  const load=async()=>{
+    try {
+      const accounts=await api('operations/staff-list',{values:[]});
+      if(!form.isConnected || get('operation').textContent!=='Manage staff accounts')return;
+      result.hidden=false;result.replaceChildren();
+      const table=node('table');const head=table.createTHead().insertRow();
+      ['Username','Role','Status','Action'].forEach(label=>head.append(node('th',label)));
+      const body=table.createTBody();
+      for(const account of accounts){
+        const row=body.insertRow();row.insertCell().textContent=account.username;
+        const role=node('select');role.setAttribute('aria-label','Role for '+account.username);
+        ['sales','warehouse','finance','owner'].forEach(value=>role.append(new Option(value[0].toUpperCase()+value.slice(1),value)));role.value=account.role;row.insertCell().append(role);
+        const state=node('select');state.setAttribute('aria-label','Status for '+account.username);state.append(new Option('Active','1'),new Option('Suspended','0'));state.value=String(account.active);row.insertCell().append(state);
+        const save=node('button','Save');save.type='button';save.onclick=async()=>{
+          if(role.value===account.role&&state.value===String(account.active)){message('status','No changes to save.');return;}
+          if(!window.confirm('Change access for '+account.username+'? Their existing sessions will end.'))return;
+          save.disabled=true;try{await api('operations/staff-update',{values:[account.username,role.value,state.value,String(account.revision)]});await load();message('status','Staff access updated.');}catch(error){message('status',error.message,true);}finally{save.disabled=false;}
+        };
+        const remove=node('button','Delete');remove.type='button';remove.className='staff-delete';remove.setAttribute('aria-label','Delete staff account '+account.username);
+        remove.onclick=async()=>{
+          if(!window.confirm('Delete staff account “'+account.username+'”? Sign-in access will be removed. Audit and order history will be kept. This cannot be undone here.'))return;
+          save.disabled=true;remove.disabled=true;
+          try{await api('operations/staff-delete',{values:[account.username,String(account.revision)]});await load();message('status','Staff account “'+account.username+'” deleted.');}
+          catch(error){message('status',error.message,true);}finally{save.disabled=false;remove.disabled=false;}
+        };
+        const actions=node('div');actions.className='form-actions';actions.append(save,remove);row.insertCell().append(actions);
+      }
+      result.append(table);
+    }catch(error){message('status',error.message,true);}
+  };
+  form.onsubmit=event=>{event.preventDefault();void load();};
+  const add=node('button','Add staff account');add.type='button';add.onclick=()=>document.querySelector('nav button[data-command="staff"]')?.click();form.querySelector('.form-actions')?.append(add);
+  await load();
+}
+
 function operation(command, definition, navButton, record, back) {
+  rememberAdminPage(command,record);
+  if(command==='enquiries'){void enquiryWorkspace(navButton,record);return;}
+  if(command==='staff-list'){void staffWorkspace(navButton);return;}
   if (['orders','fulfilments','customers','return-requests'].includes(command)) {
-    void commerceWorkspace(command, navButton);
+    void commerceWorkspace(command, navButton, record?.orderId);
     return;
   }
   if (command === 'product') {
@@ -1078,6 +1209,7 @@ function operation(command, definition, navButton, record, back) {
     return;
   }
   const [title, description, definitions, action] = definition;
+
   document.querySelectorAll('nav button').forEach(button => button.removeAttribute('aria-current'));
   navButton.setAttribute('aria-current', 'page');
   get('navigation-current').textContent = navButton.textContent;
@@ -1142,21 +1274,22 @@ function operation(command, definition, navButton, record, back) {
     else if (command === 'pricing' && operationCard.hidden) operation(command, definition, navButton);
     else document.querySelector('nav button[data-command="inventory"]')?.click();
   };
-  if (back || !['inventory', 'orders', 'audit'].includes(command)) actions.append(cancel);
+  if (back || !['inventory', 'orders', 'audit', 'enquiry-view'].includes(command)) actions.append(cancel);
   form.replaceChildren(...controls.map(control => control.wrapper), actions);
   if (command === 'staff') {
+    const feedback=node('p');feedback.id='staff-create-status';feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');actions.after(feedback);
     const guide = node('section');guide.className = 'role-access-guide';
     guide.append(node('h3','Role access'),node('p','Yes means the role can perform the action. Permissions are enforced by the backend.'));
     const definitions = [
-      ['Browse inventory','inventory'],['Add, edit and archive products; upload images','product-content'],
+      ['View and manage contact enquiries','enquiries'],['Browse inventory','inventory'],['Add, edit and archive products; upload images','product-content'],
       ['Edit available and reserved stock','stock-set'],['Run low-stock reports','reorder-report'],
       ['View selling price tiers','pricing'],['View and edit supplier costs','cost-set'],['Add, edit and remove price tiers','tier-set'],
       ['Review orders, payments, shipping and returns','commerce-data'],['View customer records with order information','commerce-data'],
-      ['Manage customer accounts and purchasing permissions','customer-save'],['Issue customer sign-up invitations','customer-invite'],['Confirm delivery charges before payment','order-shipping'],['Create customer orders and reserve stock','order-create'],
+      ['Manage customer accounts and purchasing permissions','customer-save'],['Confirm delivery charges before payment','order-shipping'],['Create customer orders and reserve stock','order-create'],
       ['Cancel unpaid reserved orders and release stock','cancel'],['Record received payments','order-payment'],
       ['Prepare shipping, enter tracking and dispatch orders','fulfilment-save'],['Submit return requests','return-request'],
       ['Approve, reject and inspect returns; restock sellable goods','return-process'],['Record completed refunds','refund-record'],
-      ['Create staff accounts and assign roles','staff'],['View the audit log','audit']
+      ['Create staff accounts','staff'],['Edit staff roles, suspend and reactivate accounts','staff-update'],['Delete staff accounts','staff-delete'],['View the audit log','audit'],['View local test emails (local pickup mode only)','mail-outbox']
     ];
     const render = rows => {
       const wrap=node('div');wrap.className='role-access-table';const table=node('table');
@@ -1239,6 +1372,11 @@ function operation(command, definition, navButton, record, back) {
     try {
       const response = await api('operations/' + command, body);
       if (!submit.isConnected) return;
+      if(command==='staff'){
+        message('status','Staff account “'+values[0]+'” created successfully. Role: '+values[1]+'.');
+        result.hidden=true;
+        return;
+      }
       if (back && ['cost-set', 'tier-set', 'tier-remove'].includes(command)) {
         back();
         return;
@@ -1278,16 +1416,36 @@ function operation(command, definition, navButton, record, back) {
             { sku: response.product.sku, cents: response.cost_cents }, restore) : null,
           allowedCommands.has('tier-remove') ? name => api('operations/tier-remove',{values:[response.product.sku,name]}) : null);
 
+      } else if(command==='audit') {
+        renderAudit(response,result,record?.page||0);
+      } else if(command==='mail-outbox') {
+        const open = async id => {
+          try {
+            const email=await api('operations/mail-open',{values:[String(id)]});
+            if(!submit.isConnected)return;
+            result.replaceChildren(node('h3',email.subject),node('p','To: '+email.recipient));
+            const content=node('pre',email.body);content.className='local-email-body';result.append(content);
+            for(const link of email.body.match(/https?:\/\/[^\s]+/g)||[]) {
+              const anchor=node('a','Open account link');anchor.href=link;anchor.target='_blank';anchor.rel='noopener noreferrer';result.append(anchor);
+            }
+            const back=node('button','Back to emails');back.type='button';back.onclick=()=>form.requestSubmit();result.append(back);
+          }catch(error){message('status',error.message,true);}
+        };
+        const table=node('table');const head=table.createTHead().insertRow();
+        ['To','Subject','Status','Created','Action'].forEach(title=>head.append(node('th',title)));
+        const body=table.createTBody();
+        for(const email of response){const row=body.insertRow();[email.recipient,email.subject,email.status,email.created_at].forEach(value=>row.insertCell().textContent=value);const button=node('button','Open');button.type='button';button.onclick=()=>void open(email.id);row.insertCell().append(button);}
+        result.append(table);if(!response.length)result.append(node('p','No local emails yet. Register an account or request a password reset.'));
       } else {
         showResult(response, result);
       }
       result.hidden = false;
-      message('status', ['inventory', 'pricing'].includes(command) ? '' : 'Completed.');
+      message('status', ['inventory', 'pricing', 'audit', 'mail-outbox'].includes(command) ? '' : 'Completed.');
     } catch (error) {
-      if (submit.isConnected) message('status', error.message, true);
+      if (submit.isConnected) message('status', command==='staff'?'Account was not created. '+error.message:error.message, true);
     } finally { submit.disabled = false; cancel.disabled = false; }
   };
-  if (record && command === 'pricing') form.requestSubmit();
+  if ((record && command === 'pricing') || command==='audit' || command==='mail-outbox') form.requestSubmit();
 }
 
 function session(user) {
@@ -1297,6 +1455,7 @@ function session(user) {
   get('logout').hidden = !user;
   get('identity').textContent = user ? user.user + ' · ' + user.role : '';
   staffRolePermissions = user?.rolePermissions || {};
+  adminViewKey=user?'ismarttech.admin.page.'+user.user:'';
   const navigation = get('navigation');
   navigation.replaceChildren();
   if (!user) return;
@@ -1305,7 +1464,7 @@ function session(user) {
     details.open = true;
     details.append(node('summary', group));
     for (const [command, definition] of Object.entries(operations)) {
-      if (!user.commands.includes(command)) continue;
+      if (!user.commands.includes(command) || (command==='mail-outbox'&&!user.localEmailOutbox)) continue;
       const button = node('button', definition[0]);
       button.dataset.command = command;
       button.addEventListener('click', () => {
@@ -1317,6 +1476,14 @@ function session(user) {
       details.append(button);
     }
     if (details.children.length > 1) navigation.append(details);
+  }
+  let saved=null;
+  try{saved=JSON.parse(sessionStorage.getItem(adminViewKey)||'null');}catch{ /* Use the default page if saved state is invalid. */ }
+  const definitions=Object.assign({},...Object.values(groups),pricingActions);
+  if(saved&&allowedCommands.has(saved.command)){
+    const button=navigation.querySelector('button[data-command="'+saved.command+'"]')||navigation.querySelector('button[data-command="inventory"]');
+    if(button&&saved.command==='stock-set'&&saved.record?.sku){void stockEditor(saved.record,saved.record.stockMode==='reserved'?'reserved':'available',button,()=>button.click());return;}
+    if(button&&definitions[saved.command]){operation(saved.command,definitions[saved.command],button,saved.record);return;}
   }
   navigation.querySelector('button')?.click();
 }

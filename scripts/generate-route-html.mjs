@@ -21,7 +21,7 @@ const assets = {
 
 const sitemapPaths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)]
   .map(([, location]) => new URL(location).pathname);
-const routePaths = new Set([...sitemapPaths, "/cart", "/signin", "/signup", "/account"]);
+const routePaths = new Set([...sitemapPaths, "/cart", "/signin", "/signup", "/account", "/forgot-password", "/reset-password", "/verify-email"]);
 
 for (const path of routePaths) {
   const response = await worker.fetch(

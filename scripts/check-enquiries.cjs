@@ -1,0 +1,25 @@
+const {spawn,spawnSync}=require('node:child_process'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'enquiry-test-')),db=path.join(dir,'test.sqlite'),dll=root+'/backend/bin/Debug/net8.0/Retail.dll',password=crypto.randomBytes(18).toString('hex');
+assert.equal(spawnSync('dotnet',[dll,'--db',db,'init','test-owner'],{cwd:root,input:(password+'\n').repeat(2)}).status,0);
+const server=spawn('dotnet',[dll,'--db',db,'serve','--port','0'],{cwd:root+'/backend',env:{...process.env,ISMARTTECH_EMAIL_MODE:'pickup',ISMARTTECH_PUBLIC_ADMIN:'0'},stdio:['ignore','pipe','pipe']});
+(async()=>{const origin=await new Promise((resolve,reject)=>{server.stdout.on('data',b=>{const m=b.toString().match(/Now listening on: (http:\/\/\S+)/);if(m)resolve(m[1]);});server.on('exit',code=>reject(Error('server exited '+code)));});const jars={};
+async function request(route,body,who='owner',status=200,csrf=true){const headers={Cookie:jars[who]||''};if(body){headers['Content-Type']='application/json';if(csrf)headers[route.startsWith('/admin')?'X-Admin-Request':'X-Customer-Request']='1';}const r=await fetch(origin+route,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined});if(r.headers.has('set-cookie'))jars[who]=r.headers.get('set-cookie').split(';')[0];const data=await r.json().catch(()=>null);assert.equal(r.status,status,JSON.stringify(data));return data;}
+const op=(name,values=[],who='owner',status=200)=>request('/admin/api/operations/'+name,{values},who,status),contact=(body,status=200,csrf=true)=>request('/api/retail/enquiries',body,'public',status,csrf);
+await request('/admin/api/login',{user:'test-owner',password});await request('/admin/api/operations/staff',{values:['sales-test','sales'],password});await request('/admin/api/operations/staff',{values:['warehouse-test','warehouse'],password});
+await request('/admin/api/login',{user:'sales-test',password},'sales');await request('/admin/api/login',{user:'warehouse-test',password},'warehouse');
+const contactBody={firstName:'Test',lastName:'Customer',email:'test@example.invalid',phone:'0212345678',interest:'Networking',message:'A genuine test enquiry.\n<script>alert("test")</script>',requestKey:crypto.randomUUID()};
+const installation=process.argv.includes('--installation');const body=installation?{kind:'installation',name:'Installation Test',email:'test@example.invalid',phone:'0212345678',address:'1 Test Road, Auckland',details:contactBody.message,requestKey:crypto.randomUUID()}:contactBody;const messageField=installation?'details':'message';
+await contact(body,403,false);if(!process.argv.includes('--browser')){await contact({...body,email:'bad'},400);await contact({...body,[messageField]:' '},400);}
+const saved=await contact(body);assert.match(saved.reference,/^ENQ-[A-F0-9]{16}$/);assert.deepEqual(await contact(body),saved);await contact({...body,[messageField]:'Different'},400);
+if(!process.argv.includes('--browser'))await contact({...body,requestKey:crypto.randomUUID()},429);
+await op('enquiries',[],'public',401);await op('enquiries',[],'warehouse',403);await op('enquiry-update',['1','closed','','1'],'warehouse',403);
+let list=await op('enquiries',[],'sales');assert.equal(list.length,1);assert.equal(list[0].reference,saved.reference);assert.equal(list[0].message,undefined);
+const detail=await op('enquiry-details',[String(list[0].id)]);assert.equal(detail.message,body[messageField]);assert.equal(detail.kind,installation?'installation':'contact');if(installation)assert.equal(detail.address,body.address);assert.equal(detail.status,'new');
+await op('enquiry-update',[String(detail.id),'in-progress','Called customer','1'],'sales');await op('enquiry-update',[String(detail.id),'closed','','1'],'owner',400);await op('enquiry-update',[String(detail.id),'invalid','','2'],'owner',400);
+assert.equal((await op('enquiries',['new'])).length,0);assert.equal((await op('enquiries',['in-progress'])).length,1);
+await op('enquiry-update',[String(detail.id),'closed','Resolved','2']);assert.equal((await op('enquiry-details',[String(detail.id)])).notes,'Resolved');assert.equal((await op('enquiries',['closed'])).length,1);
+const audit=JSON.stringify(await op('audit'));assert.ok(audit.includes('enquiry-update'));assert.equal(audit.includes('Called customer'),false);
+console.log('PASS: persisted contact submission/reference, validation/CSRF/rate limit, idempotent retry, Owner/Sales-only inbox, filtering/details, status/notes updates, concurrent-edit rejection and private audit records.');
+if(process.argv.includes('--browser')){fs.writeFileSync('/tmp/ismarttech-enquiry-browser.json',JSON.stringify({origin,password,db}));console.log('Browser fixture ready '+origin);return;}
+server.once('exit',()=>fs.rmSync(dir,{recursive:true,force:true}));server.kill();
+})().catch(e=>{console.error(e);process.exitCode=1;server.once('exit',()=>fs.rmSync(dir,{recursive:true,force:true}));server.kill();});

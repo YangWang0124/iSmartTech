@@ -173,3 +173,53 @@ CREATE TABLE IF NOT EXISTS customer_checkouts (
  customer_id INTEGER NOT NULL REFERENCES customers(id), request_key TEXT NOT NULL, fingerprint TEXT NOT NULL,
  order_id INTEGER NOT NULL UNIQUE REFERENCES orders(id), PRIMARY KEY(customer_id,request_key)
 );
+
+CREATE TABLE IF NOT EXISTS customer_security (
+ customer_id INTEGER PRIMARY KEY REFERENCES customers(id), credential_revision INTEGER NOT NULL DEFAULT 1,
+ verified_email TEXT
+);
+INSERT OR IGNORE INTO customer_security(customer_id) SELECT customer_id FROM customer_credentials;
+CREATE TABLE IF NOT EXISTS customer_action_tokens (
+ token_hash TEXT PRIMARY KEY, customer_id INTEGER NOT NULL REFERENCES customers(id),
+ purpose TEXT NOT NULL CHECK(purpose IN ('verify','reset')), email TEXT NOT NULL,
+ expires_at TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, used_at TEXT
+);
+CREATE INDEX IF NOT EXISTS customer_action_lookup ON customer_action_tokens(customer_id,purpose,used_at);
+CREATE TABLE IF NOT EXISTS customer_email_outbox (
+ id INTEGER PRIMARY KEY, recipient TEXT NOT NULL, subject TEXT NOT NULL, protected_body TEXT NOT NULL,
+ status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','sent','cancelled')),
+ attempts INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, sent_at TEXT,
+ last_attempt_at TEXT, last_error TEXT
+);
+
+CREATE TABLE IF NOT EXISTS staff_access (
+ username TEXT PRIMARY KEY REFERENCES staff(username),
+ active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1)),
+ revision INTEGER NOT NULL DEFAULT 1
+);
+INSERT OR IGNORE INTO staff_access(username) SELECT username FROM staff;
+
+CREATE TABLE IF NOT EXISTS staff_deleted (
+ username TEXT PRIMARY KEY REFERENCES staff(username),
+ deleted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS enquiries (
+ id INTEGER PRIMARY KEY, reference TEXT NOT NULL UNIQUE, request_key TEXT NOT NULL UNIQUE,
+ first_name TEXT NOT NULL,last_name TEXT NOT NULL,email TEXT NOT NULL,phone TEXT NOT NULL,interest TEXT NOT NULL,message TEXT NOT NULL,
+ status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','in-progress','closed')),
+ notes TEXT NOT NULL DEFAULT '',version INTEGER NOT NULL DEFAULT 1,
+ created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS enquiry_status_date ON enquiries(status,created_at);
+
+CREATE TABLE IF NOT EXISTS enquiry_installation (
+ enquiry_id INTEGER PRIMARY KEY REFERENCES enquiries(id), address TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS order_notification_events (
+ event_key TEXT PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES orders(id),
+ kind TEXT NOT NULL, snapshot TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ mail_id INTEGER REFERENCES customer_email_outbox(id)
+);
+CREATE INDEX IF NOT EXISTS order_notification_pending ON order_notification_events(mail_id,created_at);

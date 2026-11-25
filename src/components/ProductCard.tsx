@@ -77,10 +77,11 @@ export function ProductCard({ product }: { product: Product }) {
             <button
               className="icon-button"
               onClick={() => addItem(product.id)}
+              disabled={!(product.stock > 0)}
               aria-label={`Add ${product.name} to cart`}
             >
               <span className="product-card__cart-icon" aria-hidden="true" />
-              <span>{language === "zh" ? "加入购物车" : "Add to cart"}</span>
+              <span>{!(product.stock>0)?(language === "zh"?"暂时缺货":"Out of stock"):(language === "zh" ? "加入购物车" : "Add to cart")}</span>
             </button>
           )}
         </div>

@@ -145,6 +145,7 @@ sealed partial class RetailStore : IDisposable
     private SqliteTransaction? transaction;
     private static readonly Dictionary<string, string> Roles = new()
     {
+        ["enquiries"] = "sales", ["enquiry-details"] = "sales", ["enquiry-update"] = "sales", ["mail-outbox"] = "", ["mail-open"] = "",
         ["fulfilments"] = "sales warehouse finance", ["customers"] = "sales", ["return-requests"] = "sales warehouse finance",
         ["commerce-data"] = "sales warehouse finance", ["commerce-order"] = "sales warehouse finance",
         ["customer-invite"] = "sales", ["order-shipping"] = "sales finance", ["customer-save"] = "sales", ["order-create"] = "sales", ["order-payment"] = "finance",
@@ -153,7 +154,7 @@ sealed partial class RetailStore : IDisposable
         ["workbook-preview"] = "", ["workbook-import"] = "",
         ["pricing"] = "sales finance", ["cost-set"] = "finance", ["inventory-options"] = "sales warehouse finance", ["inventory-suggest"] = "sales warehouse finance", ["tiers"] = "sales finance", ["tier-set"] = "finance", ["tier-remove"] = "finance",
         ["stock-details"] = "warehouse", ["stock-set"] = "warehouse", ["reorder-report"] = "warehouse",
-        ["staff"] = "", ["import"] = "", ["audit"] = "", ["compatibility"] = "",
+        ["staff-list"] = "", ["staff-update"] = "", ["staff-delete"] = "", ["staff"] = "", ["import"] = "", ["audit"] = "", ["compatibility"] = "",
         ["product-details"] = "warehouse", ["product-content"] = "warehouse", ["product"] = "warehouse", ["receive"] = "warehouse", ["quote"] = "sales", ["kit"] = "sales", ["reserve"] = "sales", ["cancel"] = "sales",
         ["pay"] = "finance", ["dispatch"] = "warehouse", ["return"] = "finance",
         ["orders"] = "sales warehouse finance", ["order"] = "sales warehouse finance", ["inventory"] = "sales warehouse finance"
@@ -255,11 +256,48 @@ sealed partial class RetailStore : IDisposable
 
     private void AddStaff(string user, string role, string? suppliedPassword = null)
     {
+        Check(Query("SELECT 1 FROM staff WHERE username=$0",user).Count==0,"This username already exists or was previously deleted. Choose another username.");
         var password = suppliedPassword ?? Password("New password: ");
-        Check(password.Length >= 12, "Use at least 12 characters.");
+        Check(password.Length is >=12 and <=256, "Use between 12 and 256 characters.");
+        Check(!string.IsNullOrWhiteSpace(user) && user.Length<=100 && user==user.Trim(), "Enter a username between 1 and 100 characters without surrounding spaces.");
         if (suppliedPassword == null) Check(password == Password("Repeat password: "), "Passwords differ.");
         var salt = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         Execute("INSERT INTO staff VALUES ($0,$1,$2,$3)", user, role, salt, Convert.ToHexString(Hash(password, salt)));
+        Execute("INSERT INTO staff_access(username) VALUES ($0)",user);
+    }
+
+    public long StaffRevision(string username) => Number(Row("SELECT revision FROM staff_access WHERE username=$0",username),"revision");
+
+    private object UpdateStaff(Arguments args)
+    {
+        var username=args.At(0);var role=args.At(1);var active=args.At(2);var revision=Positive(args.At(3));
+        Check(role is "owner" or "sales" or "warehouse" or "finance","Unknown role.");
+        Check(active is "0" or "1","Choose Active or Suspended.");
+        var existing=Row("SELECT s.role,a.active,a.revision FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",username);
+        Check(Number(existing,"revision")==revision,"This staff account changed. Refresh and try again.");
+        Check(username!=args.Actor || (role=="owner" && active=="1"),"You cannot suspend your own account or remove your own Owner access.");
+        if(Equals(existing["role"],"owner") && Number(existing,"active")==1 && (role!="owner" || active=="0"))
+            Check(Query("SELECT 1 FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.role='owner' AND a.active=1 AND s.username<>$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",username).Count>0,"Keep at least one active Owner account.");
+        if(!Equals(existing["role"],role) || Number(existing,"active")!=long.Parse(active))
+        {
+            Execute("UPDATE staff SET role=$0 WHERE username=$1",role,username);
+            Execute("UPDATE staff_access SET active=$0,revision=revision+1 WHERE username=$1",long.Parse(active),username);
+        }
+        return Row("SELECT s.username,s.role,a.active,a.revision FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",username);
+    }
+
+    private object DeleteStaff(Arguments args)
+    {
+        var username=args.At(0);var revision=Positive(args.At(1));
+        Check(username!=args.Actor,"You cannot delete your own staff account.");
+        var existing=Row("SELECT s.role,a.active,a.revision FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",username);
+        Check(Number(existing,"revision")==revision,"This staff account changed. Refresh and try again.");
+        if(Equals(existing["role"],"owner") && Number(existing,"active")==1)
+            Check(Query("SELECT 1 FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.role='owner' AND a.active=1 AND s.username<>$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",username).Count>0,"Keep at least one active Owner account.");
+        Execute("UPDATE staff_access SET active=0,revision=revision+1 WHERE username=$0",username);
+        Execute("UPDATE staff SET salt=$0,password_hash=$1 WHERE username=$2",Convert.ToHexString(RandomNumberGenerator.GetBytes(16)),Convert.ToHexString(RandomNumberGenerator.GetBytes(32)),username);
+        Execute("INSERT INTO staff_deleted(username) VALUES ($0)",username);
+        return new {deleted=true,username};
     }
 
     public object Run(Arguments args)
@@ -279,7 +317,7 @@ sealed partial class RetailStore : IDisposable
 
     public string? Authenticate(string actor, string password)
     {
-        var staff = Query("SELECT * FROM staff WHERE username=$0", actor).FirstOrDefault();
+        var staff = Query("SELECT s.* FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND a.active=1 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)", actor).FirstOrDefault();
         var hash = Hash(password, staff == null ? new string('0', 32) : (string)staff["salt"]!);
         return staff != null && CryptographicOperations.FixedTimeEquals(
             Convert.FromHexString((string)staff["password_hash"]!), hash) ? (string)staff["role"]! : null;
@@ -295,10 +333,11 @@ sealed partial class RetailStore : IDisposable
             Transaction(() => { ExpireReservations(); return true; });
         return Transaction(() =>
         {
+            Check(Query("SELECT 1 FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND s.role=$1 AND a.active=1 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)",args.Actor,role).Count==1,"Your staff access has changed. Sign in again.");
             var result = RunCommand(args, role, staffPassword);
-            if (args.Command is not ("fulfilments" or "customers" or "return-requests" or "commerce-data" or "commerce-order" or "inventory" or "audit" or "order" or "orders" or "workbook-preview" or "product-details" or "stock-details" or "pricing" or "inventory-options" or "inventory-suggest" or "tiers" or "reorder-report"))
+            if (args.Command is not ("enquiries" or "enquiry-details" or "staff-list" or "mail-outbox" or "mail-open" or "fulfilments" or "customers" or "return-requests" or "commerce-data" or "commerce-order" or "inventory" or "audit" or "order" or "orders" or "workbook-preview" or "product-details" or "stock-details" or "pricing" or "inventory-options" or "inventory-suggest" or "tiers" or "reorder-report"))
                 Execute("INSERT INTO audit(actor,action,details) VALUES ($0,$1,$2)", args.Actor, args.Command,
-                    JsonSerializer.Serialize(new { arguments = args.Command == "product-content" ? args.Rest(0).Take(1) : args.Rest(0), order_id =
+                    JsonSerializer.Serialize(new { arguments = args.Command is "product-content" or "enquiry-update" ? args.Rest(0).Take(1) : args.Rest(0), order_id =
                         args.Command is "quote" or "kit" ? ((Dictionary<string, object?>)result)["id"] : null }));
             return result;
         });
@@ -404,6 +443,7 @@ sealed partial class RetailStore : IDisposable
             foreach (var item in Lines(id))
                 Move((string)item["sku"]!, 0, -Number(item, "quantity"), $"order {id} expired", (string)order["created_by"]!);
             Execute("UPDATE orders SET status='cancelled' WHERE id=$0", id);
+            QueueOrderNotification(id,"expired");
         }
     }
 
@@ -494,6 +534,9 @@ sealed partial class RetailStore : IDisposable
         }
         if (args.Command == "dispatch") Dispatch(id, args);
         Execute("UPDATE orders SET status=$0 WHERE id=$1", next, id);
+        if(args.Command=="cancel")QueueOrderNotification(id,"cancelled");
+        if(args.Command=="pay")QueueOrderNotification(id,"paid");
+        if(args.Command=="dispatch")QueueOrderNotification(id,"shipped");
         return Order(id);
     }
 
@@ -594,8 +637,9 @@ sealed partial class RetailStore : IDisposable
         if(args.Command=="order-shipping")
         {
             var id=Id("order_id");Check(Equals(Row("SELECT status FROM orders WHERE id=$0",id)["status"],"reserved"),"Shipping charges can only be confirmed before payment.");
-            var cents=long.Parse(CommerceText(data,"shipping_cents"),CultureInfo.InvariantCulture);Check(cents>=0&&cents<=10000000,"Enter a valid shipping amount.");
+            var cents=long.Parse(CommerceText(data,"shipping_cents"),CultureInfo.InvariantCulture);Check(cents>0&&cents<=10000000,"Enter a shipping amount greater than zero.");
             Check(Execute("UPDATE order_charges SET shipping_cents=$0 WHERE order_id=$1 AND shipping_cents IS NULL",cents,id)==1,"Shipping has already been confirmed. Refresh the order.");
+            QueueOrderNotification(id,"delivery");
             return CommerceOrder(id);
         }
         if (args.Command == "customer-save")
@@ -635,6 +679,7 @@ sealed partial class RetailStore : IDisposable
             Check(method == "delivery","Only shipping is supported.");
             Execute("INSERT INTO fulfilments(order_id,method,address,collection_contact) VALUES ($0,$1,$2,$3)",id,method,customer["address"],customer["name"]);
             Transition(CommandArgs("reserve",id.ToString()));
+            QueueOrderNotification(id,"received");
             return CommerceOrder(id);
         }
         if (args.Command == "order-payment")
@@ -692,6 +737,7 @@ sealed partial class RetailStore : IDisposable
                     carrier=excluded.carrier,tracking=excluded.tracking,collection_contact=excluded.collection_contact,
                     notes=excluded.notes,version=fulfilments.version+1,updated_at=CURRENT_TIMESTAMP
                 """,id,method,status,address,carrier,tracking,contact,CommerceText(data,"notes",2000));
+            if(status=="dispatched")QueueOrderNotification(id,"shipped");
             return CommerceOrder(id);
         }
         if (args.Command == "return-request")
@@ -783,6 +829,18 @@ sealed partial class RetailStore : IDisposable
                     WHERE active=1 AND available <= $0 AND ($1 IS NULL OR brand=$1 COLLATE NOCASE)
                     ORDER BY available,sku
                     """, Positive(args.At(0)), args.Rest(1).FirstOrDefault());
+            case "enquiries":
+                return EnquiryList(args.Rest(0).FirstOrDefault()??"all");
+            case "enquiry-details":
+                return Row("SELECT e.id,e.reference,e.first_name,e.last_name,e.email,e.phone,e.interest,e.message,e.status,e.notes,e.version,e.created_at,e.updated_at,i.address,CASE WHEN i.enquiry_id IS NULL THEN 'contact' ELSE 'installation' END AS kind FROM enquiries e LEFT JOIN enquiry_installation i ON i.enquiry_id=e.id WHERE e.id=$0",Positive(args.At(0)));
+            case "enquiry-update":
+                return UpdateEnquiry(args);
+            case "staff-list":
+                return Query("SELECT s.username,s.role,a.active,a.revision FROM staff s JOIN staff_access a ON a.username=s.username WHERE NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username) ORDER BY s.username COLLATE NOCASE");
+            case "staff-delete":
+                return DeleteStaff(args);
+            case "staff-update":
+                return UpdateStaff(args);
             case "staff":
                 var role = args.At(1);
                 Check(role is "sales" or "warehouse" or "finance" or "owner", "Unknown role.");

@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { customerRequest } from "../lib/products";
 
-export type Customer = { id: number; name: string; email: string; company: string; phone: string; address: string; can_purchase: number; price_tier: string; version: number };
+export type Customer = { id: number; name: string; email: string; company: string; phone: string; address: string; can_purchase: number; email_verified: number; version: number };
 type AuthValue = {
   user: Customer | null; loading: boolean; isAuthenticated: boolean;
   signIn: (email: string, password: string, remember: boolean) => Promise<void>;
-  signUp: (name: string, email: string, password: string, remember: boolean, invitation?: string) => Promise<void>;
+  signUp: (email: string, password: string, remember: boolean) => Promise<void>;
   signOut: () => Promise<void>; refresh: () => Promise<void>;
 };
 const AuthContext = createContext<AuthValue | null>(null);
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
   const value = useMemo<AuthValue>(() => ({user,loading,isAuthenticated:Boolean(user),refresh,
     signIn: async (email,password,remember) => {authMutation.current=true;++requestNumber.current;try{setUser(await customerRequest<Customer>('signin',{email,password,remember}));}finally{authMutation.current=false;}},
-    signUp: async (name,email,password,remember,invitation) => {authMutation.current=true;++requestNumber.current;try{setUser(await customerRequest<Customer>('signup',{name,email,password,remember,invitation:invitation || ''}));}finally{authMutation.current=false;}},
+    signUp: async (email,password,remember) => {authMutation.current=true;++requestNumber.current;try{setUser(await customerRequest<Customer>('signup',{email,password,remember}));}finally{authMutation.current=false;}},
     signOut: async () => {authMutation.current=true;++requestNumber.current;try{await customerRequest('signout',{});setUser(null);}finally{authMutation.current=false;}},
   }), [user,loading,refresh]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

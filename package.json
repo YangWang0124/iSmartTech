@@ -18,6 +18,10 @@
     "check:public-routes": "node scripts/check-public-routes.mjs",
     "check": "npm run build",
     "postbuild": "npm run check:public-routes",
+    "check:notifications": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-customer-workflows.cjs --notifications",
+    "check:enquiries": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-enquiries.cjs && node scripts/check-enquiries.cjs --installation",
+    "check:staff-access": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-staff-access.cjs",
+    "check:customer-security": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-customer-security.cjs",
     "check:customer": "dotnet build backend/Retail.csproj --no-restore --disable-build-servers && node scripts/check-customer-workflows.cjs"
   },
   "dependencies": {

@@ -106,7 +106,7 @@ for (const [, json] of brandHtml.matchAll(/<script type="application\/ld\+json">
 const sitemapPaths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, location]) => new URL(location).pathname);
 assert(sitemapPaths.length > 0, "Sitemap must contain public URLs");
 assert.equal(new Set(sitemapPaths).size, sitemapPaths.length, "Sitemap must not contain duplicate URLs");
-assert.ok(sitemapPaths.every((path) => !["/cart", "/signin", "/signup", "/account"].includes(path)), "Sitemap must exclude private routes");
+assert.ok(sitemapPaths.every((path) => !["/cart", "/signin", "/signup", "/account", "/forgot-password", "/reset-password", "/verify-email"].includes(path)), "Sitemap must exclude private routes");
 assert.ok(!sitemapPaths.includes("/products/dahua-nvr4104"), "Sitemap must exclude redirected product aliases");
 for (const path of sitemapPaths) {
   const response = await request(path);
@@ -129,3 +129,12 @@ for (const path of sitemapPaths) {
 }
 
 console.log("PASS: " + sitemapPaths.length + " sitemap URLs resolve with titles, descriptions and canonical links; direct routes work; unknown routes return 404.");
+
+for (const path of ["/forgot-password", "/reset-password", "/verify-email"]) {
+  const response = await request(path);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /name="robots" content="noindex, nofollow"/);
+  assert.doesNotMatch(html, /Page not found/);
+  assert.equal((await assets.fetch(new Request(new URL(path, siteOrigin)))).status, 200);
+}

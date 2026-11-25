@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
@@ -21,8 +22,9 @@ static class Admin
                 using var store = new RetailStore(database);
                 var user = context.Principal?.Identity?.Name;
                 var role = context.Principal?.FindFirstValue(ClaimTypes.Role);
-                var staff = store.Query("SELECT role FROM staff WHERE username=$0", user);
-                if (staff.Count == 0 || !Equals(staff[0]["role"], role))
+                var staff = store.Query("SELECT s.role,a.active,a.revision FROM staff s JOIN staff_access a ON a.username=s.username WHERE s.username=$0 AND NOT EXISTS(SELECT 1 FROM staff_deleted d WHERE d.username=s.username)", user);
+                if (staff.Count == 0 || !Equals(staff[0]["role"], role) || Convert.ToInt64(staff[0]["active"])!=1 ||
+                    (context.Principal?.FindFirstValue("staff-revision")??"1")!=staff[0]["revision"]!.ToString())
                 {
                     context.RejectPrincipal();
                     await context.HttpContext.SignOutAsync();
@@ -57,14 +59,20 @@ static class Admin
             {
                 using var store=new RetailStore(database);
                 var id=context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
-                if(!long.TryParse(id,out var customerId) || store.Query("SELECT 1 FROM customers c JOIN customer_credentials a ON a.customer_id=c.id WHERE c.id=$0 AND c.active=1",customerId).Count!=1)
+                if(!long.TryParse(id,out var customerId) || store.Query("SELECT 1 FROM customers c JOIN customer_credentials a ON a.customer_id=c.id WHERE c.id=$0 AND c.active=1",customerId).Count!=1 ||
+                    context.Principal?.FindFirstValue("credential-revision")!=store.CustomerCredentialRevision(customerId).ToString())
                 {context.RejectPrincipal();await context.HttpContext.SignOutAsync("Customer");}
             };
         });
+        builder.Services.AddHostedService<CustomerEmailDispatcher>(services => new CustomerEmailDispatcher(database,
+            services.GetRequiredService<IDataProtectionProvider>(),services.GetRequiredService<ILogger<CustomerEmailDispatcher>>(),services));
         builder.Services.AddAuthorization();
         builder.Services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = 429;
+            options.AddPolicy("contact", context => RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new FixedWindowRateLimiterOptions
+                {PermitLimit=5,Window=TimeSpan.FromMinutes(10),QueueLimit=0}));
             options.AddPolicy("customer-auth", context => RateLimitPartition.GetFixedWindowLimiter(
                 context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new FixedWindowRateLimiterOptions
                 {PermitLimit=20,Window=TimeSpan.FromMinutes(1),QueueLimit=0}));
@@ -81,9 +89,9 @@ static class Admin
     {
         app.Use(async (context, next) =>
         {
-            if (context.Request.Path.StartsWithSegments("/admin") || context.Request.Path.StartsWithSegments("/api/retail/customer"))
+            if (context.Request.Path.StartsWithSegments("/admin") || (context.Request.Path.StartsWithSegments("/api/retail/customer") || context.Request.Path=="/api/retail/enquiries"))
             {
-                if(context.Request.Path.StartsWithSegments("/api/retail/customer"))
+                if((context.Request.Path.StartsWithSegments("/api/retail/customer") || context.Request.Path=="/api/retail/enquiries"))
                 {
                     var limit=context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>();
                     if(limit is {IsReadOnly:false})limit.MaxRequestBodySize=131072;
@@ -115,6 +123,12 @@ static class Admin
         app.UseRateLimiter();
         app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
         MapCustomers(app,database);
+        app.MapPost("/api/retail/enquiries",(System.Text.Json.Nodes.JsonObject data)=>
+        {
+            try {using var store=new RetailStore(database);return Results.Ok(store.Transaction(()=>store.SubmitEnquiry(data)));}
+            catch(Exception error) when(error is ArgumentException or InvalidOperationException or FormatException or System.Text.Json.JsonException)
+            {return Results.BadRequest(new{error=error.Message});}
+        }).RequireRateLimiting("contact");
         var api = app.MapGroup("/admin/api");
         api.MapPost("/login", async (Login login, HttpContext context) =>
         {
@@ -122,10 +136,10 @@ static class Admin
                 string.IsNullOrEmpty(login.Password) || login.Password.Length > 256)
                 return Results.Unauthorized();
             using var store = new RetailStore(database);
-            var role = store.Authenticate(login.User, login.Password);
-            if (role == null) return Results.Unauthorized();
+            var account=store.Transaction(()=>{var role=store.Authenticate(login.User,login.Password);return (Role:role,Revision:role==null?0:store.StaffRevision(login.User));});
+            if (account.Role == null) return Results.Unauthorized();
             var identity = new ClaimsIdentity(
-                [new Claim(ClaimTypes.Name, login.User), new Claim(ClaimTypes.Role, role)],
+                [new Claim(ClaimTypes.Name, login.User), new Claim(ClaimTypes.Role, account.Role),new Claim("staff-revision",account.Revision.ToString())],
                 CookieAuthenticationDefaults.AuthenticationScheme);
             await context.SignInAsync(new ClaimsPrincipal(identity));
             return Results.Ok(Session(identity));
@@ -196,11 +210,20 @@ static class Admin
                         return Results.BadRequest(new { error = "Invalid request size." });
                     operation = await context.Request.ReadFromJsonAsync<Operation>();
                 }
-                if (operation?.Values == null || operation.Values.Any(value => value == null || value.Length > (command is "customer-invite" or "order-shipping" or "product-content" or "customer-save" or "order-create" or "order-payment" or "fulfilment-save" or "return-request" or "return-process" or "refund-record" ? 250000 : 1000)))
+                if (operation?.Values == null || operation.Values.Any(value => value == null || value.Length > (command is "enquiry-update" or "customer-invite" or "order-shipping" or "product-content" or "customer-save" or "order-create" or "order-payment" or "fulfilment-save" or "return-request" or "return-process" or "refund-record" ? 250000 : 1000)))
                     return Results.BadRequest(new { error = "Invalid fields." });
                 if (command == "staff" && operation.Password is not { Length: >= 12 and <= 256 })
                     return Results.BadRequest(new { error = "Enter a new password between 12 and 256 characters." });
                 using var store = new RetailStore(database);
+                if(command is "mail-outbox" or "mail-open")
+                {
+                    if(CustomerEmailDispatcher.Mode!="pickup" || Environment.GetEnvironmentVariable("ISMARTTECH_PUBLIC_ADMIN")=="1" ||
+                        context.Connection.RemoteIpAddress is not {} ip || !System.Net.IPAddress.IsLoopback(ip))return Results.NotFound();
+                    var protector=app.Services.GetRequiredService<IDataProtectionProvider>().CreateProtector("iSmartTech.CustomerMail.v1");
+                    if(command=="mail-outbox")return Results.Ok(store.CustomerMailOutbox());
+                    if(operation.Values.Length!=1 || !long.TryParse(operation.Values[0],out var mailId) || mailId<=0)return Results.BadRequest(new{error="Choose an email."});
+                    return Results.Ok(store.CustomerMailOpen(mailId,protector));
+                }
                 var args = new Arguments(command, context.User.Identity!.Name!, database, operation.Values);
                 return Results.Ok(store.RunAuthorized(args, role, operation.Password));
             }
@@ -226,6 +249,16 @@ static class Admin
     private static void MapCustomers(WebApplication app,string database)
     {
         var group=app.MapGroup("/api/retail/customer");
+        var protector=app.Services.GetRequiredService<IDataProtectionProvider>().CreateProtector("iSmartTech.CustomerMail.v1");
+        string Origin()
+        {
+            var configured=Environment.GetEnvironmentVariable("ISMARTTECH_SITE_URL");
+            var source=configured??app.Urls.FirstOrDefault(url=>Uri.TryCreate(url,UriKind.Absolute,out var parsed)&&parsed.IsLoopback);
+            if(!Uri.TryCreate(source,UriKind.Absolute,out var uri) || uri.UserInfo.Length>0 || uri.AbsolutePath!="/" || uri.Query.Length>0 || uri.Fragment.Length>0 ||
+                (uri.Scheme!="https" && !(uri.Scheme=="http"&&uri.IsLoopback)))
+                throw new InvalidOperationException("Configure ISMARTTECH_SITE_URL with the public HTTPS website address.");
+            return uri.GetLeftPart(UriPartial.Authority);
+        }
         group.AddEndpointFilter(async (invocation,next) =>
         {
             var context=invocation.HttpContext;
@@ -236,37 +269,74 @@ static class Admin
             catch(SqliteException error) when(error.SqliteErrorCode==19)
             {return Results.BadRequest(new{error="This request conflicts with an existing record. Refresh and try again."});}
         });
-        async Task<object> SignIn(HttpContext context,long id,bool remember)
+        async Task<object> SignIn(HttpContext context,long id,long revision,bool remember)
         {
-            var identity=new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier,id.ToString())],"Customer");
+            using var store=new RetailStore(database);
+            var identity=new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier,id.ToString()),new Claim("credential-revision",revision.ToString())],"Customer");
             await context.SignInAsync("Customer",new ClaimsPrincipal(identity),new AuthenticationProperties
             {IsPersistent=remember,ExpiresUtc=DateTimeOffset.UtcNow.AddDays(remember?7:1)});
-            using var store=new RetailStore(database);return store.CustomerProfile(id);
+            return store.CustomerPublicProfile(id);
         }
         group.MapPost("/signup",async (System.Text.Json.Nodes.JsonObject data,HttpContext context)=>
         {
             using var store=new RetailStore(database);
-            var id=store.Transaction(()=>store.RegisterCustomer(data));
-            return Results.Ok(await SignIn(context,id,data["remember"]?.GetValue<bool>()??false));
+            var origin=Origin();
+            var account=store.Transaction(()=>{var customerId=store.RegisterCustomer(data);
+                store.RequestCustomerLink("verify",(string)store.CustomerProfile(customerId)["email"]!,origin,protector);return (Id:customerId,Revision:store.CustomerCredentialRevision(customerId));});
+            return Results.Ok(await SignIn(context,account.Id,account.Revision,data["remember"]?.GetValue<bool>()??false));
         }).RequireRateLimiting("customer-auth");
         group.MapPost("/signin",async (CustomerLogin data,HttpContext context)=>
         {
             if(data.Email is not {Length:>0 and <=254} || data.Password is not {Length:>0 and <=256})return Results.Unauthorized();
-            using var store=new RetailStore(database);var id=store.AuthenticateCustomer(data.Email,data.Password);
-            if(id==null)return Results.Json(new{error="Incorrect email or password, or the account is suspended."},statusCode:401);
-            return Results.Ok(await SignIn(context,id.Value,data.Remember));
+            using var store=new RetailStore(database);
+            var account=store.Transaction(()=>{var id=store.AuthenticateCustomer(data.Email,data.Password);return (Id:id,Revision:id.HasValue?store.CustomerCredentialRevision(id.Value):0);});
+            if(account.Id==null)return Results.Json(new{error="Incorrect email or password, or the account is suspended."},statusCode:401);
+            return Results.Ok(await SignIn(context,account.Id.Value,account.Revision,data.Remember));
+        }).RequireRateLimiting("customer-auth");
+        group.MapPost("/forgot-password",(System.Text.Json.Nodes.JsonObject data)=>
+        {
+            var email=data["email"]?.GetValue<string>()??"";
+            var origin=Origin();using var store=new RetailStore(database);
+            store.Transaction(()=>{if(email.Length<=254)store.RequestCustomerLink("reset",email,origin,protector);return true;});
+            return Results.Ok(new{message="If an active account exists for this email, a password reset link has been queued. Check your inbox."});
+        }).RequireRateLimiting("customer-auth");
+        group.MapPost("/reset-password",async(System.Text.Json.Nodes.JsonObject data,HttpContext context)=>
+        {
+            using var store=new RetailStore(database);
+            store.Transaction(()=>{store.ResetCustomerPassword(data["token"]?.GetValue<string>()??"",data["password"]?.GetValue<string>()??"",protector);return true;});
+            await context.SignOutAsync("Customer");
+            return Results.Ok(new{message="Your password has been reset. Sign in with your new password."});
+        }).RequireRateLimiting("customer-auth");
+        group.MapPost("/verify-email",(System.Text.Json.Nodes.JsonObject data)=>
+        {
+            using var store=new RetailStore(database);
+            store.Transaction(()=>{store.VerifyCustomerEmail(data["token"]?.GetValue<string>()??"");return true;});
+            return Results.Ok(new{message="Your email address has been verified."});
         }).RequireRateLimiting("customer-auth");
         group.MapGet("/session",async (HttpContext context)=>
         {
             var auth=await context.AuthenticateAsync("Customer");
             if(!auth.Succeeded)return Results.Ok(new{user=(object?)null});
-            using var store=new RetailStore(database);return Results.Ok(new{user=store.CustomerProfile(long.Parse(auth.Principal!.FindFirstValue(ClaimTypes.NameIdentifier)!))});
+            using var store=new RetailStore(database);return Results.Ok(new{user=store.CustomerPublicProfile(long.Parse(auth.Principal!.FindFirstValue(ClaimTypes.NameIdentifier)!))});
         });
         group.MapPost("/signout",async(HttpContext context)=>{await context.SignOutAsync("Customer");return Results.NoContent();});
         var secured=group.MapGroup("").RequireAuthorization(new Microsoft.AspNetCore.Authorization.AuthorizeAttribute{AuthenticationSchemes="Customer"});
         long CustomerId(HttpContext context)=>long.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        secured.MapPost("/resend-verification",(HttpContext context)=>
+        {
+            var origin=Origin();using var store=new RetailStore(database);var id=CustomerId(context);
+            store.Transaction(()=>{store.RequestCustomerLink("verify",(string)store.CustomerProfile(id)["email"]!,origin,protector);return true;});
+            return Results.Ok(new{message="If verification is needed, a new email has been queued. Check your inbox. Please allow a minute between requests."});
+        }).RequireRateLimiting("customer-auth");
+        secured.MapPost("/change-password",async(System.Text.Json.Nodes.JsonObject data,HttpContext context)=>
+        {
+            var id=CustomerId(context);var auth=await context.AuthenticateAsync("Customer");
+            using var store=new RetailStore(database);
+            var revision=store.Transaction(()=>{store.ChangeCustomerPassword(id,data["currentPassword"]?.GetValue<string>()??"",data["password"]?.GetValue<string>()??"",protector);return store.CustomerCredentialRevision(id);});
+            return Results.Ok(await SignIn(context,id,revision,auth.Properties?.IsPersistent??false));
+        }).RequireRateLimiting("customer-auth");
         secured.MapPost("/profile",(System.Text.Json.Nodes.JsonObject data,HttpContext context)=>
-        {using var store=new RetailStore(database);return Results.Ok(store.Transaction(()=>store.CustomerUpdate(CustomerId(context),data)));});
+        {using var store=new RetailStore(database);return Results.Ok(store.Transaction(()=>{store.CustomerUpdate(CustomerId(context),data);return store.CustomerPublicProfile(CustomerId(context));}));});
         secured.MapGet("/orders",(HttpContext context)=>
         {using var store=new RetailStore(database);return Results.Ok(store.Transaction(()=>store.CustomerOrders(CustomerId(context))));});
         secured.MapPost("/checkout/preview",(System.Text.Json.Nodes.JsonObject data,HttpContext context)=>
@@ -282,10 +352,67 @@ static class Admin
     {
         var role = identity.FindFirst(ClaimTypes.Role)!.Value;
         return new { user = identity.Name, role, commands = RetailStore.Commands(role),
+            localEmailOutbox = role=="owner" && CustomerEmailDispatcher.Mode=="pickup" && Environment.GetEnvironmentVariable("ISMARTTECH_PUBLIC_ADMIN")!="1",
             rolePermissions = role == "owner" ? new[] { "sales", "warehouse", "finance", "owner" }
                 .ToDictionary(name => name, name => RetailStore.Commands(name)) : null };
     }
 
     private sealed record Login(string User, string Password);
     private sealed record Operation(string[] Values, string? Password);
+}
+
+// Messages are queued transactionally; no reset/verification tokens are returned to public APIs.
+sealed class CustomerEmailDispatcher(string database,IDataProtectionProvider protection,ILogger<CustomerEmailDispatcher> logger,IServiceProvider services) : BackgroundService
+{
+    public static string Mode => Environment.GetEnvironmentVariable("ISMARTTECH_EMAIL_MODE")?.ToLowerInvariant()??"pickup";
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var protector=protection.CreateProtector("iSmartTech.CustomerMail.v1");
+        while(!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                using var store=new RetailStore(database);
+                var siteUrl=Environment.GetEnvironmentVariable("ISMARTTECH_SITE_URL")??services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>().Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>()?.Addresses.FirstOrDefault();
+                store.Transaction(()=>store.PrepareOrderNotifications(protector,siteUrl));
+                var pending=store.Query("SELECT id,recipient,subject,protected_body FROM customer_email_outbox WHERE status='pending' AND attempts<5 AND (last_attempt_at IS NULL OR julianday(last_attempt_at)<julianday('now','-1 minute')) ORDER BY id LIMIT 10");
+                foreach(var row in pending)
+                {
+                    if(stoppingToken.IsCancellationRequested)break;
+                    var id=Convert.ToInt64(row["id"]);
+                    try
+                    {
+                        using var mail=new System.Net.Mail.MailMessage();
+                        mail.From=new System.Net.Mail.MailAddress(Environment.GetEnvironmentVariable("ISMARTTECH_EMAIL_FROM")??"no-reply@localhost");
+                        mail.To.Add((string)row["recipient"]!);mail.Subject=(string)row["subject"]!;
+                        mail.Body=protector.Unprotect((string)row["protected_body"]!);mail.BodyEncoding=System.Text.Encoding.UTF8;
+                        using var smtp=new System.Net.Mail.SmtpClient();
+                        if(Mode=="pickup")
+                        {
+                            var directory=Path.Combine(Path.GetDirectoryName(Path.GetFullPath(database))!,"email-outbox");
+                            Directory.CreateDirectory(directory);
+                            if(!OperatingSystem.IsWindows())File.SetUnixFileMode(directory,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute);
+                            smtp.DeliveryMethod=System.Net.Mail.SmtpDeliveryMethod.SpecifiedPickupDirectory;smtp.PickupDirectoryLocation=directory;
+                        }
+                        else if(Mode=="smtp")
+                        {
+                            smtp.Host=Environment.GetEnvironmentVariable("ISMARTTECH_SMTP_HOST")??throw new InvalidOperationException("SMTP host missing.");
+                            smtp.Port=int.Parse(Environment.GetEnvironmentVariable("ISMARTTECH_SMTP_PORT")??"587");smtp.EnableSsl=true;
+                            var user=Environment.GetEnvironmentVariable("ISMARTTECH_SMTP_USERNAME");
+                            if(!string.IsNullOrEmpty(user))smtp.Credentials=new System.Net.NetworkCredential(user,Environment.GetEnvironmentVariable("ISMARTTECH_SMTP_PASSWORD"));
+                            if(Environment.GetEnvironmentVariable("ISMARTTECH_EMAIL_FROM")==null)throw new InvalidOperationException("SMTP sender missing.");
+                        }
+                        else throw new InvalidOperationException("Invalid email mode.");
+                        await smtp.SendMailAsync(mail,stoppingToken);
+                        store.MarkCustomerMail(id,true);
+                    }
+                    catch(Exception error) when(error is not OperationCanceledException)
+                    {store.MarkCustomerMail(id,false);logger.LogWarning("Customer email {EmailId} remains queued ({ErrorType}).",id,error.GetType().Name);}
+                }
+            }
+            catch(Exception error) when(error is not OperationCanceledException)
+            {logger.LogWarning("Customer email queue unavailable ({ErrorType}).",error.GetType().Name);}
+            try{await Task.Delay(TimeSpan.FromSeconds(5),stoppingToken);}catch(OperationCanceledException){break;}
+        }
+    }
 }

@@ -51,7 +51,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("focus", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [refresh, authLoading, user?.id, user?.price_tier]);
+  }, [refresh, authLoading, user?.id, user?.version]);
   const value = useMemo(() => ({
     products,
     categories: [...new Set(products.map(product => product.category))].sort(),

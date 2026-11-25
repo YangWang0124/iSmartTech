@@ -144,7 +144,7 @@ stock. Refunds record an externally completed refund and its transaction referen
 limited to the received return's value. Duplicate refund submissions cannot create
 multiple records. Previously recorded returns remain visible separately.
 
-The storefront now connects registration, customer sign-in, account details, assigned-tier prices, checkout, order/tracking history and return requests to these records. No card charge, bank transfer, courier booking or customer email is sent automatically.
+The storefront now connects registration, customer sign-in, account details, assigned-tier prices, checkout, order/tracking history and return requests to these records. No card charge, bank transfer or courier booking is sent automatically. Account-security emails use the local outbox by default.
 
 Owner has full access. Sales manages customers and orders; Finance records
 payments and refunds; Warehouse prepares shipments. Warehouse and Finance can
@@ -177,11 +177,169 @@ Installation is charged only when selected and is calculated from the existing
 storeys/roof-access rule. Orders snapshot prices and reserve stock atomically.
 Duplicate or retried submissions do not create additional orders or reservations.
 
-Orders of $2,000 or more receive the published free-delivery allowance. Other
-orders await a delivery charge entered by Sales, Finance or Owner through the
+All new orders await a positive delivery charge entered by Sales, Finance or Owner through the
 order or Shipping detail screen. Payment cannot be recorded before this charge
 is confirmed. Customers see the resulting total in My Account. Payments/refunds
-remain manual records; there is no payment provider, automatic email or courier
-integration. Shipping, payment and refund updates appear in the customer's order
+remain manual records; there is no payment provider or courier integration. Order-update notifications now use the email queue described below. Shipping, payment and refund updates appear in the customer's order
 history. Run `npm run check:customer` for isolated customer workflow regression
 tests; no working inventory or customer data is used.
+
+
+### Customer passwords and email verification
+
+Customers change passwords in **My Account → Account security**, using their current
+password. **Forgot password?** on Sign in requests a single-use reset link (30 minutes).
+Registration queues a verification link (24 hours); My Account supports resending it.
+The customer must verify the current email address before checkout. Existing accounts
+also need verification; sign-in, profile and order history remain available.
+
+Passwords require 12–256 characters. Changing/resetting a password invalidates older
+customer sessions and unused reset links. An authenticated change keeps only the current
+session signed in. Resetting requires a fresh sign-in. Old cookies issued before this
+upgrade require sign-in again. Links are bound to their purpose and current account
+email; suspended accounts cannot use them. Recovery requests use a generic response
+and are rate limited. Tokens are stored as SHA-256 hashes; queued email bodies are
+encrypted using ASP.NET Data Protection. Keep its keys persistent and private.
+
+Local default: `ISMARTTECH_EMAIL_MODE=pickup`. **Owner → Access → Local email outbox**
+shows test emails and their links when accessed locally. The worker also writes `.eml`
+files to `email-outbox` beside the database (normally `outputs/email-outbox`), with a
+private directory on macOS/Linux. “sent” in pickup mode means saved locally, not sent
+to the recipient. No email subscription, external service or real delivery is used.
+The preview API is Owner-only, loopback-only, and unavailable in public-admin mode.
+Treat these messages as sensitive because they contain usable account links.
+
+For later real delivery, configure these environment variables outside source control:
+
+- `ISMARTTECH_SITE_URL`: canonical public HTTPS origin, for example `https://shop.example.com`
+- `ISMARTTECH_EMAIL_MODE=smtp`
+- `ISMARTTECH_EMAIL_FROM`: authorized sender address
+- `ISMARTTECH_SMTP_HOST`, `ISMARTTECH_SMTP_PORT` (default `587`, STARTTLS required)
+- `ISMARTTECH_SMTP_USERNAME`, `ISMARTTECH_SMTP_PASSWORD` if required by the server
+
+Without SITE_URL, local links use the application's loopback listening address.
+They never use a client-supplied Host header. The worker checks the durable queue
+every five seconds and retries failed messages up to five times, at least a minute
+apart. Real SMTP delivery, sender-domain configuration and public HTTPS must be
+verified on deployment; they are not provided by the local test outbox.
+
+Run `npm run check:customer-security` for isolated expiry, single-use, purpose/email
+binding, reset/change/session revocation, checkout gating and local-delivery tests.
+`npm run check:customer` checks existing commerce workflows including verification.
+Both use disposable databases and force local pickup mode.
+
+
+### Staff access management
+
+Sign in as Owner and open **Access → Manage staff accounts**. This lists accounts,
+roles and Active/Suspended status. Choose a role/status and Save; Add staff account
+opens the existing creation form and role access guide. Sales, Warehouse and Finance
+cannot read or change staff access. Existing staff retain their roles and start Active.
+Suspension blocks new sign-ins and all existing sessions. Reactivation requires a fresh
+sign-in; old cookies remain invalid. Role changes also invalidate sessions so staff
+sign in again with the updated permissions. You cannot suspend yourself, remove your
+own Owner access, or remove the final active Owner. Accounts are retained for audit
+and order-history references. Concurrent edits are rejected; refresh before retrying.
+Changes are recorded in the audit log without passwords or password hashes.
+
+`npm run check:staff-access` tests role enforcement, suspension/reactivation, session
+revocation, stale edits, self-lockout protection and auditing in a disposable database.
+
+Owner can also use **Delete** beside a staff account. Confirmation is required.
+Deletion removes sign-in credentials/access and the staff-list entry, invalidates
+sessions, and is audited. Historic actor references remain for order/audit integrity;
+the username is reserved and cannot be reused. Deleted accounts cannot be reactivated
+through the status editor. Self-deletion and deleting the last active Owner are blocked.
+
+
+### Contact enquiries
+
+The public Contact form (English and Chinese) saves enquiries in SQLite. Required:
+first name, last name, valid email, message. Phone and interest are optional. The
+confirmation includes an enquiry reference. Failed requests show an error and retain
+the form; retrying the same submission does not create another enquiry. Each IP is
+limited to five submissions/attempts per ten minutes, with request size/field limits
+and a same-origin custom-header requirement. Public users cannot read enquiries.
+
+**Enquiries → Enquiry inbox** is available to Owner and Sales. Open an enquiry to
+read the message/contact information, record internal notes and set New, In progress
+or Closed. Filter the inbox by status; it shows the newest 500 matching messages.
+Concurrent updates are rejected. Changes are audited by enquiry ID, without copying
+message bodies or internal notes into the audit log. Messages are rendered as text.
+No forwarding, automatic reply or outbound email is sent. Replies are handled separately.
+Existing inventory/pricing/customer records are unchanged.
+
+On a separately hosted frontend, the existing RETAIL_BACKEND_URL proxy now also
+forwards `/api/retail/enquiries`. Public deployment still requires HTTPS. Run
+`npm run check:enquiries` for isolated validation, persistence, retry, permissions,
+workflow, concurrency, rate-limit and audit checks.
+
+Installation quote requests now use the same inbox, marked **Installation request**.
+Name, phone, email, full address and installation details are required; address and
+details are retained in the enquiry detail screen. Contact enquiries retain their
+existing fields. The responsive inbox shows NZ local received time and wraps long
+contact details without hiding Open. Earlier preview-only installation submissions
+were never stored and cannot be recovered; they must be submitted again.
+
+
+### Simplified customer registration
+
+The storefront signup form now asks for email and password (plus Remember me), without
+name or invitation code. A new account uses its email as the initial internal display
+name; a name can be added later in My Account. Existing customer records cannot be
+claimed through public signup, including with legacy invitation codes; existing users
+use sign-in/password recovery, while records with no login require staff assistance.
+The older staff invitation API remains available for compatibility but public signup
+no longer consumes those codes. Staff should assign company pricing after a customer
+registers, rather than pre-creating a record that cannot sign in.
+
+Price-tier labels are omitted from customer authentication/session/profile/order
+responses and My Account. Assigned pricing remains server controlled; catalogue refresh
+uses the profile version to pick up staff changes without exposing the tier name.
+
+
+Checkout calculates and displays the server-priced order summary immediately on entry.
+Preview does not require delivery fields; placement still validates address and phone,
+permissions, email verification, live prices and stock. Customers fill delivery details
+and select Place order without a separate Review step. Price changes require reviewing
+the updated total before retrying. Successful placement clears both the active and
+persisted browser cart; open tabs synchronize cart changes. Add-to-cart actions show
+a dismissible notice. Delivery requiring a staff quote is labelled “Charge to be confirmed”.
+
+
+### Order and shipping email templates
+
+Order received, delivery charge confirmed, payment received, dispatched (courier,
+tracking number and address), cancelled and reservation expired messages are now
+queued automatically when their corresponding order updates succeed. They include
+order numbers, product lines, GST-inclusive NZD amounts and the customer's next step.
+Expiry dates use Pacific/Auckland time; the configured site origin links to My Account.
+Owner can preview generated messages under **Access → Local email outbox**.
+
+The existing local pickup default still sends no real emails and needs no paid service.
+Messages appear within roughly five seconds while the app is running; reopening the
+app processes pending events. In pickup mode “sent” means saved as a local email.
+SMTP must be configured and tested before customers receive actual emails.
+
+Optional bank-transfer instructions use `ISMARTTECH_BANK_ACCOUNT_NAME` and
+`ISMARTTECH_BANK_ACCOUNT_NUMBER`, set outside source control. Payment references
+are ORDER-{order number}. Until both settings exist, the template tells the customer
+to wait for store payment instructions. Pending-delivery orders always tell customers
+to wait for the final total; payment-received messages never ask them to pay again.
+No bank feed, payment processing or courier booking is performed.
+
+Events are saved in the same SQLite transaction as the order change, with snapshots
+of order/contact/shipping information so subsequent edits cannot alter earlier emails.
+They are processed in creation order and deduplicated; checkout/payment retries do not
+produce duplicate notifications. Transaction rollback also rolls back the event. The
+worker converts events into encrypted email queue entries atomically, then uses the
+existing delivery retry policy. SMTP can still deliver duplicates if it accepts a
+message and the process stops before recording success; this is not an exactly-once
+external-delivery guarantee. Event snapshots contain customer/order information and
+must be protected with the database; they contain no passwords or account-action tokens.
+Existing order history is not backfilled. Templates are plain-text English messages.
+
+`npm run check:notifications` exercises all six templates using disposable data and
+local pickup only. `node scripts/check-customer-workflows.cjs --notifications --no-bank`
+checks the unconfigured-bank fallback. Tests verify amounts, chronological order,
+tracking, expiry/cancellation, snapshot accuracy, permissions and duplicate prevention.

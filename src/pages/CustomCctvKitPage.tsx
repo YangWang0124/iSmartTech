@@ -89,7 +89,7 @@ const matchesSelectedFilters = (product: Product, selectedTags: number[]) =>
     );
   });
 const availableForKit = (product: Product) =>
-  product.priceOnRequest || product.stock > 0;
+  !product.priceOnRequest && product.stock > 0;
 
 export function CustomCctvKitPage() {
   const { products, loading } = useProducts();
@@ -296,7 +296,7 @@ export function CustomCctvKitPage() {
     )
       return;
     const customKitId = crypto.randomUUID();
-    addCustomKit(
+    const success=addCustomKit(
       kitLines.map((line, index) => ({
         productId: line.product.id,
         quantity: line.quantity,
@@ -315,6 +315,7 @@ export function CustomCctvKitPage() {
         installation: index === 0 && installation ? { storeys, noRoofAccess } : undefined,
       }))
     );
+    if(!success)return;
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2200);
   };

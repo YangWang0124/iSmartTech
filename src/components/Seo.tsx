@@ -111,7 +111,7 @@ const routeSeo: Record<string, { title: string; description: string }> = {
 export function RouteSeo() {
   const { pathname } = useLocation();
   if (pathname.startsWith("/products/") || pathname.startsWith("/category/") || pathname.startsWith("/brand/")) return null;
-  const privateRoute = ["/cart", "/signin", "/signup", "/account"].includes(pathname);
+  const privateRoute = ["/cart", "/signin", "/signup", "/account", "/forgot-password", "/reset-password", "/verify-email"].includes(pathname);
   const knownRoute = privateRoute || Boolean(routeSeo[pathname]);
   const details = privateRoute
     ? { title: "Customer account | iSmartTech", description: "Secure iSmartTech customer account area." }

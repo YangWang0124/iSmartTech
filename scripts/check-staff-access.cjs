@@ -1,0 +1,31 @@
+const {spawn,spawnSync}=require('node:child_process'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'staff-access-')),db=path.join(dir,'test.sqlite'),dll=root+'/backend/bin/Debug/net8.0/Retail.dll',password=crypto.randomBytes(18).toString('hex');
+assert.equal(spawnSync('dotnet',[dll,'--db',db,'init','test-owner'],{cwd:root,input:(password+'\n').repeat(2)}).status,0);
+const server=spawn('dotnet',[dll,'--db',db,'serve','--port','0'],{cwd:root+'/backend',env:{...process.env,ISMARTTECH_EMAIL_MODE:'pickup',ISMARTTECH_PUBLIC_ADMIN:'0'},stdio:['ignore','pipe','pipe']});
+(async()=>{const origin=await new Promise((resolve,reject)=>{server.stdout.on('data',b=>{const m=b.toString().match(/Now listening on: (http:\/\/\S+)/);if(m)resolve(m[1]);});server.on('exit',code=>reject(Error('server exited '+code)));});const jars={};
+async function request(route,body,who='owner',status=200){const headers={Cookie:jars[who]||''};if(body){headers['Content-Type']='application/json';headers['X-Admin-Request']='1';}const r=await fetch(origin+'/admin/api/'+route,{method:body?'POST':'GET',headers,body:body?JSON.stringify(body):undefined});if(r.headers.has('set-cookie'))jars[who]=r.headers.get('set-cookie').split(';')[0];const data=await r.json().catch(()=>null);assert.equal(r.status,status,JSON.stringify(data));return data;}
+const op=(name,values=[],who='owner',status=200)=>request('operations/'+name,{values},who,status);
+const login=(user,who='owner',status=200)=>request('login',{user,password},who,status);
+await login('test-owner');let list=await op('staff-list');assert.deepEqual(Object.keys(list[0]).sort(),['username','role','active','revision'].sort());assert.equal(list[0].active,1);
+await request('operations/staff',{values:['sales-test','sales'],password});await request('operations/staff',{values:['other-owner','owner'],password});
+await login('sales-test','sales');await op('staff-list',[],'sales',403);await op('staff-update',['test-owner','sales','0','1'],'sales',403);
+await op('staff-update',['test-owner','sales','1','1'],'owner',400);await op('staff-update',['test-owner','owner','0','1'],'owner',400);
+await op('staff-update',['sales-test','warehouse','1','1']);await request('session',undefined,'sales',401);
+await login('sales-test','sales');let session=await request('session',undefined,'sales');assert.equal(session.role,'warehouse');assert.ok(session.commands.includes('stock-set'));assert.equal(session.commands.includes('customer-save'),false);
+await op('staff-update',['sales-test','finance','1','1'],'owner',400);await op('staff-update',['sales-test','warehouse','0','2']);await request('session',undefined,'sales',401);await login('sales-test','sales',401);
+await op('staff-update',['sales-test','finance','1','3']);await request('session',undefined,'sales',401);await login('sales-test','sales');session=await request('session',undefined,'sales');assert.equal(session.role,'finance');assert.ok(session.commands.includes('tier-set'));assert.equal(session.commands.includes('stock-set'),false);
+await op('staff-update',['other-owner','sales','1','1']);await op('staff-update',['sales-test','unknown','1','4'],'owner',400);
+await op('staff-delete',['other-owner','2'],'sales',403);
+await op('staff-delete',['test-owner','1'],'owner',400);
+await op('staff-delete',['sales-test','3'],'owner',400);
+await op('staff-delete',['sales-test','4']);
+await request('session',undefined,'sales',401);await login('sales-test','sales',401);
+assert.equal((await op('staff-list')).some(a=>a.username==='sales-test'),false);
+await op('staff-update',['sales-test','owner','1','5'],'owner',400);
+await request('operations/staff',{values:['sales-test','sales'],password},'owner',400);
+await op('staff-delete',['sales-test','5'],'owner',400);
+const audit=await op('audit');assert.ok(JSON.stringify(audit).includes('staff-delete'));assert.ok(JSON.stringify(audit).includes('staff-update'));assert.equal(JSON.stringify(audit).includes(password),false);
+console.log('PASS: Owner-only staff list/update, role permissions, stale-edit prevention, suspension/reactivation, session revocation, self-lockout protection, safe account fields, audited access changes, deletion, credential/session removal and blocked restoration/reuse.');
+if(process.argv.includes('--browser')){fs.writeFileSync('/tmp/ismarttech-staff-browser.json',JSON.stringify({origin,password,db}));console.log('Browser fixture ready '+origin);return;}
+server.once('exit',()=>fs.rmSync(dir,{recursive:true,force:true}));server.kill();
+})().catch(e=>{console.error(e);process.exitCode=1;server.once('exit',()=>fs.rmSync(dir,{recursive:true,force:true}));server.kill();});

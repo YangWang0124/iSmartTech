@@ -37,6 +37,9 @@ const routeMetadata = {
   "/cart": ["Shopping cart | iSmartTech", "Review products in your iSmartTech shopping cart.", true],
   "/signin": ["Customer sign in | iSmartTech", "Sign in to your iSmartTech customer account.", true],
   "/signup": ["Create customer account | iSmartTech", "Create an iSmartTech customer account.", true],
+  "/forgot-password": ["Password recovery | iSmartTech", "Request a password reset link.", true],
+  "/reset-password": ["Reset password | iSmartTech", "Choose a new account password.", true],
+  "/verify-email": ["Verify email | iSmartTech", "Verify your customer email address.", true],
   "/account": ["Customer account | iSmartTech", "Secure iSmartTech customer account area.", true],
 };
 const publicPagePaths = new Set(Object.keys(routeMetadata));
@@ -83,7 +86,7 @@ function pageExists(pathname) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/retail/customer/") || url.pathname === "/api/retail/products" || /^\/api\/retail\/images\/[a-f0-9]{64}\.(png|jpg|webp)$/.test(url.pathname)) {
+    if (url.pathname === "/api/retail/enquiries" || url.pathname.startsWith("/api/retail/customer/") || url.pathname === "/api/retail/products" || /^\/api\/retail\/images\/[a-f0-9]{64}\.(png|jpg|webp)$/.test(url.pathname)) {
       if (!env.RETAIL_BACKEND_URL) return json({ error: "Retail backend is not configured." }, 503);
       const target = new URL(url.pathname, env.RETAIL_BACKEND_URL);
       if (target.protocol !== "https:") return json({ error: "Retail backend requires HTTPS." }, 503);

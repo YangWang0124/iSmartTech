@@ -1,3 +1,5 @@
+using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -177,7 +179,16 @@ sealed partial class RetailStore
     }
 
     public Dictionary<string, object?> CustomerProfile(long id) => Row(
-        "SELECT id,name,email,company,phone,address,active,can_purchase,price_tier,version FROM customers WHERE id=$0 AND active=1",id);
+        """
+        SELECT c.id,c.name,c.email,c.company,c.phone,c.address,c.active,c.can_purchase,c.price_tier,c.version,
+          CASE WHEN s.verified_email=c.email COLLATE NOCASE THEN 1 ELSE 0 END AS email_verified
+        FROM customers c LEFT JOIN customer_security s ON s.customer_id=c.id WHERE c.id=$0 AND c.active=1
+        """,id);
+
+    public object CustomerPublicProfile(long id)
+    {
+        var profile=CustomerProfile(id);profile.Remove("price_tier");return profile;
+    }
 
     public long? AuthenticateCustomer(string email,string password)
     {
@@ -192,20 +203,16 @@ sealed partial class RetailStore
 
     public long RegisterCustomer(JsonObject data)
     {
-        var name=CommerceText(data,"name",200);var email=CommerceText(data,"email",254).ToLowerInvariant();
+        var email=CommerceText(data,"email",254).ToLowerInvariant();var name=CommerceText(data,"name",200);if(name.Length==0)name=email;
         var password=data["password"]?.GetValue<string>()??"";
         Check(password.Length<=256,"Use a password between 12 and 256 characters.");
-        Check(name.Length>0 && System.Net.Mail.MailAddress.TryCreate(email,out var address) && address.Address==email,"Enter a name and valid email address.");
+        Check(System.Net.Mail.MailAddress.TryCreate(email,out var address) && address.Address==email,"Enter a valid email address.");
         Check(password.Length>=12,"Use a password between 12 and 256 characters.");
         var customer=Query("SELECT * FROM customers WHERE email=$0 COLLATE NOCASE",email).FirstOrDefault();
         long id;
         if(customer!=null)
         {
-            id=Number(customer,"id");var token=CommerceText(data,"invitation",200);
-            var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
-            Check(Number(customer,"active")==1 && Query("SELECT 1 FROM customer_credentials WHERE customer_id=$0",id).Count==0 &&
-                Query("SELECT 1 FROM customer_invitations WHERE customer_id=$0 AND token_hash=$1 AND julianday(expires_at)>julianday('now')",id,hash).Count==1,
-                "This email already has a customer record. Sign in, or ask staff for a sign-up invitation.");
+            throw new ArgumentException("This email already has a customer record. Sign in, reset your password, or contact the store for help.");
         }
         else
         {
@@ -214,8 +221,213 @@ sealed partial class RetailStore
         }
         var salt=Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         Execute("INSERT INTO customer_credentials VALUES ($0,$1,$2)",id,salt,Convert.ToHexString(Hash(password,salt)));
+        Execute("INSERT OR IGNORE INTO customer_security(customer_id) VALUES ($0)",id);
         Execute("DELETE FROM customer_invitations WHERE customer_id=$0",id);
         return id;
+    }
+
+    public object SubmitEnquiry(JsonObject data)
+    {
+        var kind=CommerceText(data,"kind",30);Check(kind is "" or "contact" or "installation","Unknown enquiry type.");
+        var installation=kind=="installation";
+        var first=installation?CommerceText(data,"name",200):CommerceText(data,"firstName",100);var last=installation?"":CommerceText(data,"lastName",100);
+        var siteAddress=installation?CommerceText(data,"address",2000):"";
+        var email=CommerceText(data,"email",254);var phone=CommerceText(data,"phone",100);
+        var interest=installation?"Installation quote":CommerceText(data,"interest",100);var message=installation?CommerceText(data,"details",10000):CommerceText(data,"message",10000);
+        var key=CommerceText(data,"requestKey",36);
+        Check(first.Length>0 && (installation||last.Length>0),installation?"Enter your name.":"Enter your first and last name.");
+        Check(!installation||(phone.Length>0&&siteAddress.Length>0),"Enter your contact number and full installation address.");
+        Check(System.Net.Mail.MailAddress.TryCreate(email,out var address) && address.Address==email,"Enter a valid email address.");
+        Check(message.Length>0,"Enter your enquiry message.");Check(Guid.TryParseExact(key,"D",out _),"Refresh the form and try again.");
+        var prior=Query("SELECT * FROM enquiries WHERE request_key=$0",key).FirstOrDefault();
+        if(prior!=null)
+        {
+            var priorAddress=Query("SELECT address FROM enquiry_installation WHERE enquiry_id=$0",prior["id"]).FirstOrDefault();
+            Check((priorAddress!=null)==installation && (!installation||Equals(priorAddress!["address"],siteAddress)),"This submission reference was already used. Start a new enquiry.");
+            Check(Equals(prior["first_name"],first)&&Equals(prior["last_name"],last)&&Equals(prior["email"],email)&&Equals(prior["phone"],phone)&&Equals(prior["interest"],interest)&&Equals(prior["message"],message),"This submission reference was already used. Start a new enquiry.");
+            return new {reference=prior["reference"]};
+        }
+        var reference="ENQ-"+Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
+        Execute("INSERT INTO enquiries(reference,request_key,first_name,last_name,email,phone,interest,message) VALUES ($0,$1,$2,$3,$4,$5,$6,$7)",reference,key,first,last,email,phone,interest,message);
+        if(installation)Execute("INSERT INTO enquiry_installation(enquiry_id,address) SELECT id,$0 FROM enquiries WHERE reference=$1",siteAddress,reference);
+        return new {reference};
+    }
+
+    private object EnquiryList(string status)
+    {
+        Check(status is "all" or "new" or "in-progress" or "closed","Choose an enquiry status.");
+        return Query("SELECT e.id,e.reference,e.first_name,e.last_name,e.email,e.interest,e.status,e.created_at,e.version,CASE WHEN i.enquiry_id IS NULL THEN 'contact' ELSE 'installation' END AS kind FROM enquiries e LEFT JOIN enquiry_installation i ON i.enquiry_id=e.id WHERE ($0='all' OR e.status=$0) ORDER BY e.id DESC LIMIT 500",status);
+    }
+
+    private object UpdateEnquiry(Arguments args)
+    {
+        var id=Positive(args.At(0));var status=args.At(1);var notes=args.At(2);var version=Positive(args.At(3));
+        Check(status is "new" or "in-progress" or "closed","Choose New, In progress or Closed.");Check(notes.Length<=10000,"Notes must be under 10,000 characters.");
+        var current=Row("SELECT version FROM enquiries WHERE id=$0",id);Check(Number(current,"version")==version,"This enquiry changed. Refresh before saving.");
+        Execute("UPDATE enquiries SET status=$0,notes=$1,version=version+1,updated_at=CURRENT_TIMESTAMP WHERE id=$2",status,notes,id);
+        return new {saved=true};
+    }
+
+    public long CustomerCredentialRevision(long id) => Number(Row(
+        "SELECT COALESCE(s.credential_revision,1) AS revision FROM customer_credentials c LEFT JOIN customer_security s ON s.customer_id=c.customer_id WHERE c.customer_id=$0",id),"revision");
+
+    private void QueueOrderNotification(long id,string kind)
+    {
+        var customer=Query("SELECT customer_name,customer_email FROM order_customers WHERE order_id=$0",id).FirstOrDefault();
+        if(customer==null)return;
+        var order=(Dictionary<string,object?>)Order(id);
+        var shipping=Query("SELECT address,carrier,tracking FROM fulfilments WHERE order_id=$0",id).FirstOrDefault();
+        var snapshot=JsonSerializer.Serialize(new {
+            id,kind,name=customer["customer_name"],email=customer["customer_email"],
+            expires_at=order["expires_at"],subtotal_cents=order["subtotal_cents"],installation_cents=order["installation_cents"],
+            shipping_cents=order["shipping_cents"],shipping_pending=order["shipping_pending"],total_cents=order["total_cents"],
+            payment_ref=order["payment_ref"],address=shipping?["address"],carrier=shipping?["carrier"],tracking=shipping?["tracking"],
+            lines=Query("SELECT l.sku,p.name,l.quantity,l.unit_cents FROM order_lines l JOIN products p ON p.sku=l.sku WHERE l.order_id=$0 ORDER BY l.sku",id)
+        });
+        var key=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(snapshot)));
+        Execute("INSERT OR IGNORE INTO order_notification_events(event_key,order_id,kind,snapshot) VALUES ($0,$1,$2,$3)",key,id,kind,snapshot);
+    }
+
+    // Templates use the event snapshot, so later order edits cannot rewrite an earlier notification.
+    public int PrepareOrderNotifications(IDataProtector protector,string? siteUrl)
+    {
+        string? accountLink=null;
+        if(!string.IsNullOrWhiteSpace(siteUrl))
+        {
+            Check(Uri.TryCreate(siteUrl,UriKind.Absolute,out var uri) && uri.UserInfo.Length==0 && uri.AbsolutePath=="/" && uri.Query.Length==0 && uri.Fragment.Length==0 && (uri.Scheme=="https"||(uri.Scheme=="http"&&uri.IsLoopback)),"Configure a valid ISMARTTECH_SITE_URL origin.");
+            accountLink=uri!.GetLeftPart(UriPartial.Authority)+"/account";
+        }
+        var pending=Query("SELECT event_key,snapshot FROM order_notification_events WHERE mail_id IS NULL ORDER BY rowid LIMIT 50");
+        foreach(var entry in pending)
+        {
+            var data=JsonNode.Parse((string)entry["snapshot"]!)!.AsObject();
+            string Value(string key)=>data[key]?.ToString()??"";
+            long Cents(string key)=>data[key]?.GetValue<long>()??0;
+            string Amount(long cents)=>"NZ$"+(cents/100m).ToString("0.00",CultureInfo.InvariantCulture);
+            var id=Value("id");var kind=Value("kind");var pendingShipping=data["shipping_pending"]!.GetValue<bool>();
+            var heading=kind switch {"received"=>"Order received","delivery"=>"Delivery charge confirmed","paid"=>"Payment received","shipped"=>"Your order has shipped","expired"=>"Order reservation expired",_=>"Order cancelled"};
+            var body=new StringBuilder().AppendLine("Hi "+Value("name")+",").AppendLine().AppendLine(heading+" — order #"+id).AppendLine();
+            body.AppendLine(kind switch {
+                "received"=>"Thank you for your order. Your items are reserved. No online payment has been taken.",
+                "delivery"=>"Your delivery charge is confirmed. The total below includes delivery.",
+                "paid"=>"We have confirmed your payment. Your order is being prepared for shipping.",
+                "shipped"=>"Your order has been dispatched. Keep the courier and tracking number below for reference.",
+                "expired"=>"The unpaid reservation has expired and the reserved stock has been released. Please contact us or place a new order if you still need these items.",
+                _=>"Your order has been cancelled and the reserved stock has been released. Please contact us if you have questions."
+            }).AppendLine();
+            foreach(var line in data["lines"]!.AsArray().OfType<JsonObject>())
+                body.AppendLine(line["name"]+" ("+line["sku"]+") × "+line["quantity"]+" — "+Amount(line["quantity"]!.GetValue<long>()*line["unit_cents"]!.GetValue<long>()));
+            body.AppendLine().AppendLine("Products: "+Amount(Cents("subtotal_cents")));
+            if(Cents("installation_cents")>0)body.AppendLine("Installation: "+Amount(Cents("installation_cents")));
+            body.AppendLine("Delivery: "+(pendingShipping?"To be confirmed":data["shipping_cents"]==null?"Included in recorded total":Cents("shipping_cents")==0?"Free":Amount(Cents("shipping_cents"))));
+            body.AppendLine("Total"+(pendingShipping?" before delivery":"")+": "+Amount(Cents("total_cents"))).AppendLine("Amounts include GST.").AppendLine();
+            if(kind is "received" or "delivery")
+            {
+                if(pendingShipping)body.AppendLine("Next step: wait for the delivery quote and final total before paying. We will send another update when delivery is confirmed.");
+                else {
+                    var bankName=Environment.GetEnvironmentVariable("ISMARTTECH_BANK_ACCOUNT_NAME");var bankNumber=Environment.GetEnvironmentVariable("ISMARTTECH_BANK_ACCOUNT_NUMBER");
+                    if(!string.IsNullOrWhiteSpace(bankName)&&!string.IsNullOrWhiteSpace(bankNumber))
+                        body.AppendLine("Pay by bank transfer:\nAccount name: "+bankName+"\nAccount number: "+bankNumber+"\nAmount: "+Amount(Cents("total_cents"))+"\nReference: ORDER-"+id+"\nWe will confirm receipt after the funds reach our bank account.");
+                    else body.AppendLine("Next step: the store will provide payment instructions. Do not send payment until you have those instructions.");
+                }
+                body.AppendLine("Reservation expires: "+TimeZoneInfo.ConvertTime(DateTimeOffset.Parse(Value("expires_at"),CultureInfo.InvariantCulture),TimeZoneInfo.FindSystemTimeZoneById("Pacific/Auckland")).ToString("d MMM yyyy, h:mm tt zzz",CultureInfo.InvariantCulture)+" NZ time.");
+            }
+            if(kind=="paid")body.AppendLine("Payment reference: "+Value("payment_ref"));
+            if(kind=="shipped")body.AppendLine("Courier: "+Value("carrier")+"\nTracking number: "+Value("tracking")+"\nDelivery address: "+Value("address"));
+            body.AppendLine().AppendLine(accountLink==null?"View the latest status in My Account on the iSmartTech website.":"View your order in My Account: "+accountLink);
+            body.AppendLine("Questions? Contact info@ismarttech.co.nz and quote order #"+id+".").AppendLine().AppendLine("iSmartTech");
+            QueueCustomerEmail(Value("email"),"iSmartTech order #"+id+" — "+heading,body.ToString(),protector);
+            Execute("UPDATE order_notification_events SET mail_id=last_insert_rowid() WHERE event_key=$0",entry["event_key"]);
+        }
+        return pending.Count;
+    }
+
+    private void QueueCustomerEmail(string recipient,string subject,string body,IDataProtector protector) =>
+        Execute("INSERT INTO customer_email_outbox(recipient,subject,protected_body) VALUES ($0,$1,$2)",recipient,subject,protector.Protect(body));
+
+    public void RequestCustomerLink(string purpose,string email,string origin,IDataProtector protector)
+    {
+        Check(purpose is "verify" or "reset","Invalid account action.");
+        var customer=Query("""
+            SELECT c.*,s.verified_email FROM customers c JOIN customer_credentials a ON a.customer_id=c.id
+            LEFT JOIN customer_security s ON s.customer_id=c.id WHERE c.email=$0 COLLATE NOCASE AND c.active=1
+            """,email.Trim()).FirstOrDefault();
+        if(customer==null)return;
+        var id=Number(customer,"id");var address=(string)customer["email"]!;
+        if(purpose=="verify" && string.Equals(customer["verified_email"] as string,address,StringComparison.OrdinalIgnoreCase))return;
+        if(Query("SELECT 1 FROM customer_action_tokens WHERE customer_id=$0 AND purpose=$1 AND used_at IS NULL AND julianday(created_at)>julianday('now','-1 minute')",id,purpose).Count>0)return;
+        Execute("UPDATE customer_action_tokens SET used_at=CURRENT_TIMESTAMP WHERE customer_id=$0 AND purpose=$1 AND used_at IS NULL",id,purpose);
+        var token=Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+        Execute("INSERT INTO customer_action_tokens(token_hash,customer_id,purpose,email,expires_at) VALUES ($0,$1,$2,$3,$4)",
+            hash,id,purpose,address,DateTimeOffset.UtcNow.AddMinutes(purpose=="reset"?30:1440).ToString("O"));
+        var url=origin+(purpose=="reset"?"/reset-password":"/verify-email")+"#token="+token;
+        var subject=purpose=="reset"?"Reset your iSmartTech password":"Verify your iSmartTech email address";
+        var body=purpose=="reset"
+            ? "A password reset was requested for your iSmartTech account. Open this link to choose a new password:\n\n"+url+"\n\nThe link expires in 30 minutes and can be used once. If you did not request this, you can ignore this message. Your password has not changed."
+            : "Please verify your iSmartTech email address by opening this link and selecting Verify email:\n\n"+url+"\n\nThe link expires in 24 hours and can be used once. If you did not create an account, you can ignore this message.";
+        QueueCustomerEmail(address,subject,body,protector);
+    }
+
+    private Dictionary<string,object?> CustomerActionToken(string token,string purpose)
+    {
+        Check(token.Length==64 && token.All(Uri.IsHexDigit),"This link is invalid or expired. Request a new one.");
+        var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+        var records=Query("""
+            SELECT t.* FROM customer_action_tokens t JOIN customers c ON c.id=t.customer_id
+            JOIN customer_credentials a ON a.customer_id=c.id
+            WHERE t.token_hash=$0 AND t.purpose=$1 AND t.used_at IS NULL AND c.active=1
+              AND t.email=c.email COLLATE NOCASE AND julianday(t.expires_at)>julianday('now')
+            """,hash,purpose);
+        Check(records.Count==1,"This link is invalid or expired. Request a new one.");return records[0];
+    }
+
+    public void VerifyCustomerEmail(string token)
+    {
+        var action=CustomerActionToken(token,"verify");var id=Number(action,"customer_id");
+        Execute("INSERT INTO customer_security(customer_id,verified_email) VALUES ($0,$1) ON CONFLICT(customer_id) DO UPDATE SET verified_email=excluded.verified_email",id,action["email"]);
+        Execute("UPDATE customer_action_tokens SET used_at=CURRENT_TIMESTAMP WHERE customer_id=$0 AND purpose='verify' AND used_at IS NULL",id);
+    }
+
+    private void SetCustomerPassword(long id,string password,IDataProtector protector)
+    {
+        Check(password.Length is >=12 and <=256,"Use a password between 12 and 256 characters.");
+        var profile=CustomerProfile(id);var salt=Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
+        Execute("UPDATE customer_credentials SET salt=$0,password_hash=$1 WHERE customer_id=$2",salt,Convert.ToHexString(Hash(password,salt)),id);
+        Execute("INSERT INTO customer_security(customer_id,credential_revision) VALUES ($0,2) ON CONFLICT(customer_id) DO UPDATE SET credential_revision=credential_revision+1",id);
+        Execute("UPDATE customer_action_tokens SET used_at=CURRENT_TIMESTAMP WHERE customer_id=$0 AND purpose='reset' AND used_at IS NULL",id);
+        QueueCustomerEmail((string)profile["email"]!,"Your iSmartTech password was changed",
+            "Your iSmartTech password has been changed. Other signed-in sessions have been invalidated. If you did not make this change, contact the store immediately.",protector);
+    }
+
+    public void ChangeCustomerPassword(long id,string current,string password,IDataProtector protector)
+    {
+        Check(current.Length<=256 && AuthenticateCustomer((string)CustomerProfile(id)["email"]!,current)==id,"Your current password is incorrect.");
+        Check(current!=password,"Choose a different new password.");
+        SetCustomerPassword(id,password,protector);
+    }
+
+    public void ResetCustomerPassword(string token,string password,IDataProtector protector)
+    {
+        var action=CustomerActionToken(token,"reset");SetCustomerPassword(Number(action,"customer_id"),password,protector);
+    }
+
+    public void MarkCustomerMail(long id,bool sent) => Execute(
+        "UPDATE customer_email_outbox SET attempts=attempts+1,last_attempt_at=CURRENT_TIMESTAMP,status=$0,sent_at=CASE WHEN $0='sent' THEN CURRENT_TIMESTAMP ELSE sent_at END,last_error=$1 WHERE id=$2 AND status='pending'",
+        sent?"sent":"pending",sent?null:"Delivery failed. Check email transport configuration.",id);
+
+    public object CustomerMailOutbox() => Query("SELECT id,recipient,subject,status,attempts,created_at,sent_at FROM customer_email_outbox ORDER BY id DESC LIMIT 100");
+    public object CustomerMailOpen(long id,IDataProtector protector)
+    {
+        var mail=Row("SELECT id,recipient,subject,protected_body,status,created_at FROM customer_email_outbox WHERE id=$0",id);
+        mail["body"]=protector.Unprotect((string)mail["protected_body"]!);mail.Remove("protected_body");return mail;
+    }
+
+    private Dictionary<string,object?> CustomerOrderView(long id)
+    {
+        var order=(Dictionary<string,object?>)CommerceOrder(id);order.Remove("created_by");
+        if(order["customer"] is Dictionary<string,object?> customer)customer.Remove("price_tier");
+        return order;
     }
 
     public object CustomerOrders(long customerId)
@@ -223,8 +435,7 @@ sealed partial class RetailStore
         ExpireReservations();
         return Query("SELECT order_id FROM order_customers WHERE customer_id=$0 ORDER BY order_id DESC",customerId)
             .Select(row => {
-                var order=(Dictionary<string,object?>)CommerceOrder(Number(row,"order_id"));
-                order.Remove("created_by");
+                var order=CustomerOrderView(Number(row,"order_id"));
                 order["requests"]=Query("""
                     SELECT r.id,r.sku,r.quantity,r.reason,r.status,x.amount_cents AS refunded_cents,x.reference AS refund_reference
                     FROM return_requests r LEFT JOIN refund_records x ON x.request_id=r.id WHERE r.order_id=$0 ORDER BY r.id
@@ -247,6 +458,7 @@ sealed partial class RetailStore
     private (List<JsonObject> Lines,long Products,long Installation,string InstallationDetails) CheckoutLines(long customerId,JsonObject data)
     {
         var customer=CustomerProfile(customerId);Check(Number(customer,"can_purchase")==1,"Purchasing is disabled for this account. Contact the store.");
+        Check(Number(customer,"email_verified")==1,"Verify your email address in My Account before placing an order.");
         var catalogue=((List<JsonObject>)StorefrontProducts((string)customer["price_tier"]!)).ToDictionary(p=>p["sku"]!.GetValue<string>());
         var input=data["items"] as JsonArray ?? throw new ArgumentException("Add products to your cart.");
         Check(input.Count is >0 and <=100,"Add between 1 and 100 products.");
@@ -321,12 +533,12 @@ sealed partial class RetailStore
         {
             Check(Guid.TryParse(key,out _),"Invalid checkout reference. Refresh the checkout.");
             var existing=Query("SELECT order_id,fingerprint FROM customer_checkouts WHERE customer_id=$0 AND request_key=$1",customerId,key).FirstOrDefault();
-            if(existing!=null){Check(Equals(existing["fingerprint"],fingerprint),"This checkout reference was already used. Start a new checkout.");return CommerceOrder(Number(existing,"order_id"));}
+            if(existing!=null){Check(Equals(existing["fingerprint"],fingerprint),"This checkout reference was already used. Start a new checkout.");return CustomerOrderView(Number(existing,"order_id"));}
         }
         var address=CommerceText(data,"address",2000);var phone=CommerceText(data,"phone",100);
-        Check(address.Length>=5 && phone.Length>=3,"Enter your delivery address and contact phone number.");
+        Check(!place || (address.Length>=5 && phone.Length>=3),"Enter your delivery address and contact phone number.");
         var checkout=CheckoutLines(customerId,data);
-        long? shipping=checkout.Products>=200000?0:null;
+        long? shipping=null;
         var summary=new{lines=checkout.Lines,subtotal_cents=checkout.Products,installation_cents=checkout.Installation,shipping_cents=shipping,total_cents=checkout.Products+checkout.Installation+(shipping??0),shipping_pending=shipping==null};
         if(!place)return summary;
         Check(data["expected_total_cents"]?.GetValue<long>()==summary.total_cents,"Prices changed. Review checkout before placing your order.");
@@ -340,7 +552,8 @@ sealed partial class RetailStore
         Transition(new Arguments("reserve",actor,"",[id.ToString()]));
         Execute("INSERT INTO customer_checkouts VALUES ($0,$1,$2,$3)",customerId,key,fingerprint,id);
         Execute("INSERT INTO audit(actor,action,details) VALUES ($0,'customer-checkout',$1)",actor,JsonSerializer.Serialize(new{customer_id=customerId,order_id=id}));
-        return CommerceOrder(id);
+        QueueOrderNotification(id,"received");
+        return CustomerOrderView(id);
     }
 
     public object CustomerUpdate(long id,JsonObject data)
